@@ -1,0 +1,132 @@
+{
+ "counterexamples": [
+  {
+   "after_repair_bypassed_head": {
+    "reason": "integrity: edge r1->r2 references a record that is not admitted; seen Admit neither applied, pending nor rejected",
+    "status": "UNKNOWN",
+    "value": "UNKNOWN"
+   },
+   "after_repair_thaw": {
+    "outcome": "INVALID_SNAPSHOT",
+    "problems": [
+     "edge r1->r2 references a record that is not admitted",
+     "seen Admit neither applied, pending nor rejected"
+    ]
+   },
+   "fixture_matches_recipe": true,
+   "id": "CE-1",
+   "recipe": {
+    "corruption": "drop one admitted record",
+    "instance": "chain",
+    "order": "reversed",
+    "prefix": 4
+   },
+   "recorded_historical_failures": {
+    "b535b1a": {
+     "exception": "KeyError",
+     "line": 241,
+     "message": "'r1'",
+     "outcome": "uncaught exception",
+     "source_line": "cur = self.admitted[cur.pred]"
+    },
+    "c175fbd": {
+     "exception": "KeyError",
+     "line": 221,
+     "message": "'r1'",
+     "outcome": "uncaught exception",
+     "source_line": "cur = self.admitted[cur.pred]"
+    }
+   },
+   "regression_tests": [
+    "tests/test_snapshot_counterexamples.py::test_counterexample_still_crashes_the_unrepaired_code[b535b1a-CE-1]",
+    "tests/test_snapshot_counterexamples.py::test_counterexample_still_crashes_the_unrepaired_code[c175fbd-CE-1]",
+    "tests/test_snapshot_counterexamples.py::test_counterexample_is_derivable_from_its_recipe[CE-1]",
+    "tests/test_snapshot_counterexamples.py::test_repaired_restore_refuses_it_deterministically[CE-1]",
+    "tests/test_snapshot_counterexamples.py::test_bypassed_boundary_gives_unknown_not_conflict_and_changes_nothing[CE-1]"
+   ],
+   "replayed_now": {
+    "b535b1a": {
+     "exception": "KeyError",
+     "line": 241,
+     "message": "'r1'",
+     "outcome": "uncaught exception",
+     "source_line": "cur = self.admitted[cur.pred]"
+    },
+    "c175fbd": {
+     "exception": "KeyError",
+     "line": 221,
+     "message": "'r1'",
+     "outcome": "uncaught exception",
+     "source_line": "cur = self.admitted[cur.pred]"
+    }
+   },
+   "site": "_chain_linked follows a predecessor that is no longer admitted",
+   "snapshot_sha256": "edd52d1dbd8724c0a0d832b4f05dd85cc9316664a62eeefa097447c7496dbedc"
+  },
+  {
+   "after_repair_bypassed_head": {
+    "reason": "integrity: edge r0->r1 references a record that is not admitted; edge r0->r2 references a record that is not admitted; seen Admit neither applied, pending nor rejected",
+    "status": "UNKNOWN",
+    "value": "UNKNOWN"
+   },
+   "after_repair_thaw": {
+    "outcome": "INVALID_SNAPSHOT",
+    "problems": [
+     "edge r0->r1 references a record that is not admitted",
+     "edge r0->r2 references a record that is not admitted",
+     "seen Admit neither applied, pending nor rejected"
+    ]
+   },
+   "fixture_matches_recipe": true,
+   "id": "CE-2",
+   "recipe": {
+    "corruption": "drop one admitted record",
+    "instance": "fork+dispute",
+    "order": "causal",
+    "prefix": 7
+   },
+   "recorded_historical_failures": {
+    "b535b1a": {
+     "exception": "KeyError",
+     "line": 266,
+     "message": "'r0'",
+     "outcome": "uncaught exception",
+     "source_line": "if any(self.admitted[src].lineage == lineage for src in disputed):"
+    },
+    "c175fbd": {
+     "exception": "KeyError",
+     "line": 245,
+     "message": "'r0'",
+     "outcome": "uncaught exception",
+     "source_line": "if any(self.admitted[src].lineage == lineage and self.decision(src)[0] == \"disputed\""
+    }
+   },
+   "regression_tests": [
+    "tests/test_snapshot_counterexamples.py::test_counterexample_still_crashes_the_unrepaired_code[b535b1a-CE-2]",
+    "tests/test_snapshot_counterexamples.py::test_counterexample_still_crashes_the_unrepaired_code[c175fbd-CE-2]",
+    "tests/test_snapshot_counterexamples.py::test_counterexample_is_derivable_from_its_recipe[CE-2]",
+    "tests/test_snapshot_counterexamples.py::test_repaired_restore_refuses_it_deterministically[CE-2]",
+    "tests/test_snapshot_counterexamples.py::test_bypassed_boundary_gives_unknown_not_conflict_and_changes_nothing[CE-2]"
+   ],
+   "replayed_now": {
+    "b535b1a": {
+     "exception": "KeyError",
+     "line": 266,
+     "message": "'r0'",
+     "outcome": "uncaught exception",
+     "source_line": "if any(self.admitted[src].lineage == lineage for src in disputed):"
+    },
+    "c175fbd": {
+     "exception": "KeyError",
+     "line": 245,
+     "message": "'r0'",
+     "outcome": "uncaught exception",
+     "source_line": "if any(self.admitted[src].lineage == lineage and self.decision(src)[0] == \"disputed\""
+    }
+   },
+   "site": "head() looks up the source of a resolution that is no longer admitted",
+   "snapshot_sha256": "fda2257a0386e27894c9150846ccf84b0a024b71093351ff53d8e1fc970f04a5"
+  }
+ ],
+ "historical_defect": "confirmed at b535b1a (development) and c175fbd (published main); repaired on the development lineage only; not applied to main"
+}

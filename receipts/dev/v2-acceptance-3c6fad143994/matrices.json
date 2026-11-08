@@ -1,0 +1,9214 @@
+{
+ "deviations_not_detected": {
+  "duplicate/first_applied_wins": {
+   "detecting": 0,
+   "deviating": 2,
+   "eligible": 2,
+   "undetected_deviating_instances": [
+    "fork+dispute",
+    "fork+dispute+escalation"
+   ]
+  },
+  "duplicate/principal_order_quorum": {
+   "detecting": 0,
+   "deviating": 5,
+   "eligible": 5,
+   "undetected_deviating_instances": [
+    "fork+dispute",
+    "fork+dispute+escalation",
+    "fork+resolution",
+    "fork+resolution+invalidate-loser",
+    "fork+resolution+invalidate-winner"
+   ]
+  },
+  "duplicate/rid_tiebreak": {
+   "detecting": 0,
+   "deviating": 7,
+   "eligible": 7,
+   "undetected_deviating_instances": [
+    "fork",
+    "fork+beneficiary-only",
+    "fork+dispute",
+    "fork+dispute+escalation",
+    "fork+resolution",
+    "fork+resolution+invalidate-loser",
+    "fork+resolution+invalidate-winner"
+   ]
+  },
+  "order/principal_order_quorum": {
+   "detecting": 0,
+   "deviating": 5,
+   "eligible": 5,
+   "undetected_deviating_instances": [
+    "fork+dispute",
+    "fork+dispute+escalation",
+    "fork+resolution",
+    "fork+resolution+invalidate-loser",
+    "fork+resolution+invalidate-winner"
+   ]
+  },
+  "order/rid_tiebreak": {
+   "detecting": 0,
+   "deviating": 7,
+   "eligible": 7,
+   "undetected_deviating_instances": [
+    "fork",
+    "fork+beneficiary-only",
+    "fork+dispute",
+    "fork+dispute+escalation",
+    "fork+resolution",
+    "fork+resolution+invalidate-loser",
+    "fork+resolution+invalidate-winner"
+   ]
+  },
+  "projection/first_applied_wins": {
+   "detecting": 0,
+   "deviating": 12,
+   "eligible": 12,
+   "undetected_deviating_instances": [
+    "chain",
+    "chain+invalidate",
+    "chain+invalidate-head-and-middle",
+    "chain+invalidate-middle",
+    "chain+invalidate-root",
+    "fork",
+    "fork+beneficiary-only",
+    "fork+dispute",
+    "fork+dispute+escalation",
+    "fork+resolution",
+    "fork+resolution+invalidate-loser",
+    "fork+resolution+invalidate-winner"
+   ]
+  },
+  "projection/global_dispute": {
+   "detecting": 9,
+   "deviating": 12,
+   "eligible": 12,
+   "undetected_deviating_instances": [
+    "fork",
+    "fork+beneficiary-only",
+    "fork+dispute"
+   ]
+  },
+  "projection/principal_order_quorum": {
+   "detecting": 0,
+   "deviating": 12,
+   "eligible": 12,
+   "undetected_deviating_instances": [
+    "chain",
+    "chain+invalidate",
+    "chain+invalidate-head-and-middle",
+    "chain+invalidate-middle",
+    "chain+invalidate-root",
+    "fork",
+    "fork+beneficiary-only",
+    "fork+dispute",
+    "fork+dispute+escalation",
+    "fork+resolution",
+    "fork+resolution+invalidate-loser",
+    "fork+resolution+invalidate-winner"
+   ]
+  },
+  "projection/rid_tiebreak": {
+   "detecting": 0,
+   "deviating": 12,
+   "eligible": 12,
+   "undetected_deviating_instances": [
+    "chain",
+    "chain+invalidate",
+    "chain+invalidate-head-and-middle",
+    "chain+invalidate-middle",
+    "chain+invalidate-root",
+    "fork",
+    "fork+beneficiary-only",
+    "fork+dispute",
+    "fork+dispute+escalation",
+    "fork+resolution",
+    "fork+resolution+invalidate-loser",
+    "fork+resolution+invalidate-winner"
+   ]
+  },
+  "renaming/first_applied_wins": {
+   "detecting": 0,
+   "deviating": 2,
+   "eligible": 2,
+   "undetected_deviating_instances": [
+    "fork+dispute",
+    "fork+dispute+escalation"
+   ]
+  },
+  "renaming/rid_tiebreak": {
+   "detecting": 2,
+   "deviating": 7,
+   "eligible": 7,
+   "undetected_deviating_instances": [
+    "fork+dispute",
+    "fork+dispute+escalation",
+    "fork+resolution",
+    "fork+resolution+invalidate-loser",
+    "fork+resolution+invalidate-winner"
+   ]
+  },
+  "serialization/first_applied_wins": {
+   "detecting": 0,
+   "deviating": 2,
+   "eligible": 12,
+   "undetected_deviating_instances": [
+    "fork+dispute",
+    "fork+dispute+escalation"
+   ]
+  },
+  "serialization/global_dispute": {
+   "detecting": 0,
+   "deviating": 2,
+   "eligible": 12,
+   "undetected_deviating_instances": [
+    "fork+dispute",
+    "fork+dispute+escalation"
+   ]
+  },
+  "serialization/naive_stale_guard": {
+   "detecting": 0,
+   "deviating": 5,
+   "eligible": 12,
+   "undetected_deviating_instances": [
+    "chain",
+    "chain+invalidate",
+    "chain+invalidate-head-and-middle",
+    "chain+invalidate-middle",
+    "chain+invalidate-root"
+   ]
+  },
+  "serialization/principal_order_quorum": {
+   "detecting": 0,
+   "deviating": 5,
+   "eligible": 12,
+   "undetected_deviating_instances": [
+    "fork+dispute",
+    "fork+dispute+escalation",
+    "fork+resolution",
+    "fork+resolution+invalidate-loser",
+    "fork+resolution+invalidate-winner"
+   ]
+  },
+  "serialization/replay_readmits": {
+   "detecting": 0,
+   "deviating": 12,
+   "eligible": 12,
+   "undetected_deviating_instances": [
+    "chain",
+    "chain+invalidate",
+    "chain+invalidate-head-and-middle",
+    "chain+invalidate-middle",
+    "chain+invalidate-root",
+    "fork",
+    "fork+beneficiary-only",
+    "fork+dispute",
+    "fork+dispute+escalation",
+    "fork+resolution",
+    "fork+resolution+invalidate-loser",
+    "fork+resolution+invalidate-winner"
+   ]
+  },
+  "serialization/rid_tiebreak": {
+   "detecting": 0,
+   "deviating": 7,
+   "eligible": 12,
+   "undetected_deviating_instances": [
+    "fork",
+    "fork+beneficiary-only",
+    "fork+dispute",
+    "fork+dispute+escalation",
+    "fork+resolution",
+    "fork+resolution+invalidate-loser",
+    "fork+resolution+invalidate-winner"
+   ]
+  }
+ },
+ "v1_fixtures": {
+  "anomalies_cached": [],
+  "anomalies_uncached": [],
+  "cached_identical_to_uncached": true,
+  "canonical": {
+   "duplicate/first_applied_wins": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork+dispute": [
+      0,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 163
+   },
+   "duplicate/freeze_drops_invalidated": {
+    "category": "NOT_APPLICABLE",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 0
+   },
+   "duplicate/global_dispute": {
+    "category": "NOT_APPLICABLE",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 0
+   },
+   "duplicate/naive_stale_guard": {
+    "category": "NOT_REACHED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [
+     "chain",
+     "chain+invalidate"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 0
+   },
+   "duplicate/principal_order_quorum": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork+dispute": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 386
+   },
+   "duplicate/replay_readmits": {
+    "category": "KILLED",
+    "detecting": [
+     "chain+invalidate",
+     "fork+resolution+invalidate-winner"
+    ],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "chain+invalidate",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "chain+invalidate": [
+      18,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      24,
+      7,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ],
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain+invalidate",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 4
+   },
+   "duplicate/rid_tiebreak": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+beneficiary-only": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 110
+   },
+   "order/first_applied_wins": {
+    "category": "KILLED",
+    "detecting": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork+dispute": [
+      0,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 9
+   },
+   "order/freeze_drops_invalidated": {
+    "category": "NOT_APPLICABLE",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 0
+   },
+   "order/global_dispute": {
+    "category": "NOT_APPLICABLE",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 0
+   },
+   "order/naive_stale_guard": {
+    "category": "KILLED",
+    "detecting": [
+     "chain",
+     "chain+invalidate"
+    ],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "chain",
+     "chain+invalidate"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "chain": [
+      1,
+      4,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ]
+      ]
+     ],
+     "chain+invalidate": [
+      2,
+      4,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 2
+   },
+   "order/principal_order_quorum": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork+dispute": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 30967
+   },
+   "order/replay_readmits": {
+    "category": "NOT_REACHED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [
+     "chain+invalidate",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 0
+   },
+   "order/rid_tiebreak": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+beneficiary-only": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 842
+   },
+   "projection/first_applied_wins": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "chain": [
+      1,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "chain+invalidate": [
+      1,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork": [
+      1,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+beneficiary-only": [
+      1,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute": [
+      0,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      1,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      1,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 36336
+   },
+   "projection/freeze_drops_invalidated": {
+    "category": "NOT_APPLICABLE",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 0
+   },
+   "projection/global_dispute": {
+    "category": "KILLED",
+    "detecting": [
+     "chain",
+     "chain+invalidate",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "chain": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "chain+invalidate": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+beneficiary-only": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 5
+   },
+   "projection/naive_stale_guard": {
+    "category": "NOT_REACHED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [
+     "chain",
+     "chain+invalidate"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 0
+   },
+   "projection/principal_order_quorum": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "chain": [
+      1,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "chain+invalidate": [
+      1,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork": [
+      1,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+beneficiary-only": [
+      1,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+dispute": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 71386
+   },
+   "projection/replay_readmits": {
+    "category": "NOT_REACHED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [
+     "chain+invalidate",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 0
+   },
+   "projection/rid_tiebreak": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "chain": [
+      1,
+      4,
+      "head(M)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ]
+      ]
+     ],
+     "chain+invalidate": [
+      1,
+      4,
+      "head(M)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ]
+      ]
+     ],
+     "fork": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+beneficiary-only": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 2510
+   },
+   "renaming/first_applied_wins": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork+dispute": [
+      0,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 111
+   },
+   "renaming/freeze_drops_invalidated": {
+    "category": "NOT_APPLICABLE",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 0
+   },
+   "renaming/global_dispute": {
+    "category": "NOT_APPLICABLE",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 0
+   },
+   "renaming/naive_stale_guard": {
+    "category": "NOT_REACHED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [
+     "chain",
+     "chain+invalidate"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 0
+   },
+   "renaming/principal_order_quorum": {
+    "category": "KILLED",
+    "detecting": [
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork+dispute": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 26
+   },
+   "renaming/replay_readmits": {
+    "category": "NOT_REACHED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [
+     "chain+invalidate",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 0
+   },
+   "renaming/rid_tiebreak": {
+    "category": "KILLED",
+    "detecting": [
+     "fork",
+     "fork+beneficiary-only"
+    ],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+beneficiary-only": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 16
+   },
+   "serialization/first_applied_wins": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork+dispute": [
+      293,
+      7,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      304,
+      7,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 208
+   },
+   "serialization/freeze_drops_invalidated": {
+    "category": "KILLED",
+    "detecting": [
+     "chain+invalidate",
+     "fork+resolution+invalidate-winner"
+    ],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "chain+invalidate",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "chain+invalidate": [
+      208,
+      4,
+      "mutant snapshot refused at thaw",
+      [
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      260,
+      5,
+      "mutant snapshot refused at thaw",
+      [
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain+invalidate",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 2
+   },
+   "serialization/global_dispute": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork+dispute": [
+      346,
+      6,
+      "head(M)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      360,
+      6,
+      "head(M)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 24
+   },
+   "serialization/naive_stale_guard": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "chain",
+     "chain+invalidate"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "chain": [
+      201,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ]
+      ]
+     ],
+     "chain+invalidate": [
+      261,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 57
+   },
+   "serialization/principal_order_quorum": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork+dispute": [
+      240,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      249,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      231,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      240,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 598
+   },
+   "serialization/replay_readmits": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "chain": [
+      55,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ]
+      ]
+     ],
+     "chain+invalidate": [
+      58,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ]
+      ]
+     ],
+     "fork": [
+      53,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+beneficiary-only": [
+      56,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['carol'])"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['carol'])"
+       ]
+      ]
+     ],
+     "fork+dispute": [
+      59,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      62,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=2, approvals=['alice', 'bob', 'carol'])"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=2, approvals=['alice', 'bob', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      56,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      59,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 132
+   },
+   "serialization/rid_tiebreak": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork": [
+      173,
+      5,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+beneficiary-only": [
+      180,
+      5,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute": [
+      187,
+      5,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      194,
+      5,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      180,
+      5,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      187,
+      5,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 8,
+    "hits": 456
+   }
+  },
+  "canonical_sha256": "1a0db692471c16c84177730fb202d6df1eb41903f04ce3b22a7e4deb35f18fe1",
+  "markdown": "| mutant | order | duplicate | projection | renaming | serialization |\n|---|---|---|---|---|---|\n| `first_applied_wins` | **KILLED** E2 D2 K2 | survived E2 D2 K0 | survived E8 D8 K0 | survived E2 D2 K0 | survived E8 D2 K0 |\n| `naive_stale_guard` | **KILLED** E2 D2 K2 | not reached E2 D0 K0 | not reached E2 D0 K0 | not reached E2 D0 K0 | survived E8 D2 K0 |\n| `replay_readmits` | not reached E2 D0 K0 | **KILLED** E2 D2 K2 | not reached E2 D0 K0 | not reached E2 D0 K0 | survived E8 D8 K0 |\n| `global_dispute` | n/a | n/a | **KILLED** E8 D8 K5 | n/a | survived E8 D2 K0 |\n| `rid_tiebreak` | survived E6 D6 K0 | survived E6 D6 K0 | survived E8 D8 K0 | **KILLED** E6 D6 K2 | survived E8 D6 K0 |\n| `principal_order_quorum` | survived E4 D4 K0 | survived E4 D4 K0 | survived E8 D8 K0 | **KILLED** E4 D4 K4 | survived E8 D4 K0 |\n| `freeze_drops_invalidated` | n/a | n/a | n/a | n/a | **KILLED** E2 D2 K2 |\n\nPer cell, over 8 source instances: **E** eligible (frozen predicate over the relation's alphabet), **D** deviating (eligible, and the mutant behaves differently from the correct replica on some execution the relation performs: state, or head for head-time mutants), **K** detecting (deviating, and the relation is violated). Exposure rate = D/E; detection breadth = K/D. Anomalies (deviation on an ineligible instance, detection without deviation, errors): 0. Suite mutation score: 7/7 (mutants killed by some relation / mutants that deviate under some relation).",
+  "mutation_score": [
+   7,
+   7
+  ],
+  "uncached_seconds": 70.9
+ },
+ "v1_to_v2": {
+  "changed": {
+   "duplicate/freeze_drops_invalidated": [
+    "not reached",
+    "n/a"
+   ],
+   "duplicate/global_dispute": [
+    "not reached",
+    "n/a"
+   ],
+   "order/freeze_drops_invalidated": [
+    "not reached",
+    "n/a"
+   ],
+   "order/global_dispute": [
+    "not reached",
+    "n/a"
+   ],
+   "projection/freeze_drops_invalidated": [
+    "not reached",
+    "n/a"
+   ],
+   "renaming/freeze_drops_invalidated": [
+    "not reached",
+    "n/a"
+   ],
+   "renaming/global_dispute": [
+    "not reached",
+    "n/a"
+   ],
+   "serialization/global_dispute": [
+    "not reached",
+    "survived"
+   ],
+   "serialization/naive_stale_guard": [
+    "not reached",
+    "survived"
+   ]
+  },
+  "every_change_explained_and_no_stale_entry": true,
+  "explained": {
+   "duplicate/freeze_drops_invalidated": {
+    "reason": "this relation never serializes, so the mutated freeze() never runs and no instance is eligible (v1 had no eligibility predicate, so it said 'not reached')",
+    "v1": "not reached",
+    "v2": "n/a"
+   },
+   "duplicate/global_dispute": {
+    "reason": "this relation's alphabet has a single lineage, so the mutated cross-lineage branch is unreachable and no instance is eligible (v1 had no eligibility predicate, so it said 'not reached')",
+    "v1": "not reached",
+    "v2": "n/a"
+   },
+   "order/freeze_drops_invalidated": {
+    "reason": "this relation never serializes, so the mutated freeze() never runs and no instance is eligible (v1 had no eligibility predicate, so it said 'not reached')",
+    "v1": "not reached",
+    "v2": "n/a"
+   },
+   "order/global_dispute": {
+    "reason": "this relation's alphabet has a single lineage, so the mutated cross-lineage branch is unreachable and no instance is eligible (v1 had no eligibility predicate, so it said 'not reached')",
+    "v1": "not reached",
+    "v2": "n/a"
+   },
+   "projection/freeze_drops_invalidated": {
+    "reason": "this relation never serializes, so the mutated freeze() never runs and no instance is eligible (v1 had no eligibility predicate, so it said 'not reached')",
+    "v1": "not reached",
+    "v2": "n/a"
+   },
+   "renaming/freeze_drops_invalidated": {
+    "reason": "this relation never serializes, so the mutated freeze() never runs and no instance is eligible (v1 had no eligibility predicate, so it said 'not reached')",
+    "v1": "not reached",
+    "v2": "n/a"
+   },
+   "renaming/global_dispute": {
+    "reason": "this relation's alphabet has a single lineage, so the mutated cross-lineage branch is unreachable and no instance is eligible (v1 had no eligibility predicate, so it said 'not reached')",
+    "v1": "not reached",
+    "v2": "n/a"
+   },
+   "serialization/global_dispute": {
+    "reason": "the declared alphabet includes the unrelated lineage's admissions, so a dispute in L meets a head query for M; restored and reference share the mutant",
+    "v1": "not reached",
+    "v2": "survived"
+   },
+   "serialization/naive_stale_guard": {
+    "reason": "prefixes of the reversed order make edges arrive out of order, which reaches the naive guard; restored and reference replicas share the mutant, so the relation correctly holds",
+    "v1": "not reached",
+    "v2": "survived"
+   }
+  }
+ },
+ "v2": {
+  "anomalies_cached": [],
+  "anomalies_uncached": [],
+  "cached_identical_to_uncached": true,
+  "canonical": {
+   "duplicate/first_applied_wins": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork+dispute": [
+      0,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 163
+   },
+   "duplicate/freeze_drops_invalidated": {
+    "category": "NOT_APPLICABLE",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 0
+   },
+   "duplicate/global_dispute": {
+    "category": "NOT_APPLICABLE",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 0
+   },
+   "duplicate/naive_stale_guard": {
+    "category": "NOT_REACHED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 0
+   },
+   "duplicate/principal_order_quorum": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork+dispute": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-loser": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 441
+   },
+   "duplicate/replay_readmits": {
+    "category": "KILLED",
+    "detecting": [
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "chain+invalidate": [
+      18,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ]
+      ]
+     ],
+     "chain+invalidate-head-and-middle": [
+      18,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ]
+      ]
+     ],
+     "chain+invalidate-middle": [
+      17,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Invalidate(r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ]
+      ]
+     ],
+     "chain+invalidate-root": [
+      16,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Invalidate(r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-loser": [
+      23,
+      7,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ],
+       [
+        "deliver",
+        "Invalidate(r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      24,
+      7,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ],
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 12
+   },
+   "duplicate/rid_tiebreak": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+beneficiary-only": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-loser": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 120
+   },
+   "order/first_applied_wins": {
+    "category": "KILLED",
+    "detecting": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork+dispute": [
+      0,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 9
+   },
+   "order/freeze_drops_invalidated": {
+    "category": "NOT_APPLICABLE",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 0
+   },
+   "order/global_dispute": {
+    "category": "NOT_APPLICABLE",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 0
+   },
+   "order/naive_stale_guard": {
+    "category": "KILLED",
+    "detecting": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root"
+    ],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "chain": [
+      1,
+      4,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ]
+      ]
+     ],
+     "chain+invalidate": [
+      2,
+      4,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ]
+      ]
+     ],
+     "chain+invalidate-head-and-middle": [
+      6,
+      4,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ]
+      ]
+     ],
+     "chain+invalidate-middle": [
+      2,
+      4,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ]
+      ]
+     ],
+     "chain+invalidate-root": [
+      2,
+      4,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 5
+   },
+   "order/principal_order_quorum": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork+dispute": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-loser": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 36008
+   },
+   "order/replay_readmits": {
+    "category": "NOT_REACHED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 0
+   },
+   "order/rid_tiebreak": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+beneficiary-only": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-loser": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 842
+   },
+   "projection/first_applied_wins": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "chain": [
+      1,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "chain+invalidate": [
+      1,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "chain+invalidate-head-and-middle": [
+      1,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "chain+invalidate-middle": [
+      1,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "chain+invalidate-root": [
+      1,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork": [
+      1,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+beneficiary-only": [
+      1,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute": [
+      0,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      1,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-loser": [
+      1,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      1,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 46632
+   },
+   "projection/freeze_drops_invalidated": {
+    "category": "NOT_APPLICABLE",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 0
+   },
+   "projection/global_dispute": {
+    "category": "KILLED",
+    "detecting": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "chain": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "chain+invalidate": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "chain+invalidate-head-and-middle": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "chain+invalidate-middle": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "chain+invalidate-root": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+beneficiary-only": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-loser": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      1,
+      6,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 9
+   },
+   "projection/naive_stale_guard": {
+    "category": "NOT_REACHED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 0
+   },
+   "projection/principal_order_quorum": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "chain": [
+      1,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "chain+invalidate": [
+      1,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "chain+invalidate-head-and-middle": [
+      1,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "chain+invalidate-middle": [
+      1,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "chain+invalidate-root": [
+      1,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork": [
+      1,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+beneficiary-only": [
+      1,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+dispute": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-loser": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 95411
+   },
+   "projection/replay_readmits": {
+    "category": "NOT_REACHED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 0
+   },
+   "projection/rid_tiebreak": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "chain": [
+      1,
+      4,
+      "head(M)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ]
+      ]
+     ],
+     "chain+invalidate": [
+      1,
+      4,
+      "head(M)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ]
+      ]
+     ],
+     "chain+invalidate-head-and-middle": [
+      1,
+      4,
+      "head(M)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ]
+      ]
+     ],
+     "chain+invalidate-middle": [
+      1,
+      4,
+      "head(M)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ]
+      ]
+     ],
+     "chain+invalidate-root": [
+      1,
+      4,
+      "head(M)",
+      [
+       [
+        "deliver",
+        "Admit(m0, M, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(m1, M, seq=1, owner=bob, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Admit(m2, M, seq=2, owner=carol, pred=m0)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m1)"
+       ],
+       [
+        "deliver",
+        "Edge(m0->m2)"
+       ]
+      ]
+     ],
+     "fork": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+beneficiary-only": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-loser": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 2510
+   },
+   "renaming/first_applied_wins": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork+dispute": [
+      0,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 111
+   },
+   "renaming/freeze_drops_invalidated": {
+    "category": "NOT_APPLICABLE",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 0
+   },
+   "renaming/global_dispute": {
+    "category": "NOT_APPLICABLE",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 0
+   },
+   "renaming/naive_stale_guard": {
+    "category": "NOT_REACHED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 0
+   },
+   "renaming/principal_order_quorum": {
+    "category": "KILLED",
+    "detecting": [
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork+dispute": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-loser": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      0,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 30
+   },
+   "renaming/replay_readmits": {
+    "category": "NOT_REACHED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [],
+    "deviating_ineligible": [],
+    "deviations": {},
+    "eligible": [
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 0
+   },
+   "renaming/rid_tiebreak": {
+    "category": "KILLED",
+    "detecting": [
+     "fork",
+     "fork+beneficiary-only"
+    ],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+beneficiary-only": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-loser": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      0,
+      4,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 16
+   },
+   "serialization/first_applied_wins": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork+dispute": [
+      293,
+      7,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      304,
+      7,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 208
+   },
+   "serialization/freeze_drops_invalidated": {
+    "category": "KILLED",
+    "detecting": [
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "chain+invalidate": [
+      208,
+      4,
+      "mutant snapshot refused at thaw",
+      [
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ]
+      ]
+     ],
+     "chain+invalidate-head-and-middle": [
+      270,
+      5,
+      "mutant snapshot refused at thaw",
+      [
+       [
+        "deliver",
+        "Invalidate(r1)"
+       ],
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ]
+      ]
+     ],
+     "chain+invalidate-middle": [
+      260,
+      5,
+      "mutant snapshot refused at thaw",
+      [
+       [
+        "deliver",
+        "Invalidate(r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ]
+      ]
+     ],
+     "chain+invalidate-root": [
+      286,
+      6,
+      "mutant snapshot refused at thaw",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Invalidate(r0)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-loser": [
+      312,
+      6,
+      "mutant snapshot refused at thaw",
+      [
+       [
+        "deliver",
+        "Invalidate(r1)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      260,
+      5,
+      "mutant snapshot refused at thaw",
+      [
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 6
+   },
+   "serialization/global_dispute": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork+dispute": [
+      346,
+      6,
+      "head(M)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      360,
+      6,
+      "head(M)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 24
+   },
+   "serialization/naive_stale_guard": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "chain": [
+      201,
+      5,
+      "state",
+      [
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ]
+      ]
+     ],
+     "chain+invalidate": [
+      261,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ]
+      ]
+     ],
+     "chain+invalidate-head-and-middle": [
+      325,
+      7,
+      "state",
+      [
+       [
+        "deliver",
+        "Invalidate(r1)"
+       ],
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ]
+      ]
+     ],
+     "chain+invalidate-middle": [
+      261,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Invalidate(r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ]
+      ]
+     ],
+     "chain+invalidate-root": [
+      261,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Invalidate(r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r1)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 145
+   },
+   "serialization/principal_order_quorum": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork+dispute": [
+      240,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      249,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      231,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-loser": [
+      240,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      240,
+      6,
+      "state",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 691
+   },
+   "serialization/replay_readmits": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "chain": [
+      55,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Edge(r1->r2)"
+       ]
+      ]
+     ],
+     "chain+invalidate": [
+      58,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ]
+      ]
+     ],
+     "chain+invalidate-head-and-middle": [
+      61,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Invalidate(r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Invalidate(r1)"
+       ]
+      ]
+     ],
+     "chain+invalidate-middle": [
+      58,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Invalidate(r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Invalidate(r1)"
+       ]
+      ]
+     ],
+     "chain+invalidate-root": [
+      58,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Invalidate(r0)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Invalidate(r0)"
+       ]
+      ]
+     ],
+     "fork": [
+      53,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+beneficiary-only": [
+      56,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['carol'])"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['carol'])"
+       ]
+      ]
+     ],
+     "fork+dispute": [
+      59,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      62,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=2, approvals=['alice', 'bob', 'carol'])"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=2, approvals=['alice', 'bob', 'carol'])"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      56,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-loser": [
+      59,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Invalidate(r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Invalidate(r1)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      59,
+      2,
+      "state",
+      [
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Invalidate(r2)"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 224
+   },
+   "serialization/rid_tiebreak": {
+    "category": "SURVIVED",
+    "detecting": [],
+    "detecting_nondeviating": [],
+    "deviating": [
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "deviating_ineligible": [],
+    "deviations": {
+     "fork": [
+      173,
+      5,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+beneficiary-only": [
+      180,
+      5,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute": [
+      187,
+      5,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+dispute+escalation": [
+      194,
+      5,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution": [
+      180,
+      5,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-loser": [
+      187,
+      5,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ],
+     "fork+resolution+invalidate-winner": [
+      187,
+      5,
+      "head(L)",
+      [
+       [
+        "deliver",
+        "Admit(r0, L, seq=0, owner=alice)"
+       ],
+       [
+        "deliver",
+        "Admit(r1, L, seq=1, owner=bob, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Admit(r2, L, seq=2, owner=carol, pred=r0)"
+       ],
+       [
+        "deliver",
+        "Edge(r0->r1)"
+       ],
+       [
+        "roundtrip",
+        ""
+       ],
+       [
+        "deliver",
+        "Edge(r0->r2)"
+       ]
+      ]
+     ]
+    },
+    "eligible": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-head-and-middle",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "fork",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution",
+     "fork+resolution+invalidate-loser",
+     "fork+resolution+invalidate-winner"
+    ],
+    "errors": 0,
+    "evaluated": 12,
+    "hits": 508
+   }
+  },
+  "canonical_sha256": "a9f0e151132987b5e8598e5eec9e42525ef40d5607c921957c1d7f3dbae56bf3",
+  "markdown": "| mutant | order | duplicate | projection | renaming | serialization |\n|---|---|---|---|---|---|\n| `first_applied_wins` | **KILLED** E2 D2 K2 | survived E2 D2 K0 | survived E12 D12 K0 | survived E2 D2 K0 | survived E12 D2 K0 |\n| `naive_stale_guard` | **KILLED** E5 D5 K5 | not reached E5 D0 K0 | not reached E5 D0 K0 | not reached E5 D0 K0 | survived E12 D5 K0 |\n| `replay_readmits` | not reached E6 D0 K0 | **KILLED** E6 D6 K6 | not reached E6 D0 K0 | not reached E6 D0 K0 | survived E12 D12 K0 |\n| `global_dispute` | n/a | n/a | **KILLED** E12 D12 K9 | n/a | survived E12 D2 K0 |\n| `rid_tiebreak` | survived E7 D7 K0 | survived E7 D7 K0 | survived E12 D12 K0 | **KILLED** E7 D7 K2 | survived E12 D7 K0 |\n| `principal_order_quorum` | survived E5 D5 K0 | survived E5 D5 K0 | survived E12 D12 K0 | **KILLED** E5 D5 K5 | survived E12 D5 K0 |\n| `freeze_drops_invalidated` | n/a | n/a | n/a | n/a | **KILLED** E6 D6 K6 |\n\nPer cell, over 12 source instances: **E** eligible (frozen predicate over the relation's alphabet), **D** deviating (eligible, and the mutant behaves differently from the correct replica on some execution the relation performs: state, or head for head-time mutants), **K** detecting (deviating, and the relation is violated). Exposure rate = D/E; detection breadth = K/D. Anomalies (deviation on an ineligible instance, detection without deviation, errors): 0. Suite mutation score: 7/7 (mutants killed by some relation / mutants that deviate under some relation).",
+  "mutation_score": [
+   7,
+   7
+  ],
+  "uncached_seconds": 88.3
+ }
+}

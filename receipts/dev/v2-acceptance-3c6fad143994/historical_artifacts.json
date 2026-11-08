@@ -1,0 +1,15 @@
+{
+ "files": [
+  {
+   "file": "historical-dev-5a925e5-before-change.md",
+   "label": "before-change receipt: the 0fe2c2b code, snapshot-bound to 5a925e5, 70/70. Not evidence for this revision",
+   "sha256": "cf7a31c6c44a7c45a8451c610779a11b6ea57ce6de87e95e6d478b42129346fa"
+  },
+  {
+   "file": "historical-in-place-quick-diagnostic-uncommitted.txt",
+   "label": "diagnostic only: in-place quick campaign console output on the uncommitted working tree before 3c6fad1 (before the cache and alphabet-sequence changes). No provenance, no authority",
+   "sha256": "da56cc5606fac9408bda81ea3fd4aae5efadd2171bbf924bfc8f1700eca0d610"
+  }
+ ],
+ "note": "stored for the record only; none is evidence for the revision named in source.json"
+}

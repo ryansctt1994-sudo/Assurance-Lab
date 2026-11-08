@@ -1,0 +1,66 @@
+{
+ "boundary": {
+  "Admit(r1, L, seq=1, owner=carol, pred=r0)": {
+   "applied": 76,
+   "rejected: re-admission of existing id": 88
+  },
+  "Admit(r3, L, seq=3, owner=alice, pred=rX)": {
+   "applied": 164
+  },
+  "Edge(r0->m0)": {
+   "deferred": 164
+  },
+  "Edge(r0->r2)": {
+   "applied": 14,
+   "deferred": 72,
+   "duplicate": 53,
+   "rejected: edge not declared by successor admission": 25
+  },
+  "Edge(r2->r0)": {
+   "deferred": 100,
+   "rejected: non-forward edge": 64
+  },
+  "Edge(rX->r0)": {
+   "deferred": 164
+  },
+  "Invalidate(rX)": {
+   "deferred": 164
+  },
+  "cross-lineage edge, after admitting its M end": {
+   "deferred": 76,
+   "rejected: cross-lineage edge": 88
+  },
+  "malformed resolution (winner = loser)": {
+   "deferred": 139,
+   "rejected: winner/loser must be the two conflicting candidates": 25
+  },
+  "tampered resolution (post-state root)": {
+   "deferred": 139,
+   "rejected: post-state root mismatch": 25
+  },
+  "tampered resolution (pre-state root)": {
+   "deferred": 139,
+   "rejected: pre-state root mismatch": 25
+  },
+  "under-quorum resolution (one independent approver)": {
+   "deferred": 139,
+   "rejected: quorum not met": 25
+  }
+ },
+ "deliveries": 4073,
+ "events": 32,
+ "never_delivered": [],
+ "rejection_rules_exercised": {
+  "cross-lineage edge": 88,
+  "edge not declared by successor admission": 25,
+  "non-forward edge": 64,
+  "post-state root mismatch": 25,
+  "pre-state root mismatch": 25,
+  "quorum not met": 25,
+  "re-admission of existing id": 88,
+  "self-authorized: no independent approver": 1,
+  "winner/loser must be the two conflicting candidates": 25
+ },
+ "rejection_rules_not_exercised": [],
+ "unexpected": {}
+}

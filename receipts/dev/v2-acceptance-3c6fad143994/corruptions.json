@@ -1,0 +1,362 @@
+{
+ "rows": [
+  {
+   "bypass": {
+    "authority_from_damaged_state": 0,
+    "exceptions": [],
+    "refused_even_unvalidated": 0,
+    "state_changed_by_head": 0,
+    "statuses": {
+     "UNKNOWN": 21
+    }
+   },
+   "class": "inconsistent",
+   "corruption": "drop invalidations",
+   "credited_control": {
+    "bypassed_diagnostic_only": "head() integrity guard (UNKNOWN); not evidence that the boundary works",
+    "production": "thaw validator (INVALID_SNAPSHOT)"
+   },
+   "infected_instances": 6,
+   "infected_snapshots": 21,
+   "relation": null,
+   "validator": {
+    "accepted": 0,
+    "deterministic": true,
+    "other_exceptions": [],
+    "refused": 21
+   }
+  },
+  {
+   "bypass": {
+    "authority_from_damaged_state": 0,
+    "exceptions": [],
+    "refused_even_unvalidated": 0,
+    "state_changed_by_head": 0,
+    "statuses": {
+     "UNKNOWN": 57
+    }
+   },
+   "class": "inconsistent",
+   "corruption": "drop one applied edge",
+   "credited_control": {
+    "bypassed_diagnostic_only": "head() integrity guard (UNKNOWN); not evidence that the boundary works",
+    "production": "thaw validator (INVALID_SNAPSHOT)"
+   },
+   "infected_instances": 12,
+   "infected_snapshots": 57,
+   "relation": null,
+   "validator": {
+    "accepted": 0,
+    "deterministic": true,
+    "other_exceptions": [],
+    "refused": 57
+   }
+  },
+  {
+   "bypass": {
+    "authority_from_damaged_state": 0,
+    "exceptions": [],
+    "refused_even_unvalidated": 0,
+    "state_changed_by_head": 0,
+    "statuses": {
+     "UNKNOWN": 112
+    }
+   },
+   "class": "inconsistent",
+   "corruption": "drop one admitted record",
+   "credited_control": {
+    "bypassed_diagnostic_only": "head() integrity guard (UNKNOWN); not evidence that the boundary works",
+    "production": "thaw validator (INVALID_SNAPSHOT)"
+   },
+   "infected_instances": 12,
+   "infected_snapshots": 112,
+   "relation": null,
+   "validator": {
+    "accepted": 0,
+    "deterministic": true,
+    "other_exceptions": [],
+    "refused": 112
+   }
+  },
+  {
+   "bypass": {
+    "authority_from_damaged_state": 0,
+    "exceptions": [],
+    "refused_even_unvalidated": 0,
+    "state_changed_by_head": 0,
+    "statuses": {
+     "UNKNOWN": 15
+    }
+   },
+   "class": "inconsistent",
+   "corruption": "drop resolutions",
+   "credited_control": {
+    "bypassed_diagnostic_only": "head() integrity guard (UNKNOWN); not evidence that the boundary works",
+    "production": "thaw validator (INVALID_SNAPSHOT)"
+   },
+   "infected_instances": 5,
+   "infected_snapshots": 15,
+   "relation": null,
+   "validator": {
+    "accepted": 0,
+    "deterministic": true,
+    "other_exceptions": [],
+    "refused": 15
+   }
+  },
+  {
+   "bypass": {
+    "authority_from_damaged_state": 0,
+    "exceptions": [],
+    "refused_even_unvalidated": 0,
+    "state_changed_by_head": 0,
+    "statuses": {
+     "UNKNOWN": 64
+    }
+   },
+   "class": "inconsistent",
+   "corruption": "drop pending queue",
+   "credited_control": {
+    "bypassed_diagnostic_only": "head() integrity guard (UNKNOWN); not evidence that the boundary works",
+    "production": "thaw validator (INVALID_SNAPSHOT)"
+   },
+   "infected_instances": 12,
+   "infected_snapshots": 64,
+   "relation": null,
+   "validator": {
+    "accepted": 0,
+    "deterministic": true,
+    "other_exceptions": [],
+    "refused": 64
+   }
+  },
+  {
+   "bypass": {
+    "authority_from_damaged_state": 0,
+    "exceptions": [],
+    "refused_even_unvalidated": 0,
+    "state_changed_by_head": 0,
+    "statuses": {
+     "UNKNOWN": 152
+    }
+   },
+   "class": "inconsistent",
+   "corruption": "drop seen-set (duplicate filter)",
+   "credited_control": {
+    "bypassed_diagnostic_only": "head() integrity guard (UNKNOWN); not evidence that the boundary works",
+    "production": "thaw validator (INVALID_SNAPSHOT)"
+   },
+   "infected_instances": 12,
+   "infected_snapshots": 152,
+   "relation": null,
+   "validator": {
+    "accepted": 0,
+    "deterministic": true,
+    "other_exceptions": [],
+    "refused": 152
+   }
+  },
+  {
+   "bypass": {
+    "authority_from_damaged_state": 0,
+    "exceptions": [],
+    "refused_even_unvalidated": 0,
+    "state_changed_by_head": 0,
+    "statuses": {
+     "UNKNOWN": 88
+    }
+   },
+   "class": "inconsistent",
+   "corruption": "inject a backward edge (seen and applied)",
+   "credited_control": {
+    "bypassed_diagnostic_only": "head() integrity guard (UNKNOWN); not evidence that the boundary works",
+    "production": "thaw validator (INVALID_SNAPSHOT)"
+   },
+   "infected_instances": 12,
+   "infected_snapshots": 88,
+   "relation": null,
+   "validator": {
+    "accepted": 0,
+    "deterministic": true,
+    "other_exceptions": [],
+    "refused": 88
+   }
+  },
+  {
+   "bypass": {
+    "authority_from_damaged_state": 0,
+    "exceptions": [],
+    "refused_even_unvalidated": 0,
+    "state_changed_by_head": 0,
+    "statuses": {
+     "UNKNOWN": 25
+    }
+   },
+   "class": "inconsistent",
+   "corruption": "inject a self-authorized resolution (seen and applied)",
+   "credited_control": {
+    "bypassed_diagnostic_only": "head() integrity guard (UNKNOWN); not evidence that the boundary works",
+    "production": "thaw validator (INVALID_SNAPSHOT)"
+   },
+   "infected_instances": 7,
+   "infected_snapshots": 25,
+   "relation": null,
+   "validator": {
+    "accepted": 0,
+    "deterministic": true,
+    "other_exceptions": [],
+    "refused": 25
+   }
+  },
+  {
+   "bypass": {
+    "authority_from_damaged_state": 0,
+    "exceptions": [],
+    "refused_even_unvalidated": 164,
+    "state_changed_by_head": 0,
+    "statuses": {}
+   },
+   "class": "malformed",
+   "corruption": "truncate the snapshot",
+   "credited_control": {
+    "bypassed_diagnostic_only": "head() integrity guard (UNKNOWN); not evidence that the boundary works",
+    "production": "thaw validator (INVALID_SNAPSHOT)"
+   },
+   "infected_instances": 12,
+   "infected_snapshots": 164,
+   "relation": null,
+   "validator": {
+    "accepted": 0,
+    "deterministic": true,
+    "other_exceptions": [],
+    "refused": 164
+   }
+  },
+  {
+   "bypass": {
+    "authority_from_damaged_state": 0,
+    "exceptions": [],
+    "refused_even_unvalidated": 0,
+    "state_changed_by_head": 0,
+    "statuses": {
+     "UNKNOWN": 112
+    }
+   },
+   "class": "malformed",
+   "corruption": "mistype a field (seq as text)",
+   "credited_control": {
+    "bypassed_diagnostic_only": "head() integrity guard (UNKNOWN); not evidence that the boundary works",
+    "production": "thaw validator (INVALID_SNAPSHOT)"
+   },
+   "infected_instances": 12,
+   "infected_snapshots": 112,
+   "relation": null,
+   "validator": {
+    "accepted": 0,
+    "deterministic": true,
+    "other_exceptions": [],
+    "refused": 112
+   }
+  },
+  {
+   "bypass": {
+    "authority_from_damaged_state": 21,
+    "exceptions": [],
+    "refused_even_unvalidated": 0,
+    "state_changed_by_head": 0,
+    "statuses": {
+     "HEAD": 11,
+     "NONE": 10
+    }
+   },
+   "class": "omission",
+   "corruption": "roll back an applied invalidation",
+   "credited_control": {
+    "production": "none: a consistent omission passes the boundary by construction (integrity is not authenticity)",
+    "test_oracle_only": "serialization relation against a never-serialized reference: exact-state 6, next-event 6, projection 6"
+   },
+   "infected_instances": 6,
+   "infected_snapshots": 21,
+   "relation": {
+    "exact-state": 6,
+    "next-event": 6,
+    "projection": 6
+   },
+   "validator": {
+    "accepted": 21,
+    "deterministic": true,
+    "other_exceptions": [],
+    "refused": 0
+   }
+  },
+  {
+   "bypass": {
+    "authority_from_damaged_state": 64,
+    "exceptions": [],
+    "refused_even_unvalidated": 0,
+    "state_changed_by_head": 0,
+    "statuses": {
+     "NONE": 64
+    }
+   },
+   "class": "omission",
+   "corruption": "omit a pending event",
+   "credited_control": {
+    "production": "none: a consistent omission passes the boundary by construction (integrity is not authenticity)",
+    "test_oracle_only": "serialization relation against a never-serialized reference: exact-state 12, next-event 11, projection 0"
+   },
+   "infected_instances": 12,
+   "infected_snapshots": 64,
+   "relation": {
+    "exact-state": 12,
+    "next-event": 11,
+    "projection": 0
+   },
+   "validator": {
+    "accepted": 64,
+    "deterministic": true,
+    "other_exceptions": [],
+    "refused": 0
+   }
+  },
+  {
+   "bypass": {
+    "authority_from_damaged_state": 2,
+    "exceptions": [],
+    "refused_even_unvalidated": 0,
+    "state_changed_by_head": 0,
+    "statuses": {
+     "CONFLICT": 2
+    }
+   },
+   "class": "omission",
+   "corruption": "omit a rejected event",
+   "credited_control": {
+    "production": "none: a consistent omission passes the boundary by construction (integrity is not authenticity)",
+    "test_oracle_only": "serialization relation against a never-serialized reference: exact-state 1, next-event 0, projection 0"
+   },
+   "infected_instances": 1,
+   "infected_snapshots": 2,
+   "relation": {
+    "exact-state": 1,
+    "next-event": 0,
+    "projection": 0
+   },
+   "validator": {
+    "accepted": 2,
+    "deterministic": true,
+    "other_exceptions": [],
+    "refused": 0
+   }
+  }
+ ],
+ "summary": {
+  "all_deterministic": true,
+  "bypassed_authority_from_damaged_state": 0,
+  "damaged_snapshots": 810,
+  "inconsistent_or_malformed_classes": 10,
+  "other_exceptions": 0,
+  "refused_at_thaw": 810,
+  "state_changed_by_head": 0
+ }
+}
