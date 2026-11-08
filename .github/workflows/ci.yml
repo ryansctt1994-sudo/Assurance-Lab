@@ -1,0 +1,41 @@
+name: verify
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install pytest
+      - run: python -m pytest -q
+      - name: Quick verification campaign
+        run: python -m assurance_lab --out results-quick.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results-quick-${{ matrix.python }}
+          path: results-quick.md
+
+  full-induction:
+    # Headline domain (~3.6M Inv-states). Runs on main and on demand only.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: python -m assurance_lab --full --out results-full.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results-full
+          path: results-full.md
