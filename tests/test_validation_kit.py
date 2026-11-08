@@ -351,3 +351,22 @@ def test_g1_requires_an_independent_label_a_match_and_an_anchor():
     assert rc.g1_status({"outcome": "MISMATCH", "label": "R1"}, {"url": "u"}).startswith("not eligible")
     assert "no timestamp anchor" in rc.g1_status(match, None)
     assert rc.g1_status(match, {"url": "u"}).startswith("eligible pending review")
+
+
+def test_frozen_identities_are_git_facts():
+    """P0-01, re-derived from git rather than trusted: the subject's trees,
+    its tracked-file inventory, and that main's code is the subject's code
+    (the merge changed only README.md and docs/RESULTS.md)."""
+    m = json.loads(FROZEN_MANIFEST)["subject"]
+    commit, base = m["source_commit"], m["baseline_report"]["commit"]
+    try:
+        tree = _git(ROOT, "rev-parse", f"{commit}^{{tree}}")
+    except subprocess.CalledProcessError:
+        pytest.skip("subject commit not in this clone (shallow checkout)")
+    assert tree == m["source_tree"]
+    assert _git(ROOT, "rev-parse", f"{commit}:assurance_lab") == m["source_tree_assurance_lab"]
+    assert _git(ROOT, "rev-parse", f"{base}:assurance_lab") == m["source_tree_assurance_lab"]
+    assert _git(ROOT, "diff", "--name-only", commit, base).split() == ["README.md", "docs/RESULTS.md"]
+    inventory = subprocess.run(["git", "ls-tree", "-r", "--long", commit], cwd=ROOT,
+                               capture_output=True, text=True, check=True).stdout
+    assert (KIT / "baseline/tracked-files-c175fbd.txt").read_text(encoding="utf-8") == inventory

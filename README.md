@@ -11,6 +11,16 @@ enumeration over a small, explicitly stated domain.
 
 Pure Python ≥3.10, no runtime dependencies.
 
+**Evidence class: author-reported.** No one independent of this repository
+has reproduced any result here yet. [`assurance-validation/`](assurance-validation/README.md)
+holds a frozen protocol for that: a fresh-clone reproduction (R1) of the
+published 32-obligation baseline on `main` (`c175fbd`). The package contains
+a claim inventory with the expected values withheld and hash-committed,
+outcome definitions and a counting rubric fixed in advance, a stdlib-only
+harness that seals its evidence, and a reconciler that reveals the targets
+only after the seal verifies. The author's own runs of it (`R0-*`) validate
+the harness only.
+
 ## Quick start
 
 ```bash

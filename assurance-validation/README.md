@@ -53,6 +53,28 @@ prove you never saw them. The commitment proves the sealed output existed
 before the reveal step; it does not prove absence of prior knowledge. That
 is why the operator declaration is required.
 
+## Roadmap status (P0, P1)
+
+Done means done for *this* package; nothing here substitutes for an
+independent operator.
+
+| Item | Status | Evidence |
+|---|---|---|
+| P0-01 commit, tree, tracked files | done | manifest `subject`; `baseline/tracked-files-c175fbd.txt`; `test_frozen_identities_are_git_facts` re-derives all of it from git, including that main's `assurance_lab/` is the subject's tree |
+| P0-02 preserve report, snapshot, receipt | partial | preserved as git objects (`ba10a0c:docs/RESULTS.md`, `c175fbd`), referenced by id; no copy outside this repository |
+| P0-03 frozen claim inventory | done | manifest `claims`: 32 entries (method, scope, source, evidence class, status); targets withheld |
+| P0-04 discrepancy rules | done | `protocol/discrepancy-rubric.md`, preregistered |
+| P0-05 outcome definitions | done | `protocol/acceptance-criteria.md`, preregistered |
+| P0-06 immutable manifest, verifiable timestamp | partial | pushed to GitHub in `5a925e5` (server-side push time); a branch can be rewritten, and GitHub is not a third-party append-only log |
+| P0-07 exclusions | done | manifest `excluded` |
+| P1-01 independent operator | **open** | needs a person |
+| P1-02 custodian package, metrics withheld | partial | metrics withheld and hash-committed, but the author prepared the package, not a separate custodian |
+| P1-03 blindness limits | done | this README; acceptance criteria |
+| P1-04 to P1-06 retrieve, verify, run, retain | done in the harness | `reproduce.py`; exercised by R0-SELF |
+| P1-07, P1-08 publish commitment before reveal | harness ready; **open** for R1 | `pre-reveal-commitment.json` carries the evidence id, source digest, report digest and declaration |
+| P1-09 reveal after verification; field-level diff | done in the reconciler | `reconcile.py`; tests prove no tampered receipt reaches the reveal |
+| P1-10, P1-11 adjudication, second auditor | **open** | |
+
 ## Layout
 
 ```text
@@ -65,6 +87,8 @@ assurance-validation/
 │   ├── discrepancy-rubric.md          counting rules
 │   ├── acceptance-criteria.md         outcomes, what each permits, G1 checklist
 │   └── preregistration-receipt.json   SHA-256 of the four files above it and both scripts
+├── baseline/
+│   └── tracked-files-c175fbd.txt      `git ls-tree -r --long` of the subject (P0-01); no target values
 └── reproduction/
     └── R0-SELF-dry-run/               author's harness validation; NOT independent
         ├── environment.json           operator declaration, checkout, recomputed source digest, interpreter, pip freeze
