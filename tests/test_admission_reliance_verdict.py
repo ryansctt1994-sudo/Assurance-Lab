@@ -106,3 +106,15 @@ def test_non_compensating_authorization():
 def test_label_carries_scope():
     r = Result("x", Verdict.PASS, "finite-exhaustive-induction", "3 records", "all Inv-states")
     assert r.label() == "PASS[finite-exhaustive-induction; 3 records; all Inv-states]"
+
+
+# --- report provenance ----------------------------------------------------------
+
+
+def test_report_records_provenance_and_ci_caveat():
+    from assurance_lab.__main__ import provenance, render
+    p = provenance()
+    assert len(p["source_sha256"]) == 64
+    assert p["model_tree"] in {"clean", "DIRTY", "unknown"}
+    md = render([R("a", Verdict.PASS)], "full")
+    assert p["source_sha256"] in md and "Green CI ≠ full induction completed" in md

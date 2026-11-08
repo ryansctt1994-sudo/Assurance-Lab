@@ -103,7 +103,34 @@ def distributed_results() -> list[Result]:
     return out
 
 
+def provenance() -> dict[str, str]:
+    """Which code produced these results: git commit, tree state, source hash."""
+    import hashlib
+    import pathlib
+    import subprocess
+
+    pkg = pathlib.Path(__file__).resolve().parent
+    h = hashlib.sha256()
+    for p in sorted(pkg.rglob("*.py")):
+        h.update(str(p.relative_to(pkg)).encode() + b"\0" + p.read_bytes() + b"\0")
+
+    def git(*args: str) -> str:
+        try:
+            return subprocess.run(["git", *args], cwd=pkg.parent, capture_output=True,
+                                  text=True, check=True).stdout.strip()
+        except (OSError, subprocess.CalledProcessError):
+            return "unknown"
+
+    dirty = git("status", "--porcelain", "--", "assurance_lab")
+    return {
+        "commit": git("rev-parse", "HEAD"),
+        "model_tree": "unknown" if dirty == "unknown" else ("DIRTY" if dirty else "clean"),
+        "source_sha256": h.hexdigest(),
+    }
+
+
 def render(results: list[Result], profile: str) -> str:
+    prov = provenance()
     lines = [
         "# Verification Results",
         "",
@@ -112,6 +139,17 @@ def render(results: list[Result], profile: str) -> str:
         f"(Python {platform.python_version()}).",
         "",
         "Status: research prototype. **Not production-certified. Not unboundedly verified.**",
+        "",
+        "## Provenance",
+        "",
+        f"- Commit: `{prov['commit']}`",
+        f"- `assurance_lab/` working tree at run time: **{prov['model_tree']}**",
+        f"- SHA-256 over `assurance_lab/**/*.py`: `{prov['source_sha256']}`",
+        "- These results come from this local run, **not from CI**. PR CI runs the",
+        "  test suite and the *quick* campaign only; the `full-induction` job is",
+        "  skipped on PRs by design. Green CI ≠ full induction completed.",
+        "",
+        "## Obligations",
         "",
         "| Obligation | Verdict |",
         "|---|---|",
