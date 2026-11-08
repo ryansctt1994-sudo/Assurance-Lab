@@ -1,22 +1,24 @@
 """Run the verification campaign and emit labeled results.
 
-    python -m assurance_lab            # quick profile (~1 min)
-    python -m assurance_lab --full     # headline domain, parallel (~6 min on 4 cores)
+    python -m assurance_lab                       # quick profile, in-place, no report
     python -m assurance_lab --full --out docs/RESULTS.md
+    python -m assurance_lab --out r.md --start-method spawn
 
-Provenance discipline:
+Provenance discipline (see ``provenance.py`` for the limits):
 
-* A *start receipt* (source digest, git commit, tree state, domains,
-  workers, command) is captured **before any enumeration** and is never
-  recomputed afterwards.
-* Writing a report (``--out``) from a dirty ``assurance_lab/`` tree is
-  refused unless ``--allow-dirty`` is given, and then flagged in the report.
-* At the end the source is re-hashed; a mismatch marks the report as not
-  bound to any single source and exits non-zero. (Process-pool workers under
-  spawn/forkserver re-import the package from disk, so a mid-run edit could
-  otherwise change the code that actually ran.)
+* With ``--out``, the campaign runs from a **snapshot**: the committed
+  ``assurance_lab/`` tree exported by ``git archive`` into a fresh temp
+  directory, cross-checked against the git objects, executed by an isolated
+  interpreter. ``--in-place`` opts out (development only).
+* A *start receipt* is captured **before any enumeration** and never
+  recomputed.
+* A report is refused (exit 2) from a dirty tree, or if the snapshot's
+  integrity cannot be established.
+* Every process that runs campaign code reports where it imported
+  ``assurance_lab`` from; any origin outside the executed tree, or any change
+  to it by the end of the run, invalidates the report (exit 3).
 * Claims (obligation labels) contain no run-dependent values; timing and
-  environment live only in the "Run metadata" section.
+  environment live only in the trailing "Run metadata" section.
 """
 
 from __future__ import annotations
@@ -26,21 +28,28 @@ import datetime as dt
 import hashlib
 import itertools
 import json
+import multiprocessing
 import os
-import pathlib
 import platform
 import subprocess
 import sys
 import time
+from pathlib import Path
+from typing import Optional
 
 from .checker.explore import explore
-from .checker.induction import check_induction
+from .checker.induction import check_induction, unmatched_reachable
 from .core.model import Config, CoreModel
 from .core.mutants import ALL_MUTANTS
 from .distributed.replica import Admit, Edge, Replica, ResolutionPolicy, make_resolution
+from .provenance import (
+    PKG, Manifest, ProvenanceError, commit_digest, foreign_origins, git,
+    interpreter_isolation, loaded_origins, make_snapshot, remove_snapshot,
+    snapshot_command, source_digest, tree_state,
+)
 from .verdict import Result, Verdict, authorize
 
-PKG = pathlib.Path(__file__).resolve().parent
+REPO = PKG.parent
 
 BASE_ASSUMPTIONS = (
     "BoundaryCompleteness: every covered authority relation is represented in the model",
@@ -56,40 +65,56 @@ MUTANT_CFG = Config()
 # ---------------------------------------------------------------- provenance
 
 
-def source_digest() -> str:
-    h = hashlib.sha256()
-    for p in sorted(PKG.rglob("*.py")):
-        h.update(str(p.relative_to(PKG)).encode() + b"\0" + p.read_bytes() + b"\0")
-    return h.hexdigest()
-
-
-def _git(*args: str) -> str:
-    try:
-        return subprocess.run(["git", *args], cwd=PKG.parent, capture_output=True,
-                              text=True, check=True).stdout.strip()
-    except (OSError, subprocess.CalledProcessError):
-        return "unknown"
-
-
-def start_receipt(core_cfg: Config, workers: int, argv: list[str]) -> dict:
+def start_receipt(core_cfg: Config, workers: int, start_method: str, command: str,
+                  manifest: Optional[Manifest] = None) -> dict:
     """Identity of the computation, captured before it starts."""
-    dirty = _git("status", "--porcelain", "--", "assurance_lab")
-    ident = {
-        "command": "python -m assurance_lab " + " ".join(argv),
-        "commit": _git("rev-parse", "HEAD"),
-        "model_tree": "unknown" if dirty == "unknown" else ("DIRTY" if dirty else "clean"),
-        "source_sha256": source_digest(),
+    if manifest is not None:
+        ident = {
+            "execution": "snapshot",
+            "command": manifest.command,
+            "commit": manifest.commit,
+            "tree_id": manifest.tree_id,
+            "model_tree": manifest.launcher_tree,
+            "git_object_sha256": manifest.git_object_sha256,
+            "snapshot_sha256": manifest.snapshot_sha256,
+        }
+    else:
+        commit = git(REPO, "rev-parse", "HEAD") or "unknown"
+        try:
+            gdig = commit_digest(REPO, commit) if commit != "unknown" else "unknown"
+        except (OSError, subprocess.CalledProcessError):
+            gdig = "unknown"
+        ident = {
+            "execution": "in-place",
+            "command": command,
+            "commit": commit,
+            "tree_id": git(REPO, "rev-parse", "HEAD:assurance_lab") or "unknown",
+            "model_tree": tree_state(REPO),
+            "git_object_sha256": gdig,
+        }
+    ident.update({
+        "source_sha256": source_digest(PKG),
         "core_domain": core_cfg.describe(),
         "mutant_domain": MUTANT_CFG.describe(),
         "workers": workers,
-    }
+        "start_method": start_method,
+    })
     ident["receipt_id"] = hashlib.sha256(
         json.dumps(ident, sort_keys=True).encode()).hexdigest()[:16]
     return ident
 
 
-def preflight(receipt: dict, writing_report: bool, allow_dirty: bool) -> str | None:
+def preflight(receipt: dict, writing_report: bool, allow_dirty: bool,
+              manifest: Optional[Manifest] = None) -> Optional[str]:
     """Refuse to produce a report whose provenance can't be bound to a commit."""
+    if manifest is not None:
+        expected = Path(manifest.snapshot_root).resolve() / PKG.name
+        if PKG != expected:
+            return f"campaign code is running from {PKG}, not the snapshot {expected}"
+        if not (receipt["source_sha256"] == manifest.snapshot_sha256 == manifest.git_object_sha256):
+            return "snapshot bytes changed between export and the start of the run"
+        if not (sys.flags.isolated and sys.flags.no_site):
+            return "snapshot runs require an isolated interpreter (-I -S)"
     if writing_report and receipt["model_tree"] != "clean" and not allow_dirty:
         return (f"refusing to write a report: assurance_lab/ tree is {receipt['model_tree']}; "
                 "commit first or pass --allow-dirty")
@@ -97,18 +122,27 @@ def preflight(receipt: dict, writing_report: bool, allow_dirty: bool) -> str | N
 
 
 def source_drifted(receipt: dict) -> bool:
-    return source_digest() != receipt["source_sha256"]
+    return source_digest(PKG) != receipt["source_sha256"]
+
+
+def origin_check(worker_origins: dict) -> tuple[int, list[str]]:
+    """(number of processes checked, origins outside the executed tree)."""
+    procs = dict(worker_origins)
+    procs[os.getpid()] = loaded_origins()  # parent, re-read at the end
+    foreign = sorted({o for origins in procs.values() for o in foreign_origins(origins, PKG)})
+    return len(procs), foreign
 
 
 # ---------------------------------------------------------------- campaign
 
 
-def core_results(cfg: Config, workers: int) -> tuple[list[Result], dict[str, float]]:
+def core_results(cfg: Config, workers: int, mp_context=None):
+    """Returns (results, timing, induction report)."""
     dom = cfg.describe()
     timing: dict[str, float] = {}
     out = []
     t0 = time.perf_counter()
-    r = explore(CoreModel(cfg), max_states=5_000_000)
+    r = explore(CoreModel(cfg), max_states=5_000_000, keep_states=True)
     timing["reachability_s"] = time.perf_counter() - t0
     v = Verdict.UNKNOWN if not r.complete else (Verdict.FAIL if r.violation else Verdict.PASS)
     out.append(Result(
@@ -117,7 +151,7 @@ def core_results(cfg: Config, workers: int) -> tuple[list[Result], dict[str, flo
         BASE_ASSUMPTIONS, ("finite domain only",),
         detail=r.violation.pretty() if r.violation else "",
     ))
-    ir = check_induction(CoreModel(cfg), workers=workers)
+    ir = check_induction(CoreModel(cfg), workers=workers, mp_context=mp_context)
     timing["induction_s"] = ir.seconds
     bounds = f"{ir.inv_state_count:,} Inv-states, {ir.transitions_checked:,} transitions"
     risks = ("finite domain only; no unbounded/parameterized proof",
@@ -127,7 +161,17 @@ def core_results(cfg: Config, workers: int) -> tuple[list[Result], dict[str, flo
         v = Verdict.UNKNOWN if not ir.complete else (Verdict.PASS if ok else Verdict.FAIL)
         out.append(Result(name, v, "finite-exhaustive-induction", dom, bounds, BASE_ASSUMPTIONS, risks,
                           detail=str(ir.first_failure) if ir.first_failure else ""))
-    return out, timing
+    t1 = time.perf_counter()
+    missing = unmatched_reachable(cfg, r.state_set) if r.complete else None
+    timing["subset_check_s"] = time.perf_counter() - t1
+    if missing is None:
+        v, b = Verdict.UNKNOWN, "reachability incomplete"
+    else:
+        v = Verdict.PASS if not missing else Verdict.FAIL
+        b = f"all {r.states:,} reachable states produced by the generator" if not missing \
+            else f"{len(missing):,} reachable states missing from generator"
+    out.append(Result("Reach ⊆ Inv-states (BFS vs generator)", v, "exhaustive-cross-check", dom, b))
+    return out, timing, ir
 
 
 def mutant_results(cfg: Config) -> list[Result]:
@@ -187,14 +231,26 @@ def distributed_results() -> list[Result]:
 METADATA_HEADING = "## Run metadata (varies between runs; not part of any claim)"
 
 
-def render(results: list[Result], receipt: dict, meta: dict, drifted: bool) -> str:
+def provenance_valid(drifted: bool, foreign: list[str]) -> bool:
+    return not drifted and not foreign
+
+
+def render(results: list[Result], receipt: dict, meta: dict, drifted: bool,
+           procs_checked: int = 0, foreign: Optional[list[str]] = None) -> str:
+    foreign = foreign or []
     lines = ["# Verification Results", ""]
     if drifted:
-        lines += ["> **INVALID PROVENANCE: `assurance_lab/` source changed during the run.**",
+        lines += ["> **INVALID PROVENANCE: the executed `assurance_lab/` source changed during the run.**",
                   "> These results are not bound to any single source tree.", ""]
+    if foreign:
+        lines += ["> **INVALID PROVENANCE: campaign code was imported from outside the executed tree:**"]
+        lines += [f"> - `{o}`" for o in foreign] + [""]
     if receipt["model_tree"] != "clean":
         lines += [f"> **Model tree was {receipt['model_tree']} at start.** Results are not "
                   "bound to the recorded commit.", ""]
+    if receipt["execution"] == "in-place":
+        lines += ["> Executed **in place** from the working tree: an edit reverted before the end "
+                  "of the run (A→B→A) would not be detected.", ""]
     lines += [
         "Status: research prototype. **Not production-certified. Not unboundedly verified.**",
         "",
@@ -205,12 +261,27 @@ def render(results: list[Result], receipt: dict, meta: dict, drifted: bool) -> s
         "## Provenance (start receipt, captured before enumeration)",
         "",
         f"- Command: `{receipt['command'].strip()}`",
-        f"- Commit: `{receipt['commit']}`",
-        f"- `assurance_lab/` tree at start: **{receipt['model_tree']}**",
-        f"- SHA-256 over `assurance_lab/**/*.py` at start: `{receipt['source_sha256']}`",
-        f"- Source re-hashed at end: **{'MISMATCH' if drifted else 'unchanged'}**",
+        f"- Commit: `{receipt['commit']}` (tree `{receipt['tree_id']}`)",
+    ]
+    if receipt["execution"] == "snapshot":
+        lines += [
+            "- Execution: **snapshot**: committed tree exported with `git archive` into a fresh "
+            "temp directory, run by an isolated interpreter (`-I -S -B`)",
+            f"- Snapshot bytes = git objects: **{'yes' if receipt['snapshot_sha256'] == receipt['git_object_sha256'] else 'NO'}**",
+        ]
+    else:
+        lines.append("- Execution: **in-place** (working tree)")
+    lines += [
+        f"- `assurance_lab/` working tree at start: **{receipt['model_tree']}**",
+        f"- SHA-256 over executed `assurance_lab/**/*.py` at start: `{receipt['source_sha256']}`",
+        f"- Same digest from git objects at the commit: `{receipt['git_object_sha256']}`",
+        f"- Import origins: {procs_checked} process(es) checked (parent + pool workers, "
+        f"start method `{receipt['start_method']}`); outside executed tree: "
+        f"**{len(foreign) if foreign else 'none'}**",
+        f"- Executed source re-hashed at end: **{'MISMATCH' if drifted else 'unchanged'}**",
         f"- Core domain: {receipt['core_domain']}",
         f"- Mutant domain: {receipt['mutant_domain']}",
+        f"- Workers: {receipt['workers']}",
         f"- Receipt id: `{receipt['receipt_id']}`",
         "",
         "## Claims",
@@ -228,48 +299,89 @@ def render(results: list[Result], receipt: dict, meta: dict, drifted: bool) -> s
                 seen.add(a)
                 lines.append(f"- {a}")
     required = [r.obligation for r in results]
-    gate = authorize(results, required) and not drifted
-    lines += ["", f"Non-compensating gate over all {len(required)} obligations: "
-              f"**{'all PASS' if gate else 'NOT all PASS'}**", ""]
+    gate = authorize(results, required) and provenance_valid(drifted, foreign)
+    lines += ["", f"Non-compensating gate over all {len(required)} obligations"
+              f" and provenance: **{'all PASS' if gate else 'NOT all PASS'}**", ""]
     # Run metadata goes last, so two reports of the same code differ only below
-    # this heading. Receipt fields above stay the same for the same commit and workers.
+    # this heading.
     lines += [METADATA_HEADING, ""]
     for k, v in meta.items():
-        lines.append(f"- {k}: {v:.1f}" if isinstance(v, float) else f"- {k}: {v}")
+        lines.append(f"- {k}: {v:.3f}" if isinstance(v, float) else f"- {k}: {v}")
     lines.append("")
     return "\n".join(lines)
 
 
-def main(argv=None) -> int:
-    argv = list(sys.argv[1:] if argv is None else argv)
+# ---------------------------------------------------------------- entry
+
+
+def _parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="assurance_lab")
     ap.add_argument("--full", action="store_true", help="headline domain (3 records, levels 0..2, sem 0..1)")
     ap.add_argument("--workers", type=int, default=os.cpu_count() or 1)
-    ap.add_argument("--out", help="write markdown report here")
+    ap.add_argument("--start-method", choices=multiprocessing.get_all_start_methods(),
+                    help="process-pool start method (default: platform default)")
+    ap.add_argument("--out", help="write markdown report here (runs from a snapshot of HEAD)")
+    ap.add_argument("--in-place", action="store_true",
+                    help="with --out: run from the working tree instead of a snapshot "
+                         "(development only; edit-and-revert is undetectable)")
     ap.add_argument("--allow-dirty", action="store_true",
                     help="write a report even if assurance_lab/ has uncommitted changes (flagged)")
-    a = ap.parse_args(argv)
-    core_cfg = FULL_CORE if a.full else QUICK_CORE
+    ap.add_argument("--_manifest", help=argparse.SUPPRESS)
+    return ap
 
-    receipt = start_receipt(core_cfg, a.workers, argv)  # BEFORE any enumeration
-    why = preflight(receipt, bool(a.out), a.allow_dirty)
+
+def launch_snapshot(a: argparse.Namespace, argv: list[str]) -> int:
+    state = tree_state(REPO)
+    if state != "clean" and not a.allow_dirty:
+        print(f"refusing to write a report: assurance_lab/ tree is {state}; "
+              "commit first or pass --allow-dirty", file=sys.stderr)
+        return 2
+    try:
+        m = make_snapshot(REPO, "HEAD", command="python -m assurance_lab " + " ".join(argv))
+    except (ProvenanceError, OSError, subprocess.CalledProcessError) as e:
+        print(f"refusing to write a report: cannot build snapshot: {e}", file=sys.stderr)
+        return 2
+    child = ["--workers", str(a.workers), "--out", os.path.abspath(a.out)]
+    child += ["--full"] if a.full else []
+    child += ["--start-method", a.start_method] if a.start_method else []
+    child += ["--allow-dirty"] if a.allow_dirty else []
+    try:
+        return subprocess.run(snapshot_command(m, child), cwd=REPO).returncode
+    finally:
+        remove_snapshot(m.snapshot_root)
+
+
+def main(argv=None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    a = _parser().parse_args(argv)
+    if a.out and not a.in_place and a._manifest is None:
+        return launch_snapshot(a, argv)
+
+    manifest = Manifest.from_json(a._manifest) if a._manifest else None
+    core_cfg = FULL_CORE if a.full else QUICK_CORE
+    ctx = multiprocessing.get_context(a.start_method)  # None -> platform default
+    receipt = start_receipt(core_cfg, a.workers, ctx.get_start_method(),
+                            "python -m assurance_lab " + " ".join(argv), manifest)  # BEFORE enumeration
+    why = preflight(receipt, bool(a.out), a.allow_dirty, manifest)
     if why:
-        print(why, file=sys.stderr)
+        print(f"refusing: {why}", file=sys.stderr)
         return 2
 
     started = dt.datetime.now(dt.timezone.utc)
     t0 = time.perf_counter()
-    results, timing = core_results(core_cfg, a.workers)
+    results, timing, ir = core_results(core_cfg, a.workers, ctx)
     t1 = time.perf_counter()
     results += mutant_results(MUTANT_CFG)
     t2 = time.perf_counter()
     results += distributed_results()
     t3 = time.perf_counter()
+    procs_checked, foreign = origin_check(ir.origins)
     drifted = source_drifted(receipt)
 
     meta = {
         "started_utc": f"{started:%Y-%m-%d %H:%M:%S}",
         "python": platform.python_version(),
+        "interpreter": interpreter_isolation(),
         **timing,
         "core_total_s": t1 - t0,
         "mutants_s": t2 - t1,
@@ -278,11 +390,14 @@ def main(argv=None) -> int:
     for r in results:
         print(f"{r.verdict.value:8} {r.obligation}  {r.label()}")
     if drifted:
-        print("ERROR: assurance_lab/ source changed during the run", file=sys.stderr)
+        print("ERROR: executed assurance_lab/ source changed during the run", file=sys.stderr)
+    if foreign:
+        print(f"ERROR: campaign code imported from outside the executed tree: {foreign}",
+              file=sys.stderr)
     if a.out:
         with open(a.out, "w") as f:
-            f.write(render(results, receipt, meta, drifted))
-    if drifted:
+            f.write(render(results, receipt, meta, drifted, procs_checked, foreign))
+    if not provenance_valid(drifted, foreign):
         return 3
     return 0 if authorize(results, [r.obligation for r in results]) else 1
 

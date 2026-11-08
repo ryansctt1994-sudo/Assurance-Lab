@@ -1,5 +1,6 @@
 import itertools
 import multiprocessing
+import os
 
 import pytest
 
@@ -112,25 +113,31 @@ _START_METHODS = [m for m in ("fork", "spawn", "forkserver")
 
 
 @pytest.mark.parametrize("method", _START_METHODS)
-def test_induction_totals_invariant_across_start_methods(method, monkeypatch):
+def test_induction_totals_invariant_across_start_methods(method):
     """fork workers inherit the already-imported package; spawn/forkserver
-    workers re-import assurance_lab from disk. Totals must not depend on it.
-    Test-only seam: check_induction looks up ProcessPoolExecutor at call time."""
-    import concurrent.futures as cf
-    from concurrent.futures.process import ProcessPoolExecutor as RealPool
+    workers re-import assurance_lab from disk. Totals must not depend on it,
+    and every worker must report importing from this package directory."""
+    from assurance_lab.provenance import PKG, foreign_origins
 
-    ctx = multiprocessing.get_context(method)
-    created = []
-
-    def pool(*a, **kw):
-        created.append(ctx.get_start_method())
-        return RealPool(*a, mp_context=ctx, **kw)
-
-    monkeypatch.setattr(cf, "ProcessPoolExecutor", pool)
     cfg = Config(n_records=2, n_lineages=1)
     r1 = check_induction(CoreModel(cfg), workers=1)  # no pool
-    r2 = check_induction(CoreModel(cfg), workers=2)  # pool with `method`
-    assert created == [method]  # the pool really used this start method
+    r2 = check_induction(CoreModel(cfg), workers=2, mp_context=multiprocessing.get_context(method))
+    assert r1.start_method is None and r2.start_method == method
     key = lambda r: (r.inv_state_count, r.transitions_checked, r.init_ok, r.step_ok,  # noqa: E731
                      r.safety_ok, r.complete)
     assert key(r1) == key(r2) and r1.complete
+    workers = {pid: o for pid, o in r2.origins.items() if pid != os.getpid()}
+    assert workers, "no pool worker reported its import origins"
+    for origins in workers.values():
+        assert any(o.endswith("checker/induction.py") for o in origins)
+        assert foreign_origins(origins, PKG) == []
+
+
+def test_reachable_states_are_all_generated():
+    """Reach ⊆ Inv-states: BFS over Next and the constructive generator agree."""
+    from assurance_lab.checker.induction import unmatched_reachable
+
+    for cfg in (Config(n_records=2, n_lineages=2), Config(n_records=3, n_lineages=1, max_level=1, n_sem=1)):
+        r = explore(CoreModel(cfg), keep_states=True)
+        assert r.complete and len(r.state_set) == r.states
+        assert unmatched_reachable(cfg, r.state_set) == set()

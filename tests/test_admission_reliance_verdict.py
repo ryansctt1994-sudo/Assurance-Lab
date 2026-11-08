@@ -114,7 +114,7 @@ def test_label_carries_scope():
 
 def _receipt(**kw):
     from assurance_lab.__main__ import QUICK_CORE, start_receipt
-    r = start_receipt(QUICK_CORE, 1, ["--out", "x.md"])
+    r = start_receipt(QUICK_CORE, 1, "fork", "python -m assurance_lab --out x.md")
     r.update(kw)
     return r
 
@@ -157,5 +157,5 @@ def test_claim_labels_contain_no_timing():
     from assurance_lab.__main__ import core_results
     cfg = Config(n_records=2, n_lineages=1, max_level=1, n_sem=1)
     labels1 = [r.label() for r in core_results(cfg, 1)[0]]
-    labels2 = [r.label() for r in core_results(cfg, 1)[0]]
+    labels2 = [r.label() for r in core_results(cfg, 2)[0]]  # worker count must not leak into claims
     assert labels1 == labels2

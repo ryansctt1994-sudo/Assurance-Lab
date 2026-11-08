@@ -32,10 +32,11 @@ class ExploreReport:
     violation: Optional[Violation]
     actions_seen: dict[str, int] = field(default_factory=dict)
     max_depth: int = 0
+    state_set: Optional[frozenset] = None  # only with keep_states=True
 
 
 def explore(model: CoreModel, max_states: int = 2_000_000, check_inv: bool = True,
-            stop_on_violation: bool = True) -> ExploreReport:
+            stop_on_violation: bool = True, keep_states: bool = False) -> ExploreReport:
     cfg = model.cfg
     s0 = model.init()
     parent: dict[State, tuple[Optional[State], Optional[tuple]]] = {s0: (None, None)}
@@ -99,4 +100,5 @@ def explore(model: CoreModel, max_states: int = 2_000_000, check_inv: bool = Tru
         violation=violation,
         actions_seen=actions_seen,
         max_depth=max(depth.values()),
+        state_set=frozenset(parent) if keep_states else None,
     )
