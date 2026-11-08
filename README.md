@@ -20,9 +20,12 @@ python -m assurance_lab             # quick verification campaign
 python -m assurance_lab --full --out docs/RESULTS.md   # headline domain, ~6 min on 4 cores
 ```
 
-Exit codes: `0` all obligations PASS · `1` some obligation FAIL/UNKNOWN ·
-`2` refused (dirty `assurance_lab/` tree with `--out`) · `3` source changed
-during the run.
+| Exit | Meaning | What it guarantees |
+|---|---|---|
+| `0` | every obligation PASS; source hash at end = hash in start receipt | results are bound to the recorded commit (modulo the edit-and-revert gap below) |
+| `1` | some obligation FAIL or UNKNOWN | non-compensating gate: no PASS elsewhere offsets it |
+| `2` | refused before running: `--out` with a dirty `assurance_lab/` tree | we won't anchor a report to a tree that isn't a commit (pre-execution check) |
+| `3` | `assurance_lab/` changed between the start receipt and the end | the anchor did not hold. Deliberately conservative: it fires even when the change could not have affected execution |
 
 ## How results are bound to code
 
@@ -32,13 +35,28 @@ during the run.
   which is then flagged at the top of the report.
 - The source is **re-hashed at the end**; a mismatch marks the report
   INVALID PROVENANCE and fails the gate even if every obligation passed.
-  (Pool workers under spawn/forkserver re-import the package from disk, so a
-  mid-run edit is not harmless.)
+  Why it is load-bearing: pool workers started with *spawn* (macOS and
+  Windows default) or *forkserver* (Linux default from Python 3.14)
+  re-import the package from disk when they start, and this campaign creates
+  its pool only after the reachability phase (~105 s into a full run). Under
+  *fork* (Linux default through 3.13) workers inherit the imported code, so
+  an edit after pool startup cannot change execution, and the hash also
+  covers modules the campaign never imports. Exit 3 fires anyway; a
+  development drift demo edited `reliance.py`, which the campaign never
+  imports, and got exit 3.
+- **Known gap: the re-hash detects *net* change, not transient change.**
+  An edit that is reverted before the end (A→B→A) passes, yet a
+  spawn/forkserver worker started in between would have run B. Closing that
+  needs execution from an immutable snapshot of the commit (e.g. a
+  `git archive` export), which makes the working tree irrelevant. Not done
+  yet.
 - **Claims carry no run-dependent values.** Timing and environment sit in a
   trailing "Run metadata" section, so two reports of the same code differ
   only there.
 - Induction totals are tested to be **worker-count invariant** (plain
-  sequential loop vs. a 2-worker process pool).
+  sequential loop vs. a 2-worker process pool) **and start-method invariant**
+  (the pool forced to fork, spawn, and forkserver in turn, wherever available;
+  CI runs this on Linux, so all three paths execute there).
 - **Green CI ≠ full induction.** PR CI runs the tests and the quick
   campaign; the full campaign runs only on `main` or by manual dispatch.
   `docs/RESULTS.md` comes from a local `--full` run whose receipt it records.

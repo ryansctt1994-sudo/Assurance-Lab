@@ -1,4 +1,5 @@
 import itertools
+import multiprocessing
 
 import pytest
 
@@ -104,3 +105,32 @@ def test_induction_totals_are_worker_count_invariant(cfg):
                      r.safety_ok, r.complete)
     assert key(r1) == key(r2)
     assert r1.complete and r1.inv_state_count > 0
+
+
+_START_METHODS = [m for m in ("fork", "spawn", "forkserver")
+                  if m in multiprocessing.get_all_start_methods()]
+
+
+@pytest.mark.parametrize("method", _START_METHODS)
+def test_induction_totals_invariant_across_start_methods(method, monkeypatch):
+    """fork workers inherit the already-imported package; spawn/forkserver
+    workers re-import assurance_lab from disk. Totals must not depend on it.
+    Test-only seam: check_induction looks up ProcessPoolExecutor at call time."""
+    import concurrent.futures as cf
+    from concurrent.futures.process import ProcessPoolExecutor as RealPool
+
+    ctx = multiprocessing.get_context(method)
+    created = []
+
+    def pool(*a, **kw):
+        created.append(ctx.get_start_method())
+        return RealPool(*a, mp_context=ctx, **kw)
+
+    monkeypatch.setattr(cf, "ProcessPoolExecutor", pool)
+    cfg = Config(n_records=2, n_lineages=1)
+    r1 = check_induction(CoreModel(cfg), workers=1)  # no pool
+    r2 = check_induction(CoreModel(cfg), workers=2)  # pool with `method`
+    assert created == [method]  # the pool really used this start method
+    key = lambda r: (r.inv_state_count, r.transitions_checked, r.init_ok, r.step_ok,  # noqa: E731
+                     r.safety_ok, r.complete)
+    assert key(r1) == key(r2) and r1.complete

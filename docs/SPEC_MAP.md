@@ -61,3 +61,10 @@ Status key: **modeled** (in the exhaustively checked core), **tested**
 3. Replace scenario permutations in `distributed/` with a small replica-level
    model checker (2 replicas, bounded message buffer, partitions).
 4. Write out §29 and model the execution boundary.
+5. Run `--full` from an immutable `git archive` snapshot of the commit, so
+   the working tree cannot affect execution (closes the edit-and-revert gap
+   the end-of-run re-hash cannot see).
+6. Cosmetic: run-metadata timings use `.1f`, so sub-50 ms phases print as
+   `0.0` (mutants ≈ 17 ms, distributed ≈ 22 ms). Fix alongside the next
+   `assurance_lab/` change, since any edit there requires regenerating
+   `docs/RESULTS.md` to keep it bound to HEAD.
