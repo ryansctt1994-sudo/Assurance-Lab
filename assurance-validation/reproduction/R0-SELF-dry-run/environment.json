@@ -1,0 +1,40 @@
+{
+  "checkout": {
+    "head": "c175fbd7b7eb5efdbd3a7b07bbf9d41bc998139c",
+    "source": "https://github.com/ryansctt1994-sudo/Assurance-Lab.git",
+    "status_porcelain": "",
+    "tracked_changes_after": "",
+    "tree": "fe8456fa0b9ad6bf486ce47091cd35af96ae6246",
+    "tree_assurance_lab": "9301006544f9c9b5b288a133fdc4995987d03040"
+  },
+  "cleared_env_vars": [
+    "PYTHONUNBUFFERED"
+  ],
+  "evidence_id": "R0-SELF-dry-run:7b1537e4-cb46-4756-bb44-2d60eff0e339",
+  "finished_utc": "2026-11-08T13:25:23Z",
+  "git_version": "git version 2.43.0",
+  "harness": {
+    "reproduce.py": "0e5286b7cdee51c8a55b216efa507b9d9e888af8886d64af985eb187e93f45c8"
+  },
+  "host": {
+    "cpu_count": 4,
+    "implementation": "CPython",
+    "machine": "x86_64",
+    "platform": "Linux-6.18.44-fc-v310-x86_64-with-glibc2.39",
+    "python": "3.13.18"
+  },
+  "label": "R0-SELF-dry-run",
+  "manifest_sha256": "352113d5b44ea5a37a998b4c66ac06454e1baab6807e20f989a875a735f8c43d",
+  "operator_declaration": "The baseline author's coding agent (Claude Code session on PR #2). Role in the baseline: built it. Prior exposure: has seen every expected value. NOT independent; harness validation only; never counts toward G1.",
+  "pip_freeze": [
+    "iniconfig==2.3.1",
+    "packaging==26.3",
+    "pluggy==1.7.0",
+    "Pygments==2.21.0",
+    "pytest==9.2.0"
+  ],
+  "python_version": "Python 3.13.18",
+  "source_sha256_assurance_lab": "bd9443baa64e641217e24d4c80bc787b0254d7a8da82ef1b79423de661414af8",
+  "started_utc": "2026-11-08T13:12:51Z",
+  "venv": true
+}

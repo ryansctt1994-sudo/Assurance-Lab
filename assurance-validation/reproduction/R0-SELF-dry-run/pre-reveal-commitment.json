@@ -1,0 +1,13 @@
+{
+  "algorithm": "sha256",
+  "commitment": "3fc3ad1eca0f98bf568f9c6dd50c1447ae5a7935c9a7c94b1de7fe7ea0e42e14",
+  "covers": "output-hashes.sha256",
+  "evidence_id": "R0-SELF-dry-run:7b1537e4-cb46-4756-bb44-2d60eff0e339",
+  "label": "R0-SELF-dry-run",
+  "operator_declaration": "The baseline author's coding agent (Claude Code session on PR #2). Role in the baseline: built it. Prior exposure: has seen every expected value. NOT independent; harness validation only; never counts toward G1.",
+  "report_sha256": "f610f52c4b825ed067e9ff64c01a5186e3a50285cd09ddeb0e49873ab94045f8",
+  "sealed_utc": "2026-11-08T13:25:23Z",
+  "source_sha256_assurance_lab": "bd9443baa64e641217e24d4c80bc787b0254d7a8da82ef1b79423de661414af8",
+  "subject_commit": "c175fbd7b7eb5efdbd3a7b07bbf9d41bc998139c",
+  "subject_tree": "fe8456fa0b9ad6bf486ce47091cd35af96ae6246"
+}
