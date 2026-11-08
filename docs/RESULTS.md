@@ -8,21 +8,21 @@ job is skipped on PRs by design. Green CI ≠ full induction completed.
 
 ## Provenance (start receipt, captured before enumeration)
 
-- Command: `python -m assurance_lab --full --out docs/RESULTS.md`
-- Commit: `748f80a09fbf0eba6906c6c71f0245e067cf2634` (tree `97178168b8f7a7b9675a2d8e36921646d9ea729b`)
+- Command: `python -m assurance_lab --full --out docs/reports/dev-3c6fad143994.md`
+- Commit: `3c6fad1439944a965c6769fd9e26ed3e88c2a2d4` (tree `208e1723f38459dd844abb5ce5cfacaf0eed335f`)
 - Execution: **snapshot**: committed tree exported with `git archive` into a fresh temp directory, run by an isolated interpreter (`-I -S -B`)
 - Snapshot bytes = git objects: **yes**
 - `assurance_lab/` working tree at start: **clean**
-- SHA-256 over executed `assurance_lab/**/*.py` at start: `b625bcf64245d8e81dab3df97adf87c72430a465bd4a22004d9faa8a72b81461`
-- Same digest from git objects at the commit: `b625bcf64245d8e81dab3df97adf87c72430a465bd4a22004d9faa8a72b81461`
+- SHA-256 over executed `assurance_lab/**/*.py` at start: `8a65f632bfb9781c420287749b3a9936964336e0dd05c5498bc31a2ee3f52a64`
+- Same digest from git objects at the commit: `8a65f632bfb9781c420287749b3a9936964336e0dd05c5498bc31a2ee3f52a64`
 - Import origins verified in every process that ran campaign code: the parent + 4 pool worker(s) that executed jobs (start method `fork`); outside executed tree: **none**
 - Executed source re-hashed at end: **unchanged**
 - Core domain: 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1
 - Mutant domain: 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1
 - Workers: 4
 - Partition manifest (frozen before execution): 18 partitions, content sha256 bac6c4698fb004bf91a4d9098f71b60ba30e12493532e7322dfc57f09c4e970a
-- Receipt id: `09acb84fb4b633fe`
-- Provenance verdict: **BOUND** to commit `748f80a09fbf`
+- Receipt id: `76e62984cfb87131`
+- Provenance verdict: **BOUND** to commit `3c6fad143994`
 
 ## Claims
 
@@ -85,16 +85,25 @@ job is skipped on PRs by design. Green CI ≠ full induction completed.
 | witness: granted authority exercised | `PASS[bfs-shortest-witness; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; path length 2]` |
 | witness: retraction without resurrection | `PASS[bfs-shortest-witness; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; path length 3]` |
 | witness: invalidation of a historical premise | `PASS[bfs-shortest-witness; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; path length 3]` |
-| METAMORPHIC: complete-delivery order invariance | `PASS[metamorphic-relation; 8 replica source instances; 17,520 comparisons]` |
-| METAMORPHIC: duplicate-message idempotence | `PASS[metamorphic-relation; 8 replica source instances; 185 comparisons]` |
-| METAMORPHIC: unrelated-lineage projection | `PASS[metamorphic-relation; 8 replica source instances; 336 comparisons]` |
-| METAMORPHIC: identifier-renaming equivariance | `PASS[metamorphic-relation; 8 replica source instances; 288 comparisons]` |
-| METAMORPHIC: serialization round-trip | `PASS[metamorphic-relation; 8 replica source instances; 428 comparisons]` |
-| METAMORPHIC: relation preconditions hold on every source instance | `PASS[precondition-check; 8 instances, renamings, added lineage; ids issued once; no cross-lineage references; disjoint added lineage; renamings are bijections keeping seq and lineage]` |
+| METAMORPHIC: complete-delivery order invariance | `PASS[metamorphic-relation; 12 replica source instances; 29,040 comparisons; 11/12 instances exhaustive (fork+dispute+escalation: 4,713 of 40,320 orders sampled)]` |
+| METAMORPHIC: duplicate-message idempotence | `PASS[metamorphic-relation; 12 replica source instances; 283 comparisons; all 12 instances exhaustive]` |
+| METAMORPHIC: unrelated-lineage projection | `PASS[metamorphic-relation; 12 replica source instances; 30,327 comparisons; all 12 instances exhaustive]` |
+| METAMORPHIC: identifier-renaming equivariance | `PASS[metamorphic-relation; 12 replica source instances; 432 comparisons; all 12 instances exhaustive]` |
+| METAMORPHIC: serialization round-trip | `PASS[metamorphic-relation; 12 replica source instances; 5,412 comparisons; all 12 instances exhaustive]` |
+| SNAPSHOT INTEGRITY: every inconsistent or malformed snapshot is refused at thaw (INVALID_SNAPSHOT) | `PASS[corruption-injection; 10 corruption classes × every serialized prefix of 12 instances; 810 damaged snapshots refused, deterministically, no other exception type]` |
+| SNAPSHOT INTEGRITY (diagnostic, boundary bypassed): head() answers UNKNOWN on every damaged state, never CONFLICT or a record, and changes nothing | `PASS[defense-in-depth; thaw(validate=False), diagnostic only; not evidence that the boundary works; evidence that head() does not turn damaged evidence into authority]` |
+| SNAPSHOT INTEGRITY: genuine snapshots are never refused and never UNKNOWN | `PASS[false-rejection-check; 164 genuine serialized states (plus every replica-checker state, thawed through the validator with UNKNOWN as a safety violation); zero false rejections]` |
+| SNAPSHOT INTEGRITY: retained KeyError counterexamples are refused, and UNKNOWN when bypassed | `PASS[regression; 2 counterexamples (crash b535b1a and main c175fbd); INVALID_SNAPSHOT at thaw; UNKNOWN, not CONFLICT, with the boundary bypassed]` |
+| METAMORPHIC: exact-state comparison detects every consistent omission | `PASS[corruption-injection; 3 omission classes, which pass the boundary by construction; against a never-serialized reference (a deployment has no such reference)]` |
+| METAMORPHIC: frozen v1 fixture campaign still holds under the current code | `PASS[regression; 8 baseline source instances; all 5 relations]` |
+| METAMORPHIC: relation preconditions hold on every source instance | `PASS[precondition-check; 12 instances, renamings, added lineage; ids issued once; no cross-lineage references; disjoint added lineage; renamings are bijections keeping seq and lineage]` |
 | METAMORPHIC: ac-state-v1 encoding round-trip (strict decoder) | `PASS[metamorphic-relation; 2 records, 2 principals, 1 lineages, levels 0..2, sem 0..1; all 12,994 Inv-states decode to the same state with the same steps]` |
 | ac-state-v1 strict decoder rejects every malformed encoding | `PASS[negative-corpus; 2 records, 2 principals, 1 lineages, levels 0..2, sem 0..1; 13/13 defect classes rejected]` |
+| METAMORPHIC: matrix denominators complete (eligible ⊇ deviating ⊇ detecting, per instance) | `PASS[relation-x-mutant-matrix; 12 and 8 instances, one at a time; frozen eligibility predicates; deviation by lockstep differential execution; no deviation outside eligibility, no detection without deviation]` |
+| METAMORPHIC: every category change from the published v1 matrix is explained | `PASS[matrix-versioning; v1 as published at b535b1a vs v2; 9 changed cells, each with a recorded reason]` |
 | METAMORPHIC: every relation kills a negative control | `PASS[relation-x-mutant-matrix; 5 relations × 7 mutants]` |
 | METAMORPHIC: every negative control is killed | `PASS[relation-x-mutant-matrix; 5 relations × 7 mutants]` |
+| METAMORPHIC: declared event alphabet exercised, boundary events handled only as declared | `PASS[alphabet-exercise; 32 events and declared sequences × every serialized prefix; 4,073 deliveries; 9/9 rejection rules exercised (cross-lineage through a declared two-event sequence)]` |
 
 ## State-set and transition digests (deterministic; exact targets for independent oracles)
 
@@ -174,19 +183,74 @@ Sole witnesses: `NoOrphanLive`: admit_without_head; `EdgesWF`: cross_lineage_sup
 
 ## Metamorphic relations × negative controls
 
-KILLED = relation violated; survived = the deviant branch ran and the relation held; not reached = this relation's inputs never reach a branch another relation does exercise (source-input adequacy); equivalent? = no relation exercises the mutant (excluded from the score). Numbers are deviant-branch executions; a kill resting on very few is thin evidence. Preconditions and justifications: `docs/METAMORPHIC.md`.
+Per cell: **E** eligible instances (frozen predicate over the inputs the relation can deliver, never an outcome), **D** deviating (eligible, and the mutant behaves differently from the correct replica on some execution the relation performs), **K** detecting (deviating, and the relation is violated). Exposure = D/E, detection breadth = K/D. KILLED: K > 0; survived: D > 0 = K; not reached: E > 0 = D; n/a: no eligible instance; equivalent?: no relation's inputs make the mutant deviate. Preconditions and justifications: `docs/METAMORPHIC.md`.
+
+**Matrix v2** (12 source instances; history, the published v1 table and the reason for every changed cell: `docs/METAMORPHIC_MATRIX_HISTORY.md`):
 
 | mutant | order | duplicate | projection | renaming | serialization |
 |---|---|---|---|---|---|
-| `first_applied_wins` | **KILLED** (9) | survived (163) | survived (465) | survived (111) | survived (43) |
-| `naive_stale_guard` | **KILLED** (2) | not reached (0) | not reached (0) | not reached (0) | not reached (0) |
-| `replay_readmits` | not reached (0) | **KILLED** (252) | not reached (0) | not reached (0) | survived (252) |
-| `global_dispute` | not reached (0) | not reached (0) | **KILLED** (89) | not reached (0) | not reached (0) |
-| `rid_tiebreak` | survived (842) | survived (110) | survived (86) | **KILLED** (16) | survived (102) |
-| `principal_order_quorum` | survived (30967) | survived (386) | survived (973) | **KILLED** (26) | survived (123) |
-| `freeze_drops_invalidated` | not reached (0) | not reached (0) | not reached (0) | not reached (0) | **KILLED** (2) |
+| `first_applied_wins` | **KILLED** E2 D2 K2 | survived E2 D2 K0 | survived E12 D12 K0 | survived E2 D2 K0 | survived E12 D2 K0 |
+| `naive_stale_guard` | **KILLED** E5 D5 K5 | not reached E5 D0 K0 | not reached E5 D0 K0 | not reached E5 D0 K0 | survived E12 D5 K0 |
+| `replay_readmits` | not reached E6 D0 K0 | **KILLED** E6 D6 K6 | not reached E6 D0 K0 | not reached E6 D0 K0 | survived E12 D12 K0 |
+| `global_dispute` | n/a | n/a | **KILLED** E12 D12 K9 | n/a | survived E12 D2 K0 |
+| `rid_tiebreak` | survived E7 D7 K0 | survived E7 D7 K0 | survived E12 D12 K0 | **KILLED** E7 D7 K2 | survived E12 D7 K0 |
+| `principal_order_quorum` | survived E5 D5 K0 | survived E5 D5 K0 | survived E12 D12 K0 | **KILLED** E5 D5 K5 | survived E12 D5 K0 |
+| `freeze_drops_invalidated` | n/a | n/a | n/a | n/a | **KILLED** E6 D6 K6 |
 
-Cells show the outcome and the number of deviant-branch executions. Suite mutation score: 7/7 (killed / non-equivalent).
+Per cell, over 12 source instances: **E** eligible (frozen predicate over the relation's alphabet), **D** deviating (eligible, and the mutant behaves differently from the correct replica on some execution the relation performs: state, or head for head-time mutants), **K** detecting (deviating, and the relation is violated). Exposure rate = D/E; detection breadth = K/D. Anomalies (deviation on an ineligible instance, detection without deviation, errors): 0. Suite mutation score: 7/7 (mutants killed by some relation / mutants that deviate under some relation).
+
+**Frozen v1 fixtures under v2** (8 instances; same categories):
+
+| mutant | order | duplicate | projection | renaming | serialization |
+|---|---|---|---|---|---|
+| `first_applied_wins` | **KILLED** E2 D2 K2 | survived E2 D2 K0 | survived E8 D8 K0 | survived E2 D2 K0 | survived E8 D2 K0 |
+| `naive_stale_guard` | **KILLED** E2 D2 K2 | not reached E2 D0 K0 | not reached E2 D0 K0 | not reached E2 D0 K0 | survived E8 D2 K0 |
+| `replay_readmits` | not reached E2 D0 K0 | **KILLED** E2 D2 K2 | not reached E2 D0 K0 | not reached E2 D0 K0 | survived E8 D8 K0 |
+| `global_dispute` | n/a | n/a | **KILLED** E8 D8 K5 | n/a | survived E8 D2 K0 |
+| `rid_tiebreak` | survived E6 D6 K0 | survived E6 D6 K0 | survived E8 D8 K0 | **KILLED** E6 D6 K2 | survived E8 D6 K0 |
+| `principal_order_quorum` | survived E4 D4 K0 | survived E4 D4 K0 | survived E8 D8 K0 | **KILLED** E4 D4 K4 | survived E8 D4 K0 |
+| `freeze_drops_invalidated` | n/a | n/a | n/a | n/a | **KILLED** E2 D2 K2 |
+
+Per cell, over 8 source instances: **E** eligible (frozen predicate over the relation's alphabet), **D** deviating (eligible, and the mutant behaves differently from the correct replica on some execution the relation performs: state, or head for head-time mutants), **K** detecting (deviating, and the relation is violated). Exposure rate = D/E; detection breadth = K/D. Anomalies (deviation on an ineligible instance, detection without deviation, errors): 0. Suite mutation score: 7/7 (mutants killed by some relation / mutants that deviate under some relation).
+
+**Snapshot integrity: each control separately** (development lineage only; the published main baseline `c175fbd` has the same `head()` defect and is not repaired). *Validator*: the production boundary, `thaw` validating. *Bypassed*: `thaw(validate=False)`, a diagnostic only, never evidence that the boundary works. *Relation*: for consistent omissions, which pass the boundary by construction, the serialization relation's layers against a never-serialized reference.
+
+| Corruption | Class | Infected (instances / snapshots) | Validator: refused | Bypassed: head() | Relation: projection / next event / exact state |
+|---|---|---|---|---|---|
+| drop invalidations | inconsistent | 6 / 21 | 21 | UNKNOWN 21 | - |
+| drop one applied edge | inconsistent | 12 / 57 | 57 | UNKNOWN 57 | - |
+| drop one admitted record | inconsistent | 12 / 112 | 112 | UNKNOWN 112 | - |
+| drop resolutions | inconsistent | 5 / 15 | 15 | UNKNOWN 15 | - |
+| drop pending queue | inconsistent | 12 / 64 | 64 | UNKNOWN 64 | - |
+| drop seen-set (duplicate filter) | inconsistent | 12 / 152 | 152 | UNKNOWN 152 | - |
+| inject a backward edge (seen and applied) | inconsistent | 12 / 88 | 88 | UNKNOWN 88 | - |
+| inject a self-authorized resolution (seen and applied) | inconsistent | 7 / 25 | 25 | UNKNOWN 25 | - |
+| truncate the snapshot | malformed | 12 / 164 | 164 | refused even unvalidated | - |
+| mistype a field (seq as text) | malformed | 12 / 112 | 112 | UNKNOWN 112 | - |
+| roll back an applied invalidation | omission | 6 / 21 | 0 | HEAD 11, NONE 10 | 6 / 6 / 6 |
+| omit a pending event | omission | 12 / 64 | 0 | NONE 64 | 0 / 11 / 12 |
+| omit a rejected event | omission | 1 / 2 | 0 | CONFLICT 2 | 0 / 0 / 1 |
+
+Head results: `HEAD` a record, `NONE` X_⊥, `CONFLICT` a genuine fork or dispute on a valid state, `UNKNOWN` the state fails the integrity check. A consistent omission is the state of a replica that has not received some events: it passes the boundary, and a rolled-back invalidation restores a stale head (residual risk: snapshots are not authenticated). Projection equivalence does not imply behavioral equivalence (an omitted pending event), and behavioral equivalence does not imply exact-state equivalence (an omitted rejected event).
+
+**Declared alphabet, exercised.** Every event of the serialization alphabet delivered after every serialized prefix, to a correct replica; how the replica handled each boundary event:
+
+| Boundary event | Handling (count) |
+|---|---|
+| Admit(r1, L, seq=1, owner=carol, pred=r0) | applied 76, rejected: re-admission of existing id 88 |
+| Admit(r3, L, seq=3, owner=alice, pred=rX) | applied 164 |
+| Edge(r0->m0) | deferred 164 |
+| Edge(r0->r2) | applied 14, deferred 72, duplicate 53, rejected: edge not declared by successor admission 25 |
+| Edge(r2->r0) | deferred 100, rejected: non-forward edge 64 |
+| Edge(rX->r0) | deferred 164 |
+| Invalidate(rX) | deferred 164 |
+| cross-lineage edge, after admitting its M end | deferred 76, rejected: cross-lineage edge 88 |
+| malformed resolution (winner = loser) | deferred 139, rejected: winner/loser must be the two conflicting candidates 25 |
+| tampered resolution (post-state root) | deferred 139, rejected: post-state root mismatch 25 |
+| tampered resolution (pre-state root) | deferred 139, rejected: pre-state root mismatch 25 |
+| under-quorum resolution (one independent approver) | deferred 139, rejected: quorum not met 25 |
+
+Rejection rules exercised: cross-lineage edge (88), edge not declared by successor admission (25), non-forward edge (64), post-state root mismatch (25), pre-state root mismatch (25), quorum not met (25), re-admission of existing id (88), self-authorized: no independent approver (1), winner/loser must be the two conflicting candidates (25). Not exercised: none. No single event after a single-lineage prefix can reach the cross-lineage rule (both ends must be admitted), so a declared two-event sequence does; a direct unit test covers the rule separately, as narrower evidence.
 
 **Known limitation (outside the precondition):** with Byzantine equivocation (two different admissions for one record id), the outcome depends on delivery order. The precondition checker flags the probe (equivocation probe: id 'r1' issued 2 times), which is why it is excluded. Minimal witness:
 
@@ -246,21 +310,22 @@ Each row is one signed record from the worker that enumerated that partition. Re
 - existential only: says nothing about progress
 - each record id is issued once (no Byzantine equivocation)
 - fixed resolution policy; complete delivery of a fixed event set
+- replica snapshots are not authenticated: a consistent omission (for example a rolled-back invalidation) is indistinguishable from a replica that has not yet received the events, passes the integrity check, and can restore a stale head
 
-Non-compensating gate over all 67 obligations and provenance: **all PASS**
+Non-compensating gate over all 76 obligations and provenance: **all PASS**
 
 ## Run metadata (varies between runs; not part of any claim)
 
-- started_utc: 2026-11-08 11:33:19
-- run_id (partition evidence binding): edc8ddce68a1ff33
+- started_utc: 2026-11-08 14:27:25
+- run_id (partition evidence binding): 9294b70415369631
 - python: 3.13.18
 - interpreter: isolated=1 no_site=1 dont_write_bytecode=1
-- reachability_s: 119.065
-- induction_s: 284.482
-- subset_check_s: 53.107
-- digest_s: 214.566
-- oracle_s: 189.420
-- coverage_witness_metamorphic_s: 48.990
-- core_total_s: 861.581
-- mutants_s: 0.068
-- distributed_s: 47.272
+- reachability_s: 122.893
+- induction_s: 374.085
+- subset_check_s: 54.856
+- digest_s: 180.242
+- oracle_s: 188.750
+- coverage_witness_metamorphic_s: 202.877
+- core_total_s: 921.631
+- mutants_s: 0.046
+- distributed_s: 162.486
