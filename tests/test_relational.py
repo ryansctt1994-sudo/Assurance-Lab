@@ -126,3 +126,20 @@ def test_partitions_are_a_disjoint_exact_cover():
     assert merged.label() == set_digest(inv_states(cfg)).label()
     with pytest.raises(DuplicateEncoding):  # a repeated partition is caught, not absorbed
         sorted_digest(line for chunk in per + per[:1] for line in chunk)
+
+
+def test_duplicate_action_labels_are_reported_not_merged():
+    """A model that yields the same labeled transition twice would keep the
+    labeled count equal to the transition count while the *set* is smaller;
+    the oracle must flag it rather than merge."""
+    class Doubled(CoreModel):
+        name = "doubled_labels"
+
+        def adjudicate(self, s):
+            for lbl, t in super().adjudicate(s):
+                yield lbl, t
+                yield lbl, t
+
+    cfg = Config(n_records=2, n_lineages=1)
+    bad = compare(Doubled(cfg), Spec.for_config(cfg), list(inv_states(cfg)))
+    assert bad and all("duplicate_labels" in b for b in bad)

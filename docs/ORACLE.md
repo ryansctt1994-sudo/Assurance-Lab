@@ -27,6 +27,34 @@
    small domain `IndInitUnpruned` (the whole typed space, filtered by `Inv`
    alone) must give the **same** set, which checks the pruning independently.
 
+## Already corroborated without TLC
+
+`checker/relational.py` is a second transition relation translated line by
+line from `AuthorityCore.tla` (dict state, its own codec, TLA+ action
+instances as labels, the spec's `Mutant` constant). It gives the
+unvalidated spec its first executable reading:
+
+- action-labeled successors agree with `CoreModel.next` on **every**
+  Inv-state (reachable or not) of three small domains, and on a 20k-state
+  sample of the core domain;
+- it disagrees with all 20 mutated transition relations, including the
+  three that reach exactly the clean state set (invisible to state digests);
+- the four TLA+ mutant translations agree exactly with their Python twins;
+- every enumerated transition must carry exactly one, distinct, label
+  (duplicates are reported, not merged by set comparison).
+
+Transition targets for TLC: the labeled-transition and edge digests in
+`docs/RESULTS.md`. A TLC `-dump` carries states but not parameterized
+action labels, so a TLC run can be compared on states and edges; labeled
+transitions need TLC's action-label dot output or a dedicated module.
+
+**Shared-dependency caveat.** The dump parser maps TLC values to the same
+canonical encoding as the Python side. Each state is therefore encoded by two
+separately written serializers (`canon_parts` and the oracle's `write`),
+which must agree byte for byte, so a defect in one cannot produce matching
+wrong digests on both sides. Both are still Python and share an author; a
+serializer in another language would be stronger.
+
 ## State correspondence
 
 | TLA+ (`AuthorityCore.tla`) | Python (`core/model.py`) |

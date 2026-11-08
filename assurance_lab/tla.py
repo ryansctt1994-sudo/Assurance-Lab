@@ -8,7 +8,9 @@ counts *and* equal digests mean the two checkers found the same states.
 
 STATUS: tested against hand-written samples in TLC's value syntax and a
 printer round-trip; **not yet validated against output from a real TLC run**
-(running TLC is pending an approved execution path).
+(running TLC is pending an approved execution path). Each state is encoded
+by two separately written Python serializers that must agree; a serializer
+in another language would be a stronger check and does not exist yet.
 
 State correspondence (see docs/ORACLE.md):
 
@@ -178,10 +180,36 @@ def state_line(d: dict, n_records: int, n_principals: int) -> str:
                        d["semNow"])
 
 
+class SerializerDisagreement(ValueError):
+    """The two independently written serializers encode a state differently."""
+
+
+def state_line_independent(d: dict, n_records: int, n_principals: int) -> str:
+    """Second serializer for the same mapping, via the transition oracle's
+    separately written ``write`` (dict state, its own formatting and sort),
+    so a defect in ``canon_parts`` cannot produce matching wrong digests on
+    both the Python and the TLC side."""
+    from .checker.relational import write
+    recs = _fn_values(d["recs"], n_records, "recs")
+    return write({
+        "recs": {i: {f: r[f] for f in FIELDS} for i, r in enumerate(recs)},
+        "current": frozenset(d["current"]),
+        "edges": frozenset(tuple(e) for e in d["edges"]),
+        "levels": dict(enumerate(_fn_values(d["levels"], n_principals, "levels"))),
+        "semNow": d["semNow"],
+    })
+
+
 def dump_digest(text: str, n_records: int, n_principals: int) -> SetDigest:
+    """Digest of a TLC dump. Every state is encoded by two independently
+    written serializers, which must agree byte for byte."""
     d = SetDigest()
     for st in parse_dump(text):
-        d.add_line(state_line(st, n_records, n_principals))
+        a = state_line(st, n_records, n_principals)
+        b = state_line_independent(st, n_records, n_principals)
+        if a != b:
+            raise SerializerDisagreement(f"{a!r} != {b!r}")
+        d.add_line(a)
     return d
 
 

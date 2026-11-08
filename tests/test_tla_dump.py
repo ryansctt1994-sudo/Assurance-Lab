@@ -73,3 +73,17 @@ def test_cli_compares_against_expected_label(tmp_path, capsys):
     assert main([str(dump), "--records", "2", "--principals", "2", "--expect", want]) == 0
     assert main([str(dump), "--records", "2", "--principals", "2", "--expect", want[:-1] + "0"]) == 1
     assert "MISMATCH" in capsys.readouterr().out
+
+
+def test_two_independent_serializers_agree_and_disagreement_is_caught(monkeypatch):
+    from assurance_lab import tla
+    states = list(inv_states(CFG))
+    dump = "".join(f"State {i + 1}:\n{to_tla(s)}\n" for i, s in enumerate(states))
+    for s in states:
+        st = parse_state(to_tla(s))
+        assert tla.state_line_independent(st, 2, 2) == state_line(st, 2, 2) == canon(s)
+    # a defect in the shared canonical serializer no longer goes unnoticed
+    monkeypatch.setattr(tla, "canon_parts",
+                        lambda recs, cur, edges, levels, sem: "|".join(["x", str(sorted(cur)), "", "", str(sem)]))
+    with pytest.raises(tla.SerializerDisagreement):
+        tla.dump_digest(dump, 2, 2)

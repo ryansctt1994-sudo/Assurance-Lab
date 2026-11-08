@@ -211,8 +211,14 @@ def compare(model, spec: Spec, states) -> list[dict]:
     out = []
     for s in states:
         line = canon(s)
-        py = {(python_label(lbl), canon(t)) for lbl, t in model.next(s)}
+        py_list = [(python_label(lbl), canon(t)) for lbl, t in model.next(s)]
+        py = set(py_list)
+        labels = [lbl for lbl, _t in py_list]
         tla = spec.successors(line)
-        if py != tla:
+        if len(labels) != len(set(labels)):
+            # each enumerated transition must carry exactly one, distinct, label;
+            # set comparison alone would silently merge duplicates
+            out.append({"state": line, "duplicate_labels": sorted({x for x in labels if labels.count(x) > 1})})
+        elif py != tla:
             out.append({"state": line, "only_python": sorted(py - tla), "only_tla": sorted(tla - py)})
     return out

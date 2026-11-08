@@ -31,6 +31,7 @@ import json
 import multiprocessing
 import os
 import platform
+import secrets
 import subprocess
 import sys
 import time
@@ -42,6 +43,7 @@ from .checker.explore import explore
 from .checker.relational import Spec, compare as oracle_compare
 from .checker.witnesses import all_witnesses
 from .checker.induction import check_induction, inv_states, unmatched_reachable
+from .checker.partitions import Manifest as PartitionManifest, build_manifest
 from .core.model import Config, CoreModel
 from .core.mutants import ALL_MUTANTS
 from .distributed import metamorphic as mm
@@ -75,7 +77,7 @@ MUTANT_CFG = Config()
 
 
 def start_receipt(core_cfg: Config, workers: int, start_method: str, command: str,
-                  manifest: Optional[Manifest] = None) -> dict:
+                  manifest: Optional[Manifest] = None, partitions: Optional[PartitionManifest] = None) -> dict:
     """Identity of the computation, captured before it starts."""
     if manifest is not None:
         ident = {
@@ -108,6 +110,8 @@ def start_receipt(core_cfg: Config, workers: int, start_method: str, command: st
         "workers": workers,
         "start_method": start_method,
     })
+    if partitions is not None:  # frozen before execution
+        ident["partition_manifest"] = f"{len(partitions.entries)} partitions, content sha256 {partitions.content_digest()}"
     ident["receipt_id"] = hashlib.sha256(
         json.dumps(ident, sort_keys=True).encode()).hexdigest()[:16]
     return ident
@@ -145,7 +149,7 @@ def origin_check(worker_origins: dict) -> tuple[int, list[str]]:
 # ---------------------------------------------------------------- campaign
 
 
-def core_results(cfg: Config, workers: int, mp_context=None):
+def core_results(cfg: Config, workers: int, mp_context=None, manifest=None, key=None):
     """Returns (results, timing, induction report)."""
     dom = cfg.describe()
     timing: dict[str, float] = {}
@@ -160,7 +164,12 @@ def core_results(cfg: Config, workers: int, mp_context=None):
         BASE_ASSUMPTIONS, ("finite domain only",),
         detail=r.violation.pretty() if r.violation else "",
     ))
-    ir = check_induction(CoreModel(cfg), workers=workers, mp_context=mp_context)
+    ir = check_induction(CoreModel(cfg), workers=workers, mp_context=mp_context, manifest=manifest, key=key)
+    out.append(Result("partition reconciliation: evidence matches the frozen manifest exactly",
+                      Verdict.FAIL if ir.reconciliation_problems else Verdict.PASS, "manifest-reconciliation",
+                      dom, f"{len(ir.manifest.entries)} partitions: complete, disjoint, authenticated, "
+                      "arithmetic recomputed", residual_risks=("does not defend against a malicious worker",),
+                      detail="; ".join(ir.reconciliation_problems)))
     timing["induction_s"] = ir.seconds
     bounds = f"{ir.inv_state_count:,} Inv-states, {ir.transitions_checked:,} transitions"
     risks = ("finite domain only; no unbounded/parameterized proof",
@@ -334,6 +343,23 @@ def witness_results(cfg: Config) -> tuple[list[Result], str]:
     return out, "\n".join(lines) + "\n"
 
 
+def partition_section(ir) -> str:
+    """Per-partition evidence, as reconciled against the frozen manifest."""
+    lines = ["## Partition evidence (reconciled against the frozen manifest)", "",
+             "Each row is one signed record from the worker that enumerated that partition. "
+             "Reconciliation checked provenance, MAC integrity, identity, completeness, "
+             "disjointness (observed keys) and arithmetic: "
+             + ("**no problems**." if not ir.reconciliation_problems else
+                "**" + "; ".join(ir.reconciliation_problems) + "**."), "",
+             "| Partition | Key (levels, sem_now) | States | Transitions | State digest |", "|---|---|---|---|---|"]
+    keys = {p: (lv, sn) for p, lv, sn in ir.manifest.entries}
+    for e in sorted(ir.evidence, key=lambda e: e.pid):
+        lv, sn = keys.get(e.pid, ("?", "?"))
+        lines.append(f"| {e.pid} | {lv}, {sn} | {e.count:,} | {e.transitions:,} | "
+                     f"`{e.digest.split(':')[2][:16]}…` |")
+    return "\n".join(lines) + "\n"
+
+
 def domain_adequacy(cfg: Config) -> str:
     """Which intended behaviors the run's own core domain can exercise. A
     behavior it cannot reach means the domain's claims say nothing about it:
@@ -481,6 +507,25 @@ def distributed_results() -> list[Result]:
 METADATA_HEADING = "## Run metadata (varies between runs; not part of any claim)"
 
 
+def publish(path: str, text: str) -> None:
+    """Write a report atomically: a temp file in the same directory, flushed
+    and fsynced, then renamed over the target. An interruption leaves either
+    the previous file or the complete new one, never a partial report."""
+    import tempfile
+    directory = os.path.dirname(os.path.abspath(path)) or "."
+    fd, tmp = tempfile.mkstemp(prefix=".tmp-report-", dir=directory)
+    try:
+        with os.fdopen(fd, "w") as f:
+            f.write(text)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
+    except BaseException:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+        raise
+
+
 def provenance_valid(drifted: bool, foreign: list[str], execution: str,
                      writing_report: bool) -> bool:
     """A report is accepted only if its results are bound to a commit.
@@ -551,6 +596,8 @@ def render(results: list[Result], receipt: dict, meta: dict, drifted: bool,
         f"- Core domain: {receipt['core_domain']}",
         f"- Mutant domain: {receipt['mutant_domain']}",
         f"- Workers: {receipt['workers']}",
+        *([f"- Partition manifest (frozen before execution): {receipt['partition_manifest']}"]
+          if receipt.get("partition_manifest") else []),
         f"- Receipt id: `{receipt['receipt_id']}`",
         f"- Provenance verdict: {provenance_verdict(receipt, drifted, foreign)}",
         "",
@@ -644,8 +691,10 @@ def main(argv=None) -> int:
     manifest = Manifest.from_json(a._manifest) if a._manifest else None
     core_cfg = FULL_CORE if a.full else QUICK_CORE
     ctx = multiprocessing.get_context(a.start_method)  # None -> platform default
+    run_id = secrets.token_hex(8)
+    pmanifest, pkey = build_manifest(core_cfg, run_id), secrets.token_bytes(32)
     receipt = start_receipt(core_cfg, a.workers, ctx.get_start_method(),
-                            "python -m assurance_lab " + " ".join(argv), manifest)  # BEFORE enumeration
+                            "python -m assurance_lab " + " ".join(argv), manifest, pmanifest)  # BEFORE enumeration
     why = preflight(receipt, bool(a.out), a.allow_dirty, manifest)
     if why:
         print(f"refusing: {why}", file=sys.stderr)
@@ -653,7 +702,7 @@ def main(argv=None) -> int:
 
     started = dt.datetime.now(dt.timezone.utc)
     t0 = time.perf_counter()
-    results, timing, ir, digests = core_results(core_cfg, a.workers, ctx)
+    results, timing, ir, digests = core_results(core_cfg, a.workers, ctx, pmanifest, pkey)
     t1 = time.perf_counter()
     results += mutant_results(MUTANT_CFG)
     t2 = time.perf_counter()
@@ -671,6 +720,7 @@ def main(argv=None) -> int:
 
     meta = {
         "started_utc": f"{started:%Y-%m-%d %H:%M:%S}",
+        "run_id (partition evidence binding)": run_id,
         "python": platform.python_version(),
         "interpreter": interpreter_isolation(),
         **timing,
@@ -688,9 +738,9 @@ def main(argv=None) -> int:
         print(f"ERROR: campaign code imported from outside the executed tree: {foreign}",
               file=sys.stderr)
     if a.out:
-        with open(a.out, "w") as f:
-            f.write(render(results, receipt, meta, drifted, procs_checked, foreign, digests,
-                           (wit_section, domain_adequacy(core_cfg), cov_section, mm_section)))
+        publish(a.out, render(results, receipt, meta, drifted, procs_checked, foreign, digests,
+                              (wit_section, domain_adequacy(core_cfg), cov_section, mm_section,
+                               partition_section(ir))))
     if not provenance_valid(drifted, foreign, receipt["execution"], bool(a.out)):
         if receipt["execution"] != "snapshot" and not (drifted or foreign):
             print("provenance UNBOUND: in-place reports are not accepted", file=sys.stderr)
