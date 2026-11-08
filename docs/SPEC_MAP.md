@@ -28,7 +28,7 @@ Status key: **modeled** (in the exhaustively checked core), **tested**
 | 16–17 | Three-valued verdicts, scoped labels | implemented | `verdict.py` |
 | 19–20 | Inductive obligations | modeled | `checker/induction.py`, results above |
 | 21 | Retained counterexamples | tested | `test_handoff_failure_1/2/3_*` |
-| 22 | Mutation testing | modeled | 13 mutants, BFS + induction |
+| 22 | Mutation testing | modeled | 20 mutants, BFS + induction; mutant × property coverage matrix (`docs/METAMORPHIC.md`) |
 | 23–25 | Store seam | tested | `store/retrieval.py` |
 | 26 | Crash recovery + epoch checkpoint | tested | `store/recovery.py` (anchor trust is an assumption) |
 | 27 | Schedule convergence | **modeled** (replica level) + tested | `distributed/mc.py`: 2 replicas (3 in `--full`), concurrent origination, reordering, ≤3 duplicates; convergence at every quiescent state. Plus 120 single-replica schedules |

@@ -72,10 +72,11 @@ Details, limits and the demo transcript are in [`docs/PROVENANCE.md`](docs/PROVE
 | Core model | `core/model.py` | Admit, Supersede, Adjudicate, Diagnose, Invalidate, Retract, RoleRevise, Grant |
 | Properties | `core/properties.py` | candidate inductive Inv (11 clauses), encoded Safety, 4 transition properties |
 | Checker | `checker/explore.py`, `checker/induction.py` | BFS with traces; `Init⇒Inv`, `Inv∧Next⇒Inv'`, `Inv⇒Safety` over **all** Inv-states |
-| Mutants | `core/mutants.py` | 13 single-guard mutations (negative controls) |
+| Mutants | `core/mutants.py` | 20 single-guard mutations (negative controls), each shown to be caught by at least one property |
 | Store seam | `store/retrieval.py` | filter-before-rank, effect-time read repair, compaction |
 | Recovery | `store/recovery.py` | graph = truth / head = cache, 4 torn-write combos, monotone checkpoint vs rollback |
 | Distributed | `distributed/replica.py`, `distributed/mc.py` | causal deferral, idempotence, `SUCCESSOR_CONFLICT_RESOLUTION`; replica-level model checker (concurrent origination, reordering, duplication, concurrent resolutions) |
+| Model validity | `checker/coverage.py`, `checker/witnesses.py`, `distributed/metamorphic.py` | mutant × property coverage; existential reachability witnesses; metamorphic relations calibrated by negative controls (`docs/METAMORPHIC.md`) |
 | Digests | `statedigest.py` | canonical state encoding; order-independent state-set digests (oracle targets) |
 | TLA+ oracle | `tla/`, `tla.py` | **UNVALIDATED** spec + TLC dump parser; see `docs/ORACLE.md` |
 | Admission | `admission.py` | I_2 projection view with read-set logging and receipt ρ_A |

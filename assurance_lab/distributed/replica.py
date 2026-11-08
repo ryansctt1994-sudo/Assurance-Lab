@@ -84,6 +84,14 @@ class Replica:
     policy: ResolutionPolicy
     naive_stale_guard: bool = False  # mutant: reproduce handoff failure #3
     first_applied_wins: bool = False  # mutant: reproduce the split-brain counterexample
+    # Negative controls for the metamorphic suite (see metamorphic.py). Each
+    # counts executions of its deviant branch in ``hits``, so "never
+    # exercised" can be told apart from "exercised but not detected".
+    replay_readmits: bool = False  # no duplicate filter; re-admission revives a record
+    global_dispute: bool = False  # a dispute in any lineage blocks every lineage
+    rid_tiebreak: bool = False  # unresolved fork resolved silently by smallest id
+    principal_order_quorum: bool = False  # "independent" means sorting after the beneficiary
+    freeze_drops_invalidated: bool = False  # serialization loses invalidations
     admitted: dict[str, Admit] = field(default_factory=dict)
     edges: set[tuple[str, str]] = field(default_factory=set)
     invalidated: set[str] = field(default_factory=set)
@@ -91,10 +99,11 @@ class Replica:
     rejected: list[tuple[Event, str]] = field(default_factory=list)
     pending: list[Event] = field(default_factory=list)
     seen: set[Event] = field(default_factory=set)
+    hits: int = field(default=0, compare=False)  # deviant-branch executions (mutants only)
 
     # ---------------------------------------------------------------- deliver
     def deliver(self, ev: Event) -> None:
-        if ev in self.seen:
+        if ev in self.seen and not self.replay_readmits:
             return  # idempotent duplicate delivery
         self.seen.add(ev)
         self.pending.append(ev)
@@ -113,6 +122,11 @@ class Replica:
 
     def _try_apply(self, ev: Event) -> str:
         if isinstance(ev, Admit):
+            if ev.rid in self.admitted and self.replay_readmits:
+                self.hits += 1  # MUTANT: replayed admission re-admits (and revives) the record
+                self.admitted[ev.rid] = ev
+                self.invalidated.discard(ev.rid)
+                return "applied"
             if ev.rid in self.admitted:
                 return self._reject(ev, "re-admission of existing id")
             self.admitted[ev.rid] = ev
@@ -128,6 +142,7 @@ class Replica:
             if b.pred != ev.old:
                 return self._reject(ev, "edge not declared by successor admission")
             if self.naive_stale_guard and self._superseded(ev.new):
+                self.hits += 1
                 return self._reject(ev, "naive guard: successor already superseded")
             self.edges.add((ev.old, ev.new))
             return "applied"
@@ -156,12 +171,17 @@ class Replica:
             return "post-state root mismatch"
         beneficiary = self.admitted[r.winner].owner
         independent = {p for p in r.approvals if p in self.policy.authorities and p != beneficiary}
+        if self.principal_order_quorum:  # MUTANT: identity compared by name order
+            ordered = {p for p in r.approvals if p in self.policy.authorities and p > beneficiary}
+            self.hits += ordered != independent
+            independent = ordered
         if not independent:
             return "self-authorized: no independent approver"
         need = max(r.quorum, self.policy.min_quorum)
         if len(independent) < need:
             return f"quorum not met ({len(independent)}/{need} independent approvals)"
-        if self.first_applied_wins and self.resolutions.get(r.source):
+        if self.first_applied_wins and self.resolutions.get(r.source) and r not in self.resolutions[r.source]:
+            self.hits += 1
             # MUTANT. Rejecting a valid competing resolution because another
             # arrived first lets delivery order pick the authority: the
             # replica-level model checker found replicas converging on
@@ -242,13 +262,26 @@ class Replica:
         order: the answer is a function of the delivered *set*.
         """
         members = [a for a in self.admitted.values() if a.lineage == lineage]
-        if any(self.admitted[src].lineage == lineage and self.decision(src)[0] == "disputed"
-               for src in self.resolutions):
+        disputed = [src for src in self.resolutions if self.decision(src)[0] == "disputed"]
+        if any(self.admitted[src].lineage == lineage for src in disputed):
             return CONFLICT  # authorities disagree: fail closed
+        if self.global_dispute and disputed:  # MUTANT: couples unrelated lineages
+            self.hits += 1
+            return CONFLICT
         losers = self._losers()
         for a in members:
             succ = [b for x, b in self.edges if x == a.rid and b not in losers]
             if len(succ) > 1:
+                if self.rid_tiebreak:  # MUTANT: silent arbitration by identifier
+                    self.hits += 1
+                    keep = min(succ)
+                    frontier = [b for b in succ if b != keep]
+                    while frontier:
+                        n = frontier.pop()
+                        if n not in losers:
+                            losers.add(n)
+                            frontier.extend(y for x, y in self.edges if x == n)
+                    continue
                 return CONFLICT
         cands = []
         for a in members:
@@ -268,10 +301,12 @@ class Replica:
         """Exact, hashable internal state (order-sensitive parts kept in order),
         so a model checker can explore replica states without assuming the
         order-independence it is trying to establish."""
+        if self.freeze_drops_invalidated and self.invalidated:
+            self.hits += 1  # MUTANT: lossy serialization
         return (
             tuple(sorted(self.admitted.items())),
             frozenset(self.edges),
-            frozenset(self.invalidated),
+            frozenset() if self.freeze_drops_invalidated else frozenset(self.invalidated),
             tuple(sorted((k, frozenset(v)) for k, v in self.resolutions.items())),
             tuple(self.rejected),
             tuple(self.pending),

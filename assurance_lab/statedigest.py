@@ -89,3 +89,32 @@ def set_digest(states: Iterable[State]) -> SetDigest:
     for s in states:
         d.add(s)
     return d
+
+
+def decanon(line: str) -> State:
+    """Inverse of ``canon``: parse an ``ac-state-v1`` line back into a State."""
+    from .core.model import Rec
+
+    def opt(v: str):
+        return None if v == "-1" else int(v)
+
+    recs_s, cur_s, edges_s, levels_s, sem_s = line.split("|")
+    recs = []
+    for r in recs_s.split(";"):
+        a, lin, own, appr, sem, inv, ret, adj = r.split(",")
+        recs.append(Rec(a == "1", opt(lin), opt(own), opt(appr), opt(sem), inv == "1", ret == "1", opt(adj)))
+    current = frozenset(int(x) for x in cur_s.split(",") if x)
+    edges = frozenset(tuple(int(v) for v in e.split(">")) for e in edges_s.split(",") if e)
+    levels = tuple(int(x) for x in levels_s.split(","))
+    return State(tuple(recs), current, edges, levels, int(sem_s))
+
+
+def round_trip_failures(states, encode=canon, decode=decanon, model=None) -> list:
+    """Serialization round-trip for the versioned encoding: decode(encode(s))
+    must equal s and, if ``model`` is given, enable exactly the same steps."""
+    bad = []
+    for s in states:
+        t = decode(encode(s))
+        if t != s or (model is not None and set(model.next(t)) != set(model.next(s))):
+            bad.append(s)
+    return bad

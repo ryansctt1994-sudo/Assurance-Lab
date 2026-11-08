@@ -39,12 +39,14 @@ from typing import Optional
 
 from .checker.coverage import Outcome, property_coverage
 from .checker.explore import explore
-from .checker.induction import check_induction, unmatched_reachable
+from .checker.witnesses import all_witnesses
+from .checker.induction import check_induction, inv_states, unmatched_reachable
 from .core.model import Config, CoreModel
 from .core.mutants import ALL_MUTANTS
+from .distributed import metamorphic as mm
 from .distributed.mc import SCENARIOS, check_scenario, mutant_scenarios, with_observer
 from .distributed.replica import Admit, Edge, Replica, ResolutionPolicy, make_resolution
-from .statedigest import ENCODING, set_digest
+from .statedigest import ENCODING, round_trip_failures, set_digest
 from .provenance import (
     PKG, Manifest, ProvenanceError, commit_digest, foreign_origins, git,
     interpreter_isolation, loaded_origins, make_snapshot, remove_snapshot,
@@ -230,6 +232,62 @@ def coverage_results() -> tuple[list[Result], str]:
                "`NoResurrection` cannot have a sole witness: it is implied by "
                "`NoSilentAuthorityIncrease` (a newly current record must be freshly admitted).", ""]
     return out, "\n".join(section)
+
+
+def witness_results(cfg: Config) -> tuple[list[Result], str]:
+    """Existential reachability witnesses (the model is not over-constrained)."""
+    out, lines = [], ["## Reachability witnesses (existential, not liveness)", "",
+                      "Shortest paths from Init, found by BFS in the core domain. Each shows a "
+                      "behavior the handoff intends to be *possible*; none claims it eventually "
+                      "happens.", "", "| Behavior | Handoff | Shortest path |", "|---|---|---|"]
+    for w in all_witnesses(cfg):
+        v = Verdict.PASS if w.found else Verdict.FAIL
+        out.append(Result(f"witness: {w.spec.name}", v, "bfs-shortest-witness", cfg.describe(),
+                          f"path length {len(w.actions)}" if w.found else "unreachable",
+                          residual_risks=("existential only: says nothing about progress",)))
+        path = " → ".join("".join(str(lbl)) for lbl in w.actions) if w.found else "**unreachable**"
+        lines.append(f"| {w.spec.meaning} | {w.spec.section} | `{path}` |")
+    return out, "\n".join(lines) + "\n"
+
+
+def metamorphic_results() -> tuple[list[Result], str]:
+    """METAMORPHIC_CONSISTENCY: relations on the corrected replica, calibrated
+    by negative controls; plus the core encoding round-trip."""
+    out = []
+    assume = ("each record id is issued once (no Byzantine equivocation)",
+              "fixed resolution policy; complete delivery of a fixed event set")
+    for rel in mm.RELATIONS.values():
+        r = rel()
+        out.append(Result(f"METAMORPHIC: {r.relation}", Verdict.PASS if r.held else Verdict.FAIL,
+                          "metamorphic-relation", f"{len(mm.KINDS)} replica source instances",
+                          f"{r.checks:,} comparisons", assume,
+                          detail="\n".join(w.pretty() for w in r.witnesses)))
+    cfg = Config(n_records=2, n_lineages=1)
+    states = list(inv_states(cfg))
+    bad = round_trip_failures(states, model=CoreModel(cfg))
+    out.append(Result(f"METAMORPHIC: {ENCODING} encoding round-trip", Verdict.FAIL if bad else Verdict.PASS,
+                      "metamorphic-relation", cfg.describe(),
+                      f"all {len(states):,} Inv-states decode to the same state with the same steps"))
+    m = mm.mutant_matrix()
+    unkilled_rel = [r for r in mm.RELATIONS if not any(m[(r, f)] == mm.Cell.KILLED for f in mm.FLAGS)]
+    unkilled_mut = [f for f in mm.FLAGS if not any(m[(r, f)] == mm.Cell.KILLED for r in mm.RELATIONS)]
+    errors = [k for k, v in m.items() if str(v).startswith(mm.Cell.ERROR)]
+    vd = lambda bad: Verdict.UNKNOWN if errors else (Verdict.FAIL if bad else Verdict.PASS)  # noqa: E731
+    out.append(Result("METAMORPHIC: every relation kills a negative control", vd(unkilled_rel),
+                      "relation-x-mutant-matrix", f"{len(mm.RELATIONS)} relations × {len(mm.FLAGS)} mutants",
+                      detail=f"unkilled relations: {unkilled_rel}"))
+    out.append(Result("METAMORPHIC: every negative control is killed", vd(unkilled_mut),
+                      "relation-x-mutant-matrix", f"{len(mm.RELATIONS)} relations × {len(mm.FLAGS)} mutants",
+                      detail=f"unkilled mutants: {unkilled_mut}"))
+    probe = mm.order_invariance([mm.EQUIVOCATION_PROBE])
+    sec = ["## Metamorphic relations × negative controls", "",
+           "KILLED = relation violated; survived = the mutant's deviant branch ran and the relation "
+           "held; not exercised = the relation's inputs never reach that branch. "
+           "Preconditions and justifications: `docs/METAMORPHIC.md`.", "", mm.matrix_markdown(m), "",
+           "**Known limitation (outside the precondition):** with Byzantine equivocation (two "
+           "different admissions for one record id), the outcome depends on delivery order. "
+           "Minimal witness:", "", "```", *(w.pretty() for w in probe.witnesses), "```", ""]
+    return out, "\n".join(sec)
 
 
 def replica_mc_results(full: bool) -> list[Result]:
@@ -484,8 +542,12 @@ def main(argv=None) -> int:
     results += distributed_results() + replica_mc_results(a.full)
     t3 = time.perf_counter()
     cov_results, cov_section = coverage_results()
-    results += cov_results
-    timing["coverage_s"] = time.perf_counter() - t3
+    # Witnesses always use the headline domain: the quick domain has a single
+    # semantic version, so role revision (I_5) is unreachable there.
+    wit_results, wit_section = witness_results(FULL_CORE)
+    mm_results, mm_section = metamorphic_results()
+    results += cov_results + wit_results + mm_results
+    timing["coverage_witness_metamorphic_s"] = time.perf_counter() - t3
     procs_checked, foreign = origin_check(ir.origins)
     drifted = source_drifted(receipt)
 
@@ -510,7 +572,7 @@ def main(argv=None) -> int:
     if a.out:
         with open(a.out, "w") as f:
             f.write(render(results, receipt, meta, drifted, procs_checked, foreign, digests,
-                           (cov_section,)))
+                           (wit_section, cov_section, mm_section)))
     if not provenance_valid(drifted, foreign, receipt["execution"], bool(a.out)):
         if receipt["execution"] != "snapshot" and not (drifted or foreign):
             print("provenance UNBOUND: in-place reports are not accepted", file=sys.stderr)
