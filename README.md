@@ -40,10 +40,16 @@ python -m assurance_lab --full --out docs/RESULTS.md   # headline domain, ~3 min
 Domain: 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1.
 
 ```
+Reachable ⊨ all     PASS[bfs-exhaustive; 1,314,526 reachable states; 10,580,311 transitions; depth 15]
 Init ⇒ Inv          PASS[finite-exhaustive-induction; 3,587,826 Inv-states; 29,053,749 transitions]
 Inv ∧ Next ⇒ Inv'   PASS[same]
 Inv ⇒ Safety        PASS[same]
+13/13 mutants detected; 120/120 chain schedules and 720/720 fork schedules converge
 ```
+
+The induction covers ~2.7× more states than are reachable: it also checks
+Inv-satisfying states that Init can never reach. Full report:
+[`docs/RESULTS.md`](docs/RESULTS.md).
 
 The handoff reported 106,938 states for its v3 model. That model is not in
 this repo; this is an independent rebuild with a different state encoding,
