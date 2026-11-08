@@ -9,19 +9,19 @@ job is skipped on PRs by design. Green CI ≠ full induction completed.
 ## Provenance (start receipt, captured before enumeration)
 
 - Command: `python -m assurance_lab --full --out docs/RESULTS.md`
-- Commit: `668050e490455d6bcb38956bba6714fe31cb574d` (tree `f87358710b5586b82493114318e917d315574fda`)
+- Commit: `e63a3265b2c21eb8a3079da0b496300edd2180f0` (tree `3a24e24bedeaa0d02ce2c848bf03cd479a536998`)
 - Execution: **snapshot**: committed tree exported with `git archive` into a fresh temp directory, run by an isolated interpreter (`-I -S -B`)
 - Snapshot bytes = git objects: **yes**
 - `assurance_lab/` working tree at start: **clean**
-- SHA-256 over executed `assurance_lab/**/*.py` at start: `215fae0130597e6b707ab5cf375413d4af83ffa50639c0586d39314ead65f0cc`
-- Same digest from git objects at the commit: `215fae0130597e6b707ab5cf375413d4af83ffa50639c0586d39314ead65f0cc`
+- SHA-256 over executed `assurance_lab/**/*.py` at start: `a2990f96ff48b897ba5f458e386b253a1eb48f6d94a3e27ff1ff9bbeb982e057`
+- Same digest from git objects at the commit: `a2990f96ff48b897ba5f458e386b253a1eb48f6d94a3e27ff1ff9bbeb982e057`
 - Import origins verified in every process that ran campaign code: the parent + 4 pool worker(s) that executed jobs (start method `fork`); outside executed tree: **none**
 - Executed source re-hashed at end: **unchanged**
 - Core domain: 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1
 - Mutant domain: 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1
 - Workers: 4
-- Receipt id: `298d1a25f01bc8f9`
-- Provenance verdict: **BOUND** to commit `668050e49045`
+- Receipt id: `875c75a02c5267e6`
+- Provenance verdict: **BOUND** to commit `e63a3265b2c2`
 
 ## Claims
 
@@ -76,12 +76,14 @@ job is skipped on PRs by design. Green CI ≠ full induction completed.
 | witness: granted authority exercised | `PASS[bfs-shortest-witness; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; path length 2]` |
 | witness: retraction without resurrection | `PASS[bfs-shortest-witness; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; path length 3]` |
 | witness: invalidation of a historical premise | `PASS[bfs-shortest-witness; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; path length 3]` |
-| METAMORPHIC: complete-delivery order invariance | `PASS[metamorphic-relation; 7 replica source instances; 12,480 comparisons]` |
-| METAMORPHIC: duplicate-message idempotence | `PASS[metamorphic-relation; 7 replica source instances; 157 comparisons]` |
-| METAMORPHIC: unrelated-lineage projection | `PASS[metamorphic-relation; 7 replica source instances; 294 comparisons]` |
-| METAMORPHIC: identifier-renaming equivariance | `PASS[metamorphic-relation; 7 replica source instances; 252 comparisons]` |
-| METAMORPHIC: serialization round-trip | `PASS[metamorphic-relation; 7 replica source instances; 364 comparisons]` |
-| METAMORPHIC: ac-state-v1 encoding round-trip | `PASS[metamorphic-relation; 2 records, 2 principals, 1 lineages, levels 0..2, sem 0..1; all 12,994 Inv-states decode to the same state with the same steps]` |
+| METAMORPHIC: complete-delivery order invariance | `PASS[metamorphic-relation; 8 replica source instances; 17,520 comparisons]` |
+| METAMORPHIC: duplicate-message idempotence | `PASS[metamorphic-relation; 8 replica source instances; 185 comparisons]` |
+| METAMORPHIC: unrelated-lineage projection | `PASS[metamorphic-relation; 8 replica source instances; 336 comparisons]` |
+| METAMORPHIC: identifier-renaming equivariance | `PASS[metamorphic-relation; 8 replica source instances; 288 comparisons]` |
+| METAMORPHIC: serialization round-trip | `PASS[metamorphic-relation; 8 replica source instances; 428 comparisons]` |
+| METAMORPHIC: relation preconditions hold on every source instance | `PASS[precondition-check; 8 instances, renamings, added lineage; ids issued once; no cross-lineage references; disjoint added lineage; renamings are bijections keeping seq and lineage]` |
+| METAMORPHIC: ac-state-v1 encoding round-trip (strict decoder) | `PASS[metamorphic-relation; 2 records, 2 principals, 1 lineages, levels 0..2, sem 0..1; all 12,994 Inv-states decode to the same state with the same steps]` |
+| ac-state-v1 strict decoder rejects every malformed encoding | `PASS[negative-corpus; 2 records, 2 principals, 1 lineages, levels 0..2, sem 0..1; 13/13 defect classes rejected]` |
 | METAMORPHIC: every relation kills a negative control | `PASS[relation-x-mutant-matrix; 5 relations × 7 mutants]` |
 | METAMORPHIC: every negative control is killed | `PASS[relation-x-mutant-matrix; 5 relations × 7 mutants]` |
 
@@ -108,6 +110,22 @@ Shortest paths from Init, found by BFS in the core domain. Each shows a behavior
 | a principal that started without authority, after an independent grant, approves an admission | §5 I_6 | `('Grant', 1, 0) → ('Admit', 0, 0, 0, 1)` |
 | a successor is retracted and its superseded predecessor does not regain authority | §10 | `('Admit', 0, 0, 1, 0) → ('Supersede', 0, 1, 1, 0) → ('Retract', 1)` |
 | an already superseded record is later invalidated | §4, §14 | `('Admit', 0, 0, 1, 0) → ('Supersede', 0, 1, 1, 0) → ('Invalidate', 0)` |
+
+
+## Domain adequacy: 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1
+
+Whether this run's core domain can exhibit each intended behavior at all (existential BFS). The witness obligations above are always checked on the headline domain; this table qualifies the core claims of *this* run.
+
+| Behavior | On this domain |
+|---|---|
+| stable no-current state | exercised (path length 2) |
+| re-admission after X_⊥ | exercised (path length 3) |
+| supersession chain | exercised (path length 3) |
+| independent lineages | exercised (path length 2) |
+| adjudication bound to an old meaning | exercised (path length 3) |
+| granted authority exercised | exercised (path length 2) |
+| retraction without resurrection | exercised (path length 3) |
+| invalidation of a historical premise | exercised (path length 3) |
 
 
 ## Property coverage (mutant × property)
@@ -143,19 +161,21 @@ Sole witnesses: `NoOrphanLive`: admit_without_head; `EdgesWF`: cross_lineage_sup
 
 ## Metamorphic relations × negative controls
 
-KILLED = relation violated; survived = the mutant's deviant branch ran and the relation held; not exercised = the relation's inputs never reach that branch. Preconditions and justifications: `docs/METAMORPHIC.md`.
+KILLED = relation violated; survived = the deviant branch ran and the relation held; not reached = this relation's inputs never reach a branch another relation does exercise (source-input adequacy); equivalent? = no relation exercises the mutant (excluded from the score). Numbers are deviant-branch executions; a kill resting on very few is thin evidence. Preconditions and justifications: `docs/METAMORPHIC.md`.
 
 | mutant | order | duplicate | projection | renaming | serialization |
 |---|---|---|---|---|---|
-| `first_applied_wins` | KILLED | survived | survived | survived | survived |
-| `naive_stale_guard` | KILLED | not exercised | not exercised | not exercised | not exercised |
-| `replay_readmits` | not exercised | KILLED | not exercised | not exercised | survived |
-| `global_dispute` | not exercised | not exercised | KILLED | not exercised | not exercised |
-| `rid_tiebreak` | survived | survived | survived | KILLED | survived |
-| `principal_order_quorum` | survived | survived | survived | KILLED | survived |
-| `freeze_drops_invalidated` | not exercised | not exercised | not exercised | not exercised | KILLED |
+| `first_applied_wins` | **KILLED** (9) | survived (163) | survived (465) | survived (111) | survived (43) |
+| `naive_stale_guard` | **KILLED** (2) | not reached (0) | not reached (0) | not reached (0) | not reached (0) |
+| `replay_readmits` | not reached (0) | **KILLED** (252) | not reached (0) | not reached (0) | survived (252) |
+| `global_dispute` | not reached (0) | not reached (0) | **KILLED** (89) | not reached (0) | not reached (0) |
+| `rid_tiebreak` | survived (842) | survived (110) | survived (86) | **KILLED** (16) | survived (102) |
+| `principal_order_quorum` | survived (30967) | survived (386) | survived (973) | **KILLED** (26) | survived (123) |
+| `freeze_drops_invalidated` | not reached (0) | not reached (0) | not reached (0) | not reached (0) | **KILLED** (2) |
 
-**Known limitation (outside the precondition):** with Byzantine equivocation (two different admissions for one record id), the outcome depends on delivery order. Minimal witness:
+Cells show the outcome and the number of deviant-branch executions. Suite mutation score: 7/7 (killed / non-equivalent).
+
+**Known limitation (outside the precondition):** with Byzantine equivocation (two different admissions for one record id), the outcome depends on delivery order. The precondition checker flags the probe (equivocation probe: id 'r1' issued 2 times), which is why it is excluded. Minimal witness:
 
 ```
 complete-delivery order invariance violated on 'equivocation probe': final observation depends on order
@@ -185,18 +205,18 @@ complete-delivery order invariance violated on 'equivocation probe': final obser
 - each record id is issued once (no Byzantine equivocation)
 - fixed resolution policy; complete delivery of a fixed event set
 
-Non-compensating gate over all 57 obligations and provenance: **all PASS**
+Non-compensating gate over all 59 obligations and provenance: **all PASS**
 
 ## Run metadata (varies between runs; not part of any claim)
 
-- started_utc: 2026-11-08 10:28:59
+- started_utc: 2026-11-08 10:45:57
 - python: 3.13.18
 - interpreter: isolated=1 no_site=1 dont_write_bytecode=1
-- reachability_s: 115.446
-- induction_s: 203.176
-- subset_check_s: 66.817
-- digest_s: 12.040
-- coverage_witness_metamorphic_s: 53.705
-- core_total_s: 398.188
-- mutants_s: 0.075
-- distributed_s: 47.189
+- reachability_s: 123.995
+- induction_s: 212.107
+- subset_check_s: 58.224
+- digest_s: 10.960
+- coverage_witness_metamorphic_s: 45.166
+- core_total_s: 405.962
+- mutants_s: 0.045
+- distributed_s: 45.033
