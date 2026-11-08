@@ -216,3 +216,59 @@ def malformed_accepted(cfg) -> list:
         except MalformedEncoding:
             pass
     return out
+
+
+# ------------------------------------------------------------ release-grade digests
+
+
+class DuplicateEncoding(ValueError):
+    pass
+
+
+def sorted_digest(lines) -> str:
+    """Second, differently structured commitment to a *set* of encodings:
+    sort, reject duplicates, SHA-256 the stream of (8-byte big-endian
+    length, bytes) records. Unambiguous (no delimiter can be forged inside a
+    line) and order-canonical; unlike the sum digest it does not combine
+    across workers, so it is computed over the whole set at once. Label:
+    ``sorted-v1:<count>:<hex>``."""
+    items = sorted(line.encode() for line in lines)
+    h = sha256()
+    for i, b in enumerate(items):
+        if i and b == items[i - 1]:
+            raise DuplicateEncoding(b.decode())
+        h.update(len(b).to_bytes(8, "big") + b)
+    return f"sorted-v1:{len(items)}:{h.hexdigest()}"
+
+
+def transition_line(src: str, action: str, dst: str) -> str:
+    """One labeled transition: ``source#action#destination``. ``#`` never
+    occurs in an ac-state-v1 line or a TLA+-style action label."""
+    return f"{src}#{action}#{dst}"
+
+
+def action_label(lbl: tuple) -> str:
+    """TLA+-style action instance for a CoreModel label (``RoleRevise`` has
+    no parameter in the spec; its target version is implied by the state)."""
+    if lbl[0] == "RoleRevise":
+        return "RoleRevise"
+    return f"{lbl[0]}({','.join(str(v) for v in lbl[1:])})"
+
+
+def add_transitions(labeled: SetDigest, edges: SetDigest, src_line: str, successors) -> None:
+    """Fold one source state's successors into the two transition digests.
+
+    * ``labeled``: the set of (source, action, destination) triples. Distinct
+      actions reaching the same destination count separately; stutter steps
+      (Diagnose) are included.
+    * ``edges``: the set of (source, destination) pairs. Each pair counts
+      once, however many actions produce it; self-loops are included.
+    Pairs from different sources are distinct, so de-duplicating within one
+    source keeps both sums set-valued.
+    """
+    dsts = set()
+    for action, dst_line in successors:
+        labeled.add_line(transition_line(src_line, action, dst_line))
+        dsts.add(dst_line)
+    for d in sorted(dsts):
+        edges.add_line(f"{src_line}#{d}")

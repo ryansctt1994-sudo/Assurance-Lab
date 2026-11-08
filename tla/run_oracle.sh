@@ -25,9 +25,8 @@ tlc() {  # cfg -> runs TLC with a state dump; returns TLC's exit code
   (cd "$repo/tla" && java -cp "$TLC_JAR" tlc2.TLC -workers auto -config "$1.cfg" \
      -dump "$out/$1" AuthorityCore.tla) >"$out/$1.log" 2>&1
 }
-target() {  # set name in docs/RESULTS.md digest table -> digest label
-  awk -F'|' -v n=" $1 " '$2 == n { gsub(/[ `,]/, "", $3); gsub(/[ `]/, "", $4);
-    print "ac-state-v1:" $3 ":" $4 }' "$repo/docs/RESULTS.md"
+target() {  # row name in docs/RESULTS.md digest table -> sum-digest label
+  awk -F'|' -v n=" $1 " '$2 == n { gsub(/[ `]/, "", $3); print $3 }' "$repo/docs/RESULTS.md"
 }
 compare() {  # cfg records expected-label
   python3 -m assurance_lab.tla "$out/$1.dump" --records "$2" --principals 2 --expect "$3"
@@ -42,8 +41,8 @@ case "$mode" in
     ;;
   full)
     for cfg in full_reach full_ind; do tlc "$cfg"; done
-    compare full_reach 3 "$(target reachable)"
-    compare full_ind 3 "$(target inv_states)"
+    compare full_reach 3 "$(target 'reachable states')"
+    compare full_ind 3 "$(target Inv-states)"
     ;;
   mutants)  # each must make TLC report a violation
     for m in beneficiary_self_approval admit_into_occupied_lineage stale_successor resurrect_on_retract; do

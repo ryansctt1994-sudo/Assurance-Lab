@@ -39,6 +39,7 @@ from typing import Optional
 
 from .checker.coverage import Outcome, property_coverage
 from .checker.explore import explore
+from .checker.relational import Spec, compare as oracle_compare
 from .checker.witnesses import all_witnesses
 from .checker.induction import check_induction, inv_states, unmatched_reachable
 from .core.model import Config, CoreModel
@@ -47,7 +48,8 @@ from .distributed import metamorphic as mm
 from .distributed.mc import SCENARIOS, check_scenario, mutant_scenarios, with_observer
 from .distributed.replica import Admit, Edge, Replica, ResolutionPolicy, make_resolution
 from .statedigest import (
-    ENCODING, MALFORMED_CORPUS, decanon, malformed_accepted, round_trip_failures, set_digest,
+    ENCODING, MALFORMED_CORPUS, SetDigest, action_label, add_transitions, canon, decanon,
+    malformed_accepted, round_trip_failures, set_digest, sorted_digest,
 )
 from .provenance import (
     PKG, Manifest, ProvenanceError, commit_digest, foreign_origins, git,
@@ -179,12 +181,92 @@ def core_results(cfg: Config, workers: int, mp_context=None):
             else f"{len(missing):,} reachable states missing from generator"
     out.append(Result("Reach ⊆ Inv-states (BFS vs generator)", v, "exhaustive-cross-check", dom, b))
     t2 = time.perf_counter()
-    digests = {
-        "reachable": set_digest(r.state_set) if r.complete else None,
-        "inv_states": ir.digest if ir.complete else None,
-    }
+    digests = {}
+    if r.complete:
+        lines = {st: canon(st) for st in r.state_set}
+        lab, edg = SetDigest(), SetDigest()
+        model = CoreModel(cfg)
+        for st, line in lines.items():
+            add_transitions(lab, edg, line, [(action_label(lbl), lines[t]) for lbl, t in model.next(st)])
+        digests["reachable states"] = (set_digest(r.state_set).label(), sorted_digest(lines.values()))
+        digests["reachable transitions (source, action, destination)"] = (lab.label(), None)
+        digests["reachable edges (source, destination)"] = (edg.label(), None)
+    if ir.complete:
+        digests["Inv-states"] = (ir.digest.label(), sorted_digest(canon(st) for st in inv_states(cfg)))
+        digests["Inv-state transitions (source, action, destination)"] = (ir.transition_digest.label(), None)
+        digests["Inv-state edges (source, destination)"] = (ir.edge_digest.label(), None)
     timing["digest_s"] = time.perf_counter() - t2
+    if r.complete and ir.complete:
+        pairs = [("reachable states", r.states, digests["reachable states"][0]),
+                 ("reachable transitions", r.transitions,
+                  digests["reachable transitions (source, action, destination)"][0]),
+                 ("Inv-states", ir.inv_state_count, digests["Inv-states"][0]),
+                 ("Inv-state transitions", ir.transitions_checked,
+                  digests["Inv-state transitions (source, action, destination)"][0])]
+        off = [f"{n}: checker {c:,} vs digest {lbl.split(':')[1]}" for n, c, lbl in pairs
+               if int(lbl.split(":")[1]) != c]
+        out.append(Result("digest counts equal the checkers' own counts", Verdict.FAIL if off else Verdict.PASS,
+                          "self-consistency", dom, "states and transitions, reachable and Inv",
+                          detail="; ".join(off)))
+    out += transition_oracle_results(cfg, r.state_set if r.complete else None)
+    timing["oracle_s"] = time.perf_counter() - t2 - timing["digest_s"]
     return out, timing, ir, digests
+
+
+ORACLE_SMALL = (Config(n_records=2, n_lineages=1), Config(n_records=2, n_lineages=2),
+                Config(n_records=3, n_lineages=1, max_level=1, n_sem=1))
+
+
+def transition_oracle_results(cfg: Config, reachable) -> list[Result]:
+    """Independent transition relation (translated from tla/AuthorityCore.tla):
+    identical action-labeled successors, not just identical states."""
+    from .checker.coverage import mutant_domain
+    from .core import mutants as mu
+
+    out = []
+    risk = ("same author wrote both relations: a shared misreading of the handoff would agree",)
+    for small in ORACLE_SMALL:
+        states = list(inv_states(small))
+        bad = oracle_compare(CoreModel(small), Spec.for_config(small), states)
+        n = sum(1 for st in states for _ in CoreModel(small).next(st))
+        out.append(Result("TRANSITION ORACLE: action-labeled successors agree on every Inv-state",
+                          Verdict.FAIL if bad else Verdict.PASS, "exhaustive-relation-comparison",
+                          small.describe(), f"{len(states):,} states, {n:,} labeled transitions",
+                          residual_risks=risk, detail=str(bad[:3]) if bad else ""))
+    if reachable is not None:
+        ordered = sorted(reachable, key=canon)
+        sample = ordered[::max(1, len(ordered) // 20_000)]
+        bad = oracle_compare(CoreModel(cfg), Spec.for_config(cfg), sample)
+        out.append(Result("TRANSITION ORACLE: agreement on a sample of the core domain",
+                          Verdict.FAIL if bad else Verdict.PASS, "sampled-relation-comparison",
+                          cfg.describe(), f"{len(sample):,} of {len(ordered):,} reachable states "
+                          "(every k-th in canonical order)", residual_risks=risk + ("sampled, not exhaustive",)))
+    full = cfg == FULL_CORE
+    pool = mu.ALL_MUTANTS if full else [mu.SelfGrant, mu.DiagnosisRevisesRoles, mu.CompactionDropsEdge]
+    unseen = []
+    for M in pool:
+        mcfg = mutant_domain(M.name)
+        states = explore(M(mcfg), stop_on_violation=False, keep_states=True, properties=frozenset()).state_set
+        if not oracle_compare(M(mcfg), Spec.for_config(mcfg), states):
+            unseen.append(M.name)
+    out.append(Result("TRANSITION ORACLE: disagrees with every mutated transition relation",
+                      Verdict.FAIL if unseen else Verdict.PASS, "mutant-calibration",
+                      "each mutant's own graph", f"{len(pool) - len(unseen)}/{len(pool)} mutants seen"
+                      + ("" if full else " (transition-only subset; --full checks all)"),
+                      detail=f"unseen: {unseen}"))
+    small, fork = Config(n_records=2, n_lineages=1), Config(n_records=3, n_lineages=1, max_level=1, n_sem=1)
+    twins = [(mu.BeneficiarySelfApproval, "beneficiary_self_approval", small),
+             (mu.AdmitIntoOccupiedLineage, "admit_into_occupied_lineage", small),
+             (mu.StaleSuccessor, "stale_successor", fork), (mu.ResurrectOnRetract, "resurrect_on_retract", small)]
+    off = [name for M, name, mc in twins
+           if oracle_compare(M(mc), Spec.for_config(mc, name),
+                             explore(M(mc), stop_on_violation=False, keep_states=True,
+                                     properties=frozenset()).state_set)]
+    out.append(Result("TRANSITION ORACLE: TLA+ mutant translations match their Python twins",
+                      Verdict.FAIL if off else Verdict.PASS, "exhaustive-relation-comparison",
+                      "each mutant's own graph", f"{len(twins) - len(off)}/{len(twins)} agree",
+                      detail=f"disagree: {off}"))
+    return out
 
 
 def mutant_results(cfg: Config) -> list[Result]:
@@ -480,14 +562,16 @@ def render(results: list[Result], receipt: dict, meta: dict, drifted: bool,
     for r in results:
         lines.append(f"| {r.obligation} | `{r.label()}` |")
     if digests:
-        lines += ["", "## State-set digests (deterministic; exact targets for independent oracles)", "",
-                  f"Encoding `{ENCODING}`, digest = count and Σ SHA-256(state) mod 2^256 "
-                  "(see `assurance_lab/statedigest.py`). Core domain: "
-                  f"{receipt['core_domain']}.", "",
-                  "| Set | States | Digest |", "|---|---|---|"]
-        for name, d in digests.items():
-            lines.append(f"| {name} | {d.count:,} | `{d.hexdigest()}` |" if d else
-                         f"| {name} | — | not computed (incomplete) |")
+        lines += ["", "## State-set and transition digests (deterministic; exact targets for independent oracles)", "",
+                  f"Encoding `{ENCODING}` (see `assurance_lab/statedigest.py`). Core domain: "
+                  f"{receipt['core_domain']}. `{ENCODING}:<count>:<hex>` = count and Σ SHA-256 mod "
+                  "2^256 (combinable across workers); `sorted-v1:<count>:<hex>` = SHA-256 over the sorted, "
+                  "duplicate-free, length-delimited stream. Transitions are the set of (source, action, "
+                  "destination) triples: distinct actions reaching the same state count separately, "
+                  "stutter steps included. Edges are (source, destination) pairs, each counted once.", "",
+                  "| Set | Sum digest | Sorted digest |", "|---|---|---|"]
+        for name, (sum_label, sorted_label) in digests.items():
+            lines.append(f"| {name} | `{sum_label}` | " + (f"`{sorted_label}`" if sorted_label else "—") + " |")
     for sec in sections:
         lines += ["", sec]
     lines += ["", "## Assumptions and residual risks", ""]
@@ -596,8 +680,8 @@ def main(argv=None) -> int:
     }
     for r in results:
         print(f"{r.verdict.value:8} {r.obligation}  {r.label()}")
-    for name, d in digests.items():
-        print(f"DIGEST   {name}  {d.label() if d else 'not computed'}")
+    for name, (sum_label, sorted_label) in digests.items():
+        print(f"DIGEST   {name}  {sum_label}" + (f"  {sorted_label}" if sorted_label else ""))
     if drifted:
         print("ERROR: executed assurance_lab/ source changed during the run", file=sys.stderr)
     if foreign:

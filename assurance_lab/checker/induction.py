@@ -26,7 +26,7 @@ from typing import Iterator, Optional
 from ..core.model import Config, CoreModel, Rec, State, live
 from ..core.properties import inv, inv_failures, safety_failures, transition_failures
 from ..provenance import loaded_origins
-from ..statedigest import SetDigest
+from ..statedigest import SetDigest, action_label, add_transitions, canon
 
 
 def record_domain(cfg: Config) -> list[Rec]:
@@ -111,6 +111,8 @@ class InductionReport:
     # pid -> files that process imported assurance_lab from (parent included)
     origins: dict = field(default_factory=dict)
     digest: Optional[SetDigest] = None  # over every Inv-state checked
+    transition_digest: Optional[SetDigest] = None  # (source, action, destination) triples
+    edge_digest: Optional[SetDigest] = None  # (source, destination) pairs
 
 
 def _check_parts(model: CoreModel, parts, max_states, stop_on_failure=False):
@@ -119,18 +121,20 @@ def _check_parts(model: CoreModel, parts, max_states, stop_on_failure=False):
     first = None
     count = transitions = 0
     complete = True
-    digest = SetDigest()
+    digest, tdig, edig = SetDigest(), SetDigest(), SetDigest()
     for s in inv_states(cfg, parts):
         if max_states is not None and count >= max_states:
             complete = False
             break
         count += 1
         digest.add(s)
+        succ = list(model.next(s))
+        add_transitions(tdig, edig, canon(s), [(action_label(lbl), canon(t)) for lbl, t in succ])
         sf = safety_failures(cfg, s)
         if sf:
             safety_ok = False
             first = first or ("Inv⇒Safety", s, None, None, sf)
-        for lbl, t in model.next(s):
+        for lbl, t in succ:
             transitions += 1
             msgs = inv_failures(cfg, t) + transition_failures(cfg, s, lbl, t)
             if msgs:
@@ -139,7 +143,7 @@ def _check_parts(model: CoreModel, parts, max_states, stop_on_failure=False):
         if stop_on_failure and first:
             complete = False
             break
-    return count, transitions, step_ok, safety_ok, complete, first, digest
+    return count, transitions, step_ok, safety_ok, complete, first, digest, tdig, edig
 
 
 def _worker(args):
@@ -180,14 +184,15 @@ def check_induction(model: CoreModel, max_states: Optional[int] = None,
     complete = all(r[4] for r in results)
     for r in results:
         first = first or r[5]
-    digest = SetDigest()
+    digest, tdig, edig = SetDigest(), SetDigest(), SetDigest()
     for r in results:
-        digest = digest.merge(r[6])
+        digest, tdig, edig = digest.merge(r[6]), tdig.merge(r[7]), edig.merge(r[8])
     return InductionReport(
         model=model.name, config=cfg, inv_state_count=count, transitions_checked=transitions,
         init_ok=init_ok, step_ok=step_ok, safety_ok=safety_ok, complete=complete,
         seconds=time.perf_counter() - t0, first_failure=first,
         start_method=start_method, origins=origins, digest=digest,
+        transition_digest=tdig, edge_digest=edig,
     )
 
 
