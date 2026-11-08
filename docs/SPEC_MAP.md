@@ -65,8 +65,9 @@ Status key: **modeled** (in the exhaustively checked core), **tested**
 
 ## Suggested next steps
 
-1. Port the core to TLA+ and check it with TLC at the same bounds, as an
-   independent oracle (I_6R: a second implementation that doesn't share code).
+1. TLA+ oracle: spec, cfgs, dump parser, digest targets and runner are in
+   place but **UNVALIDATED**; running TLC awaits an approved execution path
+   (`docs/ORACLE.md`).
 2. Model I_1 (execution witness vs correctness) and BasisBound.
 3. ~~Replica-level model checker~~: done (`distributed/mc.py`). Next: message
    loss with retransmission, crash/recovery, and Byzantine replicas.

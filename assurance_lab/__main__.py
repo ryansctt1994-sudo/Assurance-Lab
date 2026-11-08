@@ -43,6 +43,7 @@ from .core.model import Config, CoreModel
 from .core.mutants import ALL_MUTANTS
 from .distributed.mc import SCENARIOS, check_scenario, mutant_scenarios, with_observer
 from .distributed.replica import Admit, Edge, Replica, ResolutionPolicy, make_resolution
+from .statedigest import ENCODING, set_digest
 from .provenance import (
     PKG, Manifest, ProvenanceError, commit_digest, foreign_origins, git,
     interpreter_isolation, loaded_origins, make_snapshot, remove_snapshot,
@@ -172,7 +173,13 @@ def core_results(cfg: Config, workers: int, mp_context=None):
         b = f"all {r.states:,} reachable states produced by the generator" if not missing \
             else f"{len(missing):,} reachable states missing from generator"
     out.append(Result("Reach ⊆ Inv-states (BFS vs generator)", v, "exhaustive-cross-check", dom, b))
-    return out, timing, ir
+    t2 = time.perf_counter()
+    digests = {
+        "reachable": set_digest(r.state_set) if r.complete else None,
+        "inv_states": ir.digest if ir.complete else None,
+    }
+    timing["digest_s"] = time.perf_counter() - t2
+    return out, timing, ir, digests
 
 
 def mutant_results(cfg: Config) -> list[Result]:
@@ -288,7 +295,8 @@ def provenance_verdict(receipt: dict, drifted: bool, foreign: list[str]) -> str:
 
 
 def render(results: list[Result], receipt: dict, meta: dict, drifted: bool,
-           procs_checked: int = 0, foreign: Optional[list[str]] = None) -> str:
+           procs_checked: int = 0, foreign: Optional[list[str]] = None,
+           digests: Optional[dict] = None) -> str:
     foreign = foreign or []
     lines = ["# Verification Results", ""]
     if drifted:
@@ -345,6 +353,15 @@ def render(results: list[Result], receipt: dict, meta: dict, drifted: bool,
     ]
     for r in results:
         lines.append(f"| {r.obligation} | `{r.label()}` |")
+    if digests:
+        lines += ["", "## State-set digests (deterministic; exact targets for independent oracles)", "",
+                  f"Encoding `{ENCODING}`, digest = count and Σ SHA-256(state) mod 2^256 "
+                  "(see `assurance_lab/statedigest.py`). Core domain: "
+                  f"{receipt['core_domain']}.", "",
+                  "| Set | States | Digest |", "|---|---|---|"]
+        for name, d in digests.items():
+            lines.append(f"| {name} | {d.count:,} | `{d.hexdigest()}` |" if d else
+                         f"| {name} | — | not computed (incomplete) |")
     lines += ["", "## Assumptions and residual risks", ""]
     seen = set()
     for r in results:
@@ -424,7 +441,7 @@ def main(argv=None) -> int:
 
     started = dt.datetime.now(dt.timezone.utc)
     t0 = time.perf_counter()
-    results, timing, ir = core_results(core_cfg, a.workers, ctx)
+    results, timing, ir, digests = core_results(core_cfg, a.workers, ctx)
     t1 = time.perf_counter()
     results += mutant_results(MUTANT_CFG)
     t2 = time.perf_counter()
@@ -444,6 +461,8 @@ def main(argv=None) -> int:
     }
     for r in results:
         print(f"{r.verdict.value:8} {r.obligation}  {r.label()}")
+    for name, d in digests.items():
+        print(f"DIGEST   {name}  {d.label() if d else 'not computed'}")
     if drifted:
         print("ERROR: executed assurance_lab/ source changed during the run", file=sys.stderr)
     if foreign:
@@ -451,7 +470,7 @@ def main(argv=None) -> int:
               file=sys.stderr)
     if a.out:
         with open(a.out, "w") as f:
-            f.write(render(results, receipt, meta, drifted, procs_checked, foreign))
+            f.write(render(results, receipt, meta, drifted, procs_checked, foreign, digests))
     if not provenance_valid(drifted, foreign, receipt["execution"], bool(a.out)):
         if receipt["execution"] != "snapshot" and not (drifted or foreign):
             print("provenance UNBOUND: in-place reports are not accepted", file=sys.stderr)

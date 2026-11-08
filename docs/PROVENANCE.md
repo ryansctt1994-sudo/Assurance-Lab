@@ -4,6 +4,13 @@ A verification report is only as good as the link between its numbers and
 the code that computed them. This file states what that link guarantees,
 how it is enforced, where it stops, and the evidence for each part.
 
+> **Not an immutability guarantee.** Snapshot execution closes the
+> demonstrated *working-tree* edit-and-revert attack. It does not make the
+> snapshot immutable: a sufficiently privileged process (root, in the
+> development container) can modify the snapshot and restore it before the
+> end of the run, and the end re-hash cannot see a change that was undone.
+> The random directory name provides isolation, not a security boundary.
+
 ## Threat model
 
 In scope: **accidental or careless mismatch** between the code that ran and

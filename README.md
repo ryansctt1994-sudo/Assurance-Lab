@@ -48,9 +48,11 @@ Details, limits and the demo transcript are in [`docs/PROVENANCE.md`](docs/PROVE
   mid-run and reverts it: every per-line provenance check passes while 38% of
   the inductive check is silently skipped. The same demo in `snapshot` mode
   is unaffected.
-- **Limit:** snapshot files are read-only, but permissions don't bind root.
-  The protection is that nothing else knows the snapshot's random path;
-  tampering by something that does is detected only as a net change.
+- **Limit, not an immutability guarantee:** the snapshot closes the
+  demonstrated working-tree attack, but a privileged process could modify and
+  restore the snapshot itself mid-run, and the end re-hash would not see it.
+  Read-only permissions don't bind root; the random path is isolation, not a
+  security boundary.
 - **Claims carry no run-dependent values.** Timing and environment sit in a
   trailing "Run metadata" section, so two reports of the same code differ
   only there.
@@ -74,6 +76,8 @@ Details, limits and the demo transcript are in [`docs/PROVENANCE.md`](docs/PROVE
 | Store seam | `store/retrieval.py` | filter-before-rank, effect-time read repair, compaction |
 | Recovery | `store/recovery.py` | graph = truth / head = cache, 4 torn-write combos, monotone checkpoint vs rollback |
 | Distributed | `distributed/replica.py`, `distributed/mc.py` | causal deferral, idempotence, `SUCCESSOR_CONFLICT_RESOLUTION`; replica-level model checker (concurrent origination, reordering, duplication, concurrent resolutions) |
+| Digests | `statedigest.py` | canonical state encoding; order-independent state-set digests (oracle targets) |
+| TLA+ oracle | `tla/`, `tla.py` | **UNVALIDATED** spec + TLC dump parser; see `docs/ORACLE.md` |
 | Admission | `admission.py` | I_2 projection view with read-set logging and receipt ρ_A |
 | Reliance | `reliance.py` | use receipts, descendant closure, BoundaryCompleteness triage |
 
