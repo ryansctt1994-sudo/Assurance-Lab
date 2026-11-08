@@ -79,6 +79,10 @@ class ResolutionPolicy:
 CONFLICT = "CONFLICT"
 
 
+class CorruptSnapshot(ValueError):
+    """A frozen replica state that is not internally consistent."""
+
+
 @dataclass
 class Replica:
     policy: ResolutionPolicy
@@ -123,7 +127,9 @@ class Replica:
     def _try_apply(self, ev: Event) -> str:
         if isinstance(ev, Admit):
             if ev.rid in self.admitted and self.replay_readmits:
-                self.hits += 1  # MUTANT: replayed admission re-admits (and revives) the record
+                # MUTANT: replayed admission re-admits (and revives) the record.
+                # Counted only when it changes state (an *effective* deviation).
+                self.hits += ev.rid in self.invalidated or self.admitted[ev.rid] != ev
                 self.admitted[ev.rid] = ev
                 self.invalidated.discard(ev.rid)
                 return "applied"
@@ -238,7 +244,10 @@ class Replica:
             if cur.rid in seen or (cur.pred, cur.rid) not in self.edges:
                 return False
             seen.add(cur.rid)
-            cur = self.admitted[cur.pred]
+            nxt = self.admitted.get(cur.pred)
+            if nxt is None:  # inconsistent state: fail closed, never crash
+                return False
+            cur = nxt
         return True
 
     def _losers(self) -> set[str]:
@@ -263,11 +272,21 @@ class Replica:
         """
         members = [a for a in self.admitted.values() if a.lineage == lineage]
         disputed = [src for src in self.resolutions if self.decision(src)[0] == "disputed"]
-        if any(self.admitted[src].lineage == lineage for src in disputed):
-            return CONFLICT  # authorities disagree: fail closed
+        for src in disputed:
+            a = self.admitted.get(src)
+            if a is None or a.lineage == lineage:
+                # authorities disagree (or the state is inconsistent): fail closed
+                return CONFLICT
         if self.global_dispute and disputed:  # MUTANT: couples unrelated lineages
-            self.hits += 1
+            # counted only when the correct rule would not also answer CONFLICT
+            self.global_dispute = False
+            try:
+                self.hits += self.head(lineage) != CONFLICT
+            finally:
+                self.global_dispute = True
             return CONFLICT
+        if any(src not in self.admitted for src in self.resolutions):
+            return CONFLICT  # resolution for an unknown record: inconsistent state, fail closed
         losers = self._losers()
         for a in members:
             succ = [b for x, b in self.edges if x == a.rid and b not in losers]
@@ -314,11 +333,65 @@ class Replica:
         )
 
     @classmethod
-    def thaw(cls, policy: ResolutionPolicy, frozen: tuple, **flags) -> "Replica":
+    def thaw(cls, policy: ResolutionPolicy, frozen: tuple, validate: bool = True, **flags) -> "Replica":
+        """Restore a frozen replica. With ``validate`` (default) a structurally
+        inconsistent snapshot is refused (``CorruptSnapshot``) rather than
+        restored into a replica that misbehaves or crashes later."""
         adm, edges, inv, res, rej, pend, seen = frozen
-        return cls(policy, admitted=dict(adm), edges=set(edges), invalidated=set(inv),
-                   resolutions={k: set(v) for k, v in res}, rejected=list(rej),
-                   pending=list(pend), seen=set(seen), **flags)
+        rep = cls(policy, admitted=dict(adm), edges=set(edges), invalidated=set(inv),
+                  resolutions={k: set(v) for k, v in res}, rejected=list(rej),
+                  pending=list(pend), seen=set(seen), **flags)
+        if validate:
+            problems = rep.integrity_problems()
+            if problems:
+                raise CorruptSnapshot("; ".join(problems[:3]))
+        return rep
+
+    def integrity_problems(self) -> list[str]:
+        """Structural integrity of a replica state, independent of history.
+
+        Every effect must be explained by an event in ``seen``, and every
+        event in ``seen`` must be accounted for exactly: applied (its effect is
+        present), still pending, or recorded as rejected.
+        """
+        out = []
+        rejected = {e for e, _why in self.rejected}
+        for rid, ev in self.admitted.items():
+            if not isinstance(ev, Admit) or ev.rid != rid:
+                out.append(f"admitted[{rid!r}] is not its own admission")
+            elif ev not in self.seen:
+                out.append(f"admission of {rid} was never seen")
+        for a, b in self.edges:
+            if a not in self.admitted or b not in self.admitted:
+                out.append(f"edge {a}->{b} references a record that is not admitted")
+            elif Edge(a, b) not in self.seen:
+                out.append(f"edge {a}->{b} was never seen")
+        for rid in self.invalidated:
+            if rid not in self.admitted:
+                out.append(f"invalidation of unadmitted {rid}")
+            elif Invalidate(rid) not in self.seen:
+                out.append(f"invalidation of {rid} was never seen")
+        for src, rs in self.resolutions.items():
+            for r in rs:
+                if r not in self.seen:
+                    out.append(f"resolution of {src} was never seen")
+                if not all((r.source, c) in self.edges for c in r.candidates):
+                    out.append(f"resolution of {src} without both candidate edges")
+        pending = set(self.pending)
+        for e in self.seen:
+            if e in pending or e in rejected:
+                continue
+            applied = (
+                (isinstance(e, Admit) and self.admitted.get(e.rid) == e)
+                or (isinstance(e, Edge) and (e.old, e.new) in self.edges)
+                or (isinstance(e, Invalidate) and e.rid in self.invalidated)
+                or (isinstance(e, Resolve) and e in self.resolutions.get(e.source, ()))
+            )
+            if not applied:
+                out.append(f"seen event neither applied, pending nor rejected: {type(e).__name__}")
+        if not pending <= self.seen:
+            out.append("pending event that was never seen")
+        return out
 
     def canonical(self) -> tuple:
         return (

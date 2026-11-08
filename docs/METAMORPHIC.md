@@ -88,7 +88,7 @@ is not observed.
 | Duplicate-message idempotence | the duplicate is identical to an event already delivered | redelivery of a seen event is a no-op; effects are idempotent | `replay_readmits` (a replayed admission revives an invalidated record) |
 | Unrelated-lineage projection | the added lineage shares no ids and has no cross-lineage references | every replica rule is per lineage | `global_dispute` (a dispute anywhere blocks every lineage) |
 | Identifier-renaming equivariance | bijections on record ids and principal names; `seq` and lineage names fixed | ids and names are used only for equality and membership; forward order comes from `seq`; roots are recomputed for renamed ids | `rid_tiebreak` (silent arbitration by smallest id), `principal_order_quorum` (identity compared by name order) |
-| Serialization round-trip | the frozen form is the complete state | `thaw(freeze(r))` rebuilds every behavior-relevant field, so the copy responds identically to every next event (reference: a never-serialized re-execution under the same flags) | `freeze_drops_invalidated` |
+| Serialization round-trip: finite-domain exhaustive projection testing **plus exact-state restoration verification over a declared event alphabet** | the frozen form is the complete state | `thaw(freeze(r))` rebuilds every field of the exact-state contract, so the copy has the same projection, the same exact state, and the same response to **every event of the declared finite alphabet** (all instances' events, both lineages, eight invalid and boundary events), but **not** to every event the API could accept. Reference: a never-serialized re-execution under the same flags | `freeze_drops_invalidated`, plus six snapshot corruptions |
 | `ac-state-v1` round-trip (core) | versioned canonical encoding | `decanon` inverts `canon`; decoded states enable the same steps | a codec that drops `retracted` (test) |
 
 **Not claimed for the core model:** lineage projection. Core lineages share
@@ -110,10 +110,31 @@ relation × mutant matrix in `docs/RESULTS.md` distinguishes:
   equivalent or unreachable mutant, excluded from the mutation score's
   denominator (currently none: the score is 7/7).
 
-Cells carry the raw deviant-branch counts. **A kill resting on very few
-executions is thin evidence**: `freeze_drops_invalidated` (2) and
-`naive_stale_guard` (2) are killed, but by almost no inputs; more source
-instances exercising invalidation and out-of-order edges would thicken them.
+**Measuring kills.** Relations stop at the first witness per source
+instance, so a deviant-branch count on a KILLED cell only measures
+exercise *until detection*. KILLED cells therefore report **kill breadth**:
+in how many source instances the mutant was caught. An external audit
+(at `e63a326`) correctly flagged `freeze_drops_invalidated` and
+`naive_stale_guard` as thinly killed (2 executions each). Four targeted
+instances (invalidation and out-of-order chains) were added; they are now
+killed in 6/12 and 5/12 instances.
+
+**Sampled versus exhaustive** is reported per relation. Order invariance is
+exhaustive on 11/12 instances and samples one (`fork+dispute+escalation`:
+4,713 distinct of 40,320 orders). Lineage projection is exhaustive on all 12
+(every interleaving that preserves each lineage's own order).
+
+**Serialization scope and corruption.** Restored replicas are compared
+against a never-serialized reference on every event of a **declared finite
+event universe**: all source instances' events, both lineages. That is not
+every event the API could accept. Prefixes come from the causal and the
+reversed delivery order, so states with deferred events are serialized too;
+the first version used causal prefixes only, so a dropped pending queue was
+never even infected. Two criteria apply: observational, and exact state (a
+correct thaw is exact). Six deliberate corruptions of the frozen state are
+each rejected in every instance they infect. Losing the duplicate filter is
+unobservable, because effects are idempotent, so only the exact-state
+criterion rejects it.
 
 **Preconditions are machine-checked**, not just stated:
 `precondition_violations()` verifies on every source instance that ids are
@@ -161,3 +182,32 @@ transitions. Recovery-specific mutants (e.g. a restart that discards a
 competing resolution) can only be caught by recovery-aware checks, so
 they are not used to calibrate this suite. Convergence under fairness is a
 liveness property and would be a new obligation type.
+
+## Exact-state contract and fail-closed restoration
+
+**Exact-state contract** (`EXACT_STATE_CONTRACT`): admitted records (full
+admission events), applied edges, invalidations, every valid resolution per
+source, the pending queue *in order*, the duplicate filter (seen-set), and
+the mutant flags. Excluded: the rejection log (append-only diagnostics no
+rule reads), instrumentation counters, and the policy (fixed by
+precondition). `exact_state` extracts these fields directly. It deliberately
+does **not** call `freeze`: comparing two outputs of the serializer under
+test would hide any field the serializer drops on both sides.
+
+**Explicit invariant:** projection equivalence ⇏ behavioral equivalence ⇏
+exact-state equivalence. Measured, not assumed: a dropped pending queue is
+projection-equal but behaves differently later, and a dropped duplicate
+filter is behaviorally equal but not exact-state equal.
+
+**Fail-closed restoration.** `Replica.thaw` validates integrity (every
+effect is explained by a seen event; every seen event is applied, pending,
+or recorded as rejected) and refuses an inconsistent snapshot with
+`CorruptSnapshot`. Building this exposed that a damaged snapshot could make
+`head()` raise `KeyError` in two places: an earlier check had short-circuited
+before `head()` ran. `head()` now also fails closed to CONFLICT on
+inconsistent state (defense in depth). The validator accepts every genuine
+state: the replica model checker thaws all of its roughly 31k explored states
+through it.
+
+Matrix versions and the reasons for changed cells:
+`docs/METAMORPHIC_MATRIX_HISTORY.md`.

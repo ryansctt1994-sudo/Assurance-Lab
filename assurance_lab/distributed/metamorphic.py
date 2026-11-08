@@ -27,6 +27,7 @@ from dataclasses import dataclass, field, replace
 from typing import Callable, Optional
 
 from .replica import (
+    CorruptSnapshot,
     Admit, Edge, Invalidate, Replica, ResolutionPolicy, Resolve, make_resolution,
 )
 
@@ -74,16 +75,30 @@ def build(kind: str, rid=lambda r: r, who=lambda p: p, lineage: str = "L") -> In
         "fork+dispute+escalation": fork + (a, b, res("r2", "r1", ("alice", "bob", "carol"), epoch=2)),
         # the resolved winner is later invalidated: X_⊥, never a fallback to the loser
         "fork+resolution+invalidate-winner": fork + (b, Invalidate(r2)),
+        # targeted (audit A3): more inputs that exercise invalidation and
+        # out-of-order chain edges, the two thinly killed negative controls
+        "chain+invalidate-middle": chain + (Invalidate(r1),),
+        "chain+invalidate-root": chain + (Invalidate(r0),),
+        "chain+invalidate-head-and-middle": chain + (Invalidate(r2), Invalidate(r1)),
+        "fork+resolution+invalidate-loser": fork + (b, Invalidate(r1)),
     }[kind]
     return Instance(kind, events, pol, (lineage,))
 
 
 KINDS = ("chain", "chain+invalidate", "fork", "fork+resolution", "fork+beneficiary-only",
-         "fork+dispute", "fork+dispute+escalation", "fork+resolution+invalidate-winner")
+         "fork+dispute", "fork+dispute+escalation", "fork+resolution+invalidate-winner",
+         "chain+invalidate-middle", "chain+invalidate-root", "chain+invalidate-head-and-middle",
+         "fork+resolution+invalidate-loser")
 
 
-def instances() -> list[Instance]:
-    return [build(k) for k in KINDS]
+#: Frozen baseline fixture set (matrix v1, as published at b535b1a). The
+#: expanded set (v2) adds four targeted instances; both are reported, so a
+#: new fixture cannot silently improve the baseline's numbers.
+KINDS_V1 = KINDS[:8]
+
+
+def instances(kinds=KINDS) -> list[Instance]:
+    return [build(k) for k in kinds]
 
 
 # ------------------------------------------------------------ execution
@@ -147,12 +162,29 @@ class Witness:
 class RelationResult:
     relation: str
     checks: int = 0  # comparisons made
-    hits: int = 0  # mutant deviant-branch executions observed
+    # Deviant-branch executions observed. Relations stop at the first witness
+    # per instance, so for a KILLED mutant this counts exercise *until
+    # detection*, not exposure; kill breadth is ``killed_instances``.
+    hits: int = 0
     witnesses: list = field(default_factory=list)
+    instances: int = 0
+    coverage: list = field(default_factory=list)  # (instance, checked, total) where not exhaustive
+    infected: int = 0  # instances where an injected corruption actually changed the state
+    mechanisms: dict = field(default_factory=dict)  # detection mechanism -> instances
 
     @property
     def held(self) -> bool:
         return not self.witnesses
+
+    @property
+    def killed_instances(self) -> int:
+        return len({w.instance for w in self.witnesses})
+
+    def coverage_note(self) -> str:
+        if not self.coverage:
+            return f"all {self.instances} instances exhaustive"
+        sampled = "; ".join(f"{name}: {done:,} of {total:,} orders sampled" for name, done, total in self.coverage)
+        return f"{self.instances - len(self.coverage)}/{self.instances} instances exhaustive ({sampled})"
 
 
 def _shrink(events: list, still_fails: Callable[[list], bool]) -> list:
@@ -190,13 +222,17 @@ def order_invariance(insts, flags=None, max_perms: int = 5040, seed: int = 0,
     flags = flags or {}
     res, ctr = RelationResult("complete-delivery order invariance"), [0]
     for inst in insts:
+        res.instances += 1
         base = list(inst.events)
         want = run_obs(inst, base, flags, ctr)
-        perms = list(itertools.permutations(base))
-        if len(perms) > max_perms:
+        total = __import__("math").factorial(len(base))
+        if total > max_perms:  # deterministic sample, reported as such
             rng = random.Random(seed)
             perms = [tuple(base), tuple(reversed(base))] + [tuple(rng.sample(base, len(base)))
                                                           for _ in range(max_perms - 2)]
+            res.coverage.append((inst.name, len(set(perms)), total))
+        else:
+            perms = list(itertools.permutations(base))
         for p in perms:
             res.checks += 1
             got = run_obs(inst, p, flags, ctr)
@@ -224,6 +260,7 @@ def duplicate_idempotence(insts, flags=None, compare: Compare = lambda a, b: a =
     flags = flags or {}
     res, ctr = RelationResult("duplicate-message idempotence"), [0]
     for inst in insts:
+        res.instances += 1
         base = list(inst.events)
         final = run_obs(inst, base, flags, ctr)
         done = False
@@ -256,7 +293,7 @@ def _project(obs: tuple, lineage: str, ids: set) -> tuple:
 
 
 def lineage_projection(insts, flags=None, interleavings: int = 40, seed: int = 0,
-                       compare: Compare = lambda a, b: a == b) -> RelationResult:
+                       compare: Compare = lambda a, b: a == b, max_exhaustive: int = 8000) -> RelationResult:
     """R3 unrelated-lineage projection.
 
     Precondition: the added lineage M shares no record ids with L and no
@@ -272,15 +309,22 @@ def lineage_projection(insts, flags=None, interleavings: int = 40, seed: int = 0
     other = build("fork+dispute", rid=lambda r: "m" + r[1:], lineage="M")
     rng = random.Random(seed)
     for inst in insts:
+        res.instances += 1
         L, M = list(inst.events), list(other.events)
         ids = {e.rid for e in L if isinstance(e, Admit)}
         want = _project(run_obs(inst, L, flags, ctr, ("L",)), "L", ids)
-        mixes = [M + L, L + M]
-        for _ in range(interleavings):
-            slots = sorted(rng.sample(range(len(L) + len(M)), len(M)))
-            mix, li, mi = [], iter(L), iter(M)
+        total = __import__("math").comb(len(L) + len(M), len(M))
+        if total <= max_exhaustive:  # every interleaving preserving each lineage's own order
+            slot_sets = itertools.combinations(range(len(L) + len(M)), len(M))
+        else:
+            slot_sets = [tuple(range(len(M))), tuple(range(len(L), len(L) + len(M)))] + \
+                [tuple(sorted(rng.sample(range(len(L) + len(M)), len(M)))) for _ in range(interleavings)]
+            res.coverage.append((inst.name, len(set(slot_sets)), total))
+        mixes = []
+        for slots in slot_sets:
+            chosen, mix, li, mi = set(slots), [], iter(L), iter(M)
             for k in range(len(L) + len(M)):
-                mix.append(next(mi) if k in slots else next(li))
+                mix.append(next(mi) if k in chosen else next(li))
             mixes.append(mix)
         merged = Instance(inst.name + " + unrelated M", tuple(L + M), inst.policy, ("L", "M"))
         for mix in mixes:
@@ -323,6 +367,7 @@ def renaming_equivariance(insts_kinds=KINDS, flags=None,
     rid_perms = list(itertools.permutations(("r0", "r1", "r2")))
     who_perms = list(itertools.permutations(PRINCIPALS))
     for kind in insts_kinds:
+        res.instances += 1
         src = build(kind)
         base = run_obs(src, src.events, flags, ctr)
         done = False
@@ -346,44 +391,188 @@ def renaming_equivariance(insts_kinds=KINDS, flags=None,
     return res
 
 
-def serialization_round_trip(insts, flags=None, compare: Compare = lambda a, b: a == b) -> RelationResult:
+# ------------------------------------------------------------ exact-state contract
+
+#: Fields of a replica that affect its future behavior, compared by
+#: ``exact_state``. Excluded: ``rejected`` (an append-only diagnostic log no
+#: rule reads), ``hits`` (test instrumentation) and the policy (fixed by the
+#: precondition). ``pending`` is compared *in order*, since deferred events
+#: are retried in that order.
+EXACT_STATE_CONTRACT = ("admitted (rid -> full Admit event)", "edges", "invalidated",
+                        "resolutions (source -> every valid Resolve)", "pending (in order)",
+                        "seen (duplicate filter)", "mutant flags")
+
+
+def exact_state(rep: Replica) -> tuple:
+    """Independent extraction of the exact-state contract, reading the
+    replica's fields directly. Deliberately does **not** call ``freeze``:
+    comparing two outputs of the serializer under test would hide any field
+    the serializer drops (both sides would drop it identically)."""
+    return (
+        tuple(sorted((rid, repr(ev)) for rid, ev in rep.admitted.items())),
+        tuple(sorted(rep.edges)),
+        tuple(sorted(rep.invalidated)),
+        tuple(sorted((src, tuple(sorted(repr(r) for r in rs))) for src, rs in rep.resolutions.items())),
+        tuple(repr(e) for e in rep.pending),
+        tuple(sorted(repr(e) for e in rep.seen)),
+        tuple(getattr(rep, f) for f in FLAGS),
+    )
+
+
+def boundary_events() -> list:
+    """Invalid and boundary-case events for the declared alphabet: each must
+    be handled identically by a restored replica and its reference."""
+    from dataclasses import replace as _replace
+    fork = build("fork+resolution")
+    valid_res = fork.events[-1]
+    return [
+        Edge("r2", "r0"),  # backward (non-forward)
+        Edge("r0", "m0"),  # cross-lineage
+        Edge("rX", "r0"),  # unknown record: deferred forever
+        Edge("r0", "r2"),  # undeclared in a chain (r2's declared pred is r1)
+        Invalidate("rX"),  # unknown record: deferred forever
+        Admit("r3", "L", 3, "alice", pred="rX"),  # unknown predecessor
+        Admit("r1", "L", 1, "carol", pred="r0"),  # conflicting re-admission of an existing id
+        _replace(valid_res, pre_state_root="0" * 16),  # tampered resolution
+    ]
+
+
+def event_universe(insts) -> list:
+    """The declared finite event alphabet for the serialization relation:
+    every event of every source instance, plus the unrelated lineage's
+    events. Not every event the replica API could accept (that is
+    unbounded); claims are scoped to this alphabet."""
+    other = build("fork+dispute", rid=lambda r: "m" + r[1:], lineage="M")
+    seen, out = set(), []
+    for e in [e for inst in insts for e in inst.events] + list(other.events) + boundary_events():
+        if e not in seen:
+            seen.add(e)
+            out.append(e)
+    return out
+
+
+def serialization_round_trip(insts, flags=None, compare: Compare = lambda a, b: a == b,
+                             universe=None, corrupt=None, exact: bool = True,
+                             validate: bool = True) -> RelationResult:
     """R5 serialization round-trip (``Replica.freeze``/``thaw``).
 
     Precondition: the frozen form is the replica's complete state.
     Justification: thaw(freeze(r)) reconstructs every field the behavior
     depends on, so the restored replica has the same canonical state and
-    responds identically to every possible next event.
+    responds identically to every event of the declared event universe
+    (``event_universe``: all source instances' events, both lineages); not
+    to every event the API could accept. The reference is a never-
+    serialized re-execution under the same flags. Prefixes are taken from the
+    causal *and* the reversed delivery order, so states with deferred
+    (pending) events are serialized too.
+
+    Two criteria: *observational* (same observation and canonical state,
+    same response to every universe event) and, with ``exact``, *exact
+    state* (the restored replica's complete internal state equals the
+    reference's, before and after each event). A correct thaw is exact, so
+    the stricter criterion is valid here, unlike for the order relations; it
+    catches lossy snapshots whose loss is not observable (a dropped duplicate
+    filter). ``corrupt`` damages the frozen state before thawing.
     """
     flags = flags or {}
+    universe = event_universe(insts) if universe is None else universe
     res, ctr = RelationResult("serialization round-trip"), [0]
+    res.infected = 0
+    res.mechanisms = {"thaw-validation": 0, "projection": 0, "next-event": 0, "exact-state": 0}
     for inst in insts:
-        base = list(inst.events)
-        done = False
-        for i in range(len(base) + 1):
-            orig = run(inst, base[:i], flags)
-            copy = Replica.thaw(inst.policy, orig.freeze(), **flags)
+        res.instances += 1
+        orders = [list(inst.events), list(reversed(inst.events))]  # reversed: events get deferred
+        prefixes = {tuple(o[:i]) for o in orders for i in range(len(o) + 1)}
+        infected_here = False
+        caught: set = set()
+        witness = None
+        for pre in sorted(prefixes, key=lambda t: (len(t), [label(e) for e in t])):
+            base = list(pre)
+            frozen = run(inst, base, flags).freeze()
+            if corrupt:
+                damaged = corrupt(frozen)
+                infected_here |= damaged != frozen
+                frozen = damaged
+            # The reference is built straight from the event history: never
+            # serialized, never thawed.
+            reference = run(inst, base, flags)
             res.checks += 1
-            same = copy.canonical() == orig.canonical() and \
-                compare(observe(copy, inst.lineages), observe(orig, inst.lineages))
-            ctr[0] += orig.hits + copy.hits
-            for nxt in base:  # identical response to every possible next event
-                restored = Replica.thaw(inst.policy, run(inst, base[:i], flags).freeze(), **flags)
-                reference = run(inst, base[:i], flags)  # never serialized, same flags
+            here = set()
+            try:
+                copy = Replica.thaw(inst.policy, frozen, validate=validate, **flags)
+            except CorruptSnapshot:  # refused to restore: fails closed
+                here.add("thaw-validation")
+                caught |= here
+                if witness is None:
+                    witness = Witness(res.relation, inst.name, f"snapshot after {len(base)} events "
+                                      "refused at thaw (fail closed)", [base])
+                if not corrupt:
+                    break
+                continue
+            if copy.canonical() != reference.canonical() or \
+                    not compare(observe(copy, inst.lineages), observe(reference, inst.lineages)):
+                here.add("projection")
+            if exact and exact_state(copy) != exact_state(reference):
+                here.add("exact-state")
+            ctr[0] += copy.hits + reference.hits
+            for nxt in universe:  # response to every event of the declared universe
+                restored = Replica.thaw(inst.policy, frozen, validate=validate, **flags)
+                ref = run(inst, base, flags)
                 restored.deliver(nxt)
-                reference.deliver(nxt)
+                ref.deliver(nxt)
                 res.checks += 1
-                same = same and compare(observe(restored, inst.lineages),
-                                        observe(reference, inst.lineages))
-                ctr[0] += restored.hits + reference.hits
-            if not same:
-                res.witnesses.append(Witness(res.relation, inst.name,
-                                             f"state after {i} events not preserved by freeze/thaw",
-                                             [base[:i]]))
-                done = True
-            if done:
-                break
+                lins = tuple(sorted(set(inst.lineages) | ({nxt.lineage} if isinstance(nxt, Admit) else set())))
+                if not compare(observe(restored, lins), observe(ref, lins)):
+                    here.add("next-event")
+                if exact and exact_state(restored) != exact_state(ref):
+                    here.add("exact-state")
+                ctr[0] += restored.hits + ref.hits
+            if here and witness is None:
+                witness = Witness(res.relation, inst.name,
+                                  f"state after {len(base)} events not preserved by freeze/thaw "
+                                  f"(detected by {', '.join(sorted(here))})", [base])
+            caught |= here
+            if here and not corrupt:
+                break  # one witness per instance is enough outside corruption accounting
+        if witness:
+            res.witnesses.append(witness)
+        for mech in caught:
+            res.mechanisms[mech] += 1
+        res.infected += infected_here
     res.hits = ctr[0]
     return res
+
+
+def corruption_table(insts=None) -> list[tuple]:
+    """(corruption, infected, rejected at thaw, {mechanism: instances} with
+    thaw validation *off*).
+
+    With validation on, a corrupted snapshot is refused at thaw (fail
+    closed), so the later detectors never see it. Running again with
+    validation off shows what each later layer would catch on its own:
+    ``projection`` (observation right after thaw), ``next-event`` (response
+    to some event of the declared universe), ``exact-state`` (independent
+    extraction of the exact-state contract)."""
+    insts = insts or instances()
+    rows = []
+    for name, fn in CORRUPTIONS.items():
+        on = serialization_round_trip(insts, corrupt=fn)
+        off = serialization_round_trip(insts, corrupt=fn, validate=False)
+        mech = {k: v for k, v in off.mechanisms.items() if k != "thaw-validation"}
+        rows.append((name, on.infected, on.mechanisms["thaw-validation"], mech))
+    return rows
+
+
+#: Deliberate damage to a frozen replica state (audit P1). Each must be
+#: rejected in every instance it infects.
+CORRUPTIONS = {
+    "drop invalidations": lambda f: (f[0], f[1], frozenset(), *f[3:]),
+    "drop one applied edge": lambda f: (f[0], frozenset(sorted(f[1])[1:]), *f[2:]),
+    "drop one admitted record": lambda f: (f[0][1:], *f[1:]),
+    "drop resolutions": lambda f: (f[0], f[1], f[2], (), *f[4:]),
+    "drop pending queue": lambda f: (*f[:5], (), f[6]),
+    "drop seen-set (duplicate filter)": lambda f: (*f[:6], frozenset()),
+}
 
 
 RELATIONS = {
@@ -421,34 +610,67 @@ class Cell:
     ERROR = "ERROR"
 
 
-def mutant_matrix() -> dict:
-    """(relation, flag) -> (Cell, deviant-branch hits)."""
+def _relation_on(name: str, inst_or_kind, flags):
+    if name == "renaming":
+        return renaming_equivariance([inst_or_kind.name], flags)
+    return {"order": order_invariance, "duplicate": duplicate_idempotence,
+            "projection": lineage_projection, "serialization": serialization_round_trip}[name]([inst_or_kind], flags)
+
+
+@dataclass
+class MatrixCell:
+    category: str
+    detecting: int  # eligible instances in which the relation caught the mutant
+    eligible: int  # instances in which the mutant's deviant branch executed (or it was caught)
+    evaluated: int
+    errors: int
+    hits: int  # total deviant-branch executions (exercise until detection)
+
+    def __iter__(self):  # (category, hits, detecting, eligible) for older callers
+        return iter((self.category, self.hits, self.detecting, self.eligible))
+
+    def __getitem__(self, i):
+        return tuple(self)[i]
+
+
+def mutant_matrix(kinds=KINDS) -> dict:
+    """(relation, flag) -> MatrixCell, evaluated one source instance at a time,
+    so kill breadth = detecting eligible instances / eligible instances."""
+    insts = instances(kinds)
     out = {}
     for flag in FLAGS:
-        row = {}
-        for name, rel in RELATIONS.items():
-            try:
-                r = rel({flag: True})
-                row[name] = (not r.held, r.hits)
-            except Exception as e:  # infrastructure failure: never a kill
-                row[name] = (Cell.ERROR + f": {type(e).__name__}", 0)
-        exercised = any(k is True or h > 0 for k, h in row.values())
-        for name, (killed, hits) in row.items():
-            if isinstance(killed, str):
-                out[(name, flag)] = (killed, hits)
-            elif killed:
-                out[(name, flag)] = (Cell.KILLED, hits)
-            elif hits:
-                out[(name, flag)] = (Cell.SURVIVED, hits)
+        cells = {}
+        for name in RELATIONS:
+            detecting = eligible = errors = hits = 0
+            for inst in insts:
+                try:
+                    r = _relation_on(name, inst, {flag: True})
+                except Exception:  # infrastructure failure: never a kill
+                    errors += 1
+                    continue
+                hits += r.hits
+                caught = not r.held
+                detecting += caught
+                eligible += bool(caught or r.hits)
+            cells[name] = (detecting, eligible, errors, hits)
+        exercised = any(e for _d, e, _x, _h in cells.values())
+        for name, (d, e, x, h) in cells.items():
+            if d:
+                cat = Cell.KILLED
+            elif e:
+                cat = Cell.SURVIVED
+            elif x:
+                cat = Cell.ERROR
             else:
-                out[(name, flag)] = (Cell.NOT_REACHED if exercised else Cell.EQUIVALENT_CANDIDATE, 0)
+                cat = Cell.NOT_REACHED if exercised else Cell.EQUIVALENT_CANDIDATE
+            out[(name, flag)] = MatrixCell(cat, d, e, len(insts), x, h)
     return out
 
 
 def mutation_score(m: dict) -> tuple[int, int]:
     """(mutants killed by some relation, mutants not equivalent-candidates)."""
-    killed = {f for (r, f), (c, _h) in m.items() if c == Cell.KILLED}
-    equiv = {f for f in FLAGS if all(m[(r, f)][0] == Cell.EQUIVALENT_CANDIDATE for r in RELATIONS)}
+    killed = {f for (r, f), v in m.items() if v.category == Cell.KILLED}
+    equiv = {f for f in FLAGS if all(m[(r, f)].category == Cell.EQUIVALENT_CANDIDATE for r in RELATIONS)}
     return len(killed), len(FLAGS) - len(equiv)
 
 
@@ -459,12 +681,22 @@ def matrix_markdown(m: dict) -> str:
     for flag in FLAGS:
         cells = []
         for r in RELATIONS:
-            c, h = m[(r, flag)]
-            cells.append(f"{sym.get(c, c)} ({h})")
+            c = m[(r, flag)]
+            if c.category == Cell.KILLED:
+                cells.append(f"**KILLED** {c.detecting}/{c.eligible} eligible")
+            elif c.category == Cell.SURVIVED:
+                cells.append(f"survived 0/{c.eligible} eligible")
+            else:
+                cells.append(sym.get(c.category, c.category))
         lines.append(f"| `{flag}` | " + " | ".join(cells) + " |")
     k, n = mutation_score(m)
-    lines += ["", f"Cells show the outcome and the number of deviant-branch executions. "
-                  f"Suite mutation score: {k}/{n} (killed / non-equivalent)."]
+    some = next(iter(m.values()))
+    errs = sum(c.errors for c in m.values())
+    lines += ["", f"Kill breadth = detecting eligible instances / eligible instances, of {some.evaluated} "
+                  "evaluated per cell. An instance is *eligible* when the mutant's deviant branch makes an "
+                  "effective deviation in it (changes state or result relative to the correct rule); "
+                  f"the rest are ineligible. Errored instances: {errs}. Suite mutation score: "
+                  f"{k}/{n} (killed / non-equivalent)."]
     return "\n".join(lines)
 
 

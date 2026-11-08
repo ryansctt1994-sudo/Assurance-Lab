@@ -17,9 +17,9 @@ from assurance_lab.statedigest import (
 # the suite can detect, so it must be reviewed, not just re-recorded.
 EXPECTED = {
     "first_applied_wins": ("KILLED", "SURVIVED", "SURVIVED", "SURVIVED", "SURVIVED"),
-    "naive_stale_guard": ("KILLED", "NOT_REACHED", "NOT_REACHED", "NOT_REACHED", "NOT_REACHED"),
+    "naive_stale_guard": ("KILLED", "NOT_REACHED", "NOT_REACHED", "NOT_REACHED", "SURVIVED"),
     "replay_readmits": ("NOT_REACHED", "KILLED", "NOT_REACHED", "NOT_REACHED", "SURVIVED"),
-    "global_dispute": ("NOT_REACHED", "NOT_REACHED", "KILLED", "NOT_REACHED", "NOT_REACHED"),
+    "global_dispute": ("NOT_REACHED", "NOT_REACHED", "KILLED", "NOT_REACHED", "SURVIVED"),
     "rid_tiebreak": ("SURVIVED", "SURVIVED", "SURVIVED", "KILLED", "SURVIVED"),
     "principal_order_quorum": ("SURVIVED", "SURVIVED", "SURVIVED", "KILLED", "SURVIVED"),
     "freeze_drops_invalidated": ("NOT_REACHED", "NOT_REACHED", "NOT_REACHED", "NOT_REACHED", "KILLED"),
@@ -41,7 +41,7 @@ def test_relation_mutant_matrix_is_calibrated():
         assert any(m[(rel, f)][0] == Cell.KILLED for f in FLAGS), rel
     for f in FLAGS:  # every negative control is killed by some relation
         assert any(m[(rel, f)][0] == Cell.KILLED for rel in RELATIONS), f
-    for (rel, f), (cell, hits) in m.items():  # SURVIVED means the branch really ran
+    for (rel, f), (cell, hits, *_breadth) in m.items():  # SURVIVED means the branch really ran
         assert (cell == Cell.SURVIVED) <= (hits > 0)
     assert mutation_score(m) == (len(FLAGS), len(FLAGS))
 
@@ -111,3 +111,87 @@ def test_strict_decoder_rejects_every_malformed_encoding():
     assert malformed_accepted(Config(n_records=2, n_lineages=1)) == []
     with pytest.raises(MalformedEncoding):
         decanon("1,0,1,0,0,0,0,-1;1,0,0,1,0,0,0,-1|1,0||2,0|0")  # unsorted: not canonical
+
+
+
+def test_every_kill_has_full_breadth_and_thin_controls_are_thickened():
+    """Kill breadth = detecting eligible instances / eligible instances.
+    Every KILLED cell detects its mutant in every eligible instance, and the
+    two controls the audit called thin are now eligible in several."""
+    m = mutant_matrix()
+    for (rel, flag), c in m.items():
+        assert c.errors == 0
+        if c.category == Cell.KILLED:
+            assert c.detecting == c.eligible > 0, (rel, flag, c)
+    assert m[("order", "naive_stale_guard")].eligible >= 4
+    assert m[("serialization", "freeze_drops_invalidated")].eligible >= 5
+
+
+def test_frozen_v1_fixture_campaign_still_holds_and_reads_the_same():
+    """Regression: the original fixtures, re-run under the current code,
+    still satisfy every relation and give the same categories."""
+    from assurance_lab.distributed.metamorphic import KINDS_V1
+    v1 = instances(KINDS_V1)
+    for name, rel in [("order", order_invariance), ("duplicate", duplicate_idempotence)]:
+        assert rel(v1).held, name
+    assert renaming_equivariance(KINDS_V1).held
+    m1, m2 = mutant_matrix(KINDS_V1), mutant_matrix()
+    assert {k: c.category for k, c in m1.items()} == {k: c.category for k, c in m2.items()}
+
+
+def test_coverage_is_labeled_sampled_or_exhaustive():
+    from assurance_lab.distributed.metamorphic import lineage_projection
+    order = order_invariance(instances())
+    assert [name for name, _done, _total in order.coverage] == ["fork+dispute+escalation"]
+    assert "11/12 instances exhaustive" in order.coverage_note()
+    assert lineage_projection(instances()).coverage_note() == "all 12 instances exhaustive"
+
+
+def test_corrupted_snapshots_fail_closed_and_each_layer_is_measured():
+    """Every corruption is refused at thaw wherever it infects. With
+    validation off, each later layer's own detection is measured:
+    projection ⇏ next-event ⇏ exact-state equivalence."""
+    from assurance_lab.distributed.metamorphic import corruption_table
+    rows = {name: (inf, thaw, mech) for name, inf, thaw, mech in corruption_table()}
+    for name, (inf, thaw, mech) in rows.items():
+        assert inf > 0 and thaw == inf, name
+        assert mech["exact-state"] == inf, name  # the independent extractor sees everything
+    assert rows["drop pending queue"][2]["projection"] == 0  # invisible right after thaw ...
+    assert rows["drop pending queue"][2]["next-event"] == rows["drop pending queue"][0]  # ... not later
+    assert rows["drop seen-set (duplicate filter)"][2] == {"projection": 0, "next-event": 0, "exact-state": 12}
+
+
+def test_thaw_refuses_inconsistent_snapshots_and_head_never_crashes():
+    from assurance_lab.distributed.metamorphic import CORRUPTIONS
+    from assurance_lab.distributed.replica import CorruptSnapshot, Replica
+    inst = next(i for i in instances() if i.name == "fork+resolution+invalidate-winner")
+    evs = list(inst.events)
+    states = [run(inst, o[:i], {}).freeze() for o in (evs, evs[::-1]) for i in range(len(evs) + 1)]
+    for frozen in states:
+        Replica.thaw(inst.policy, frozen)  # every genuine snapshot is accepted
+    for name, fn in CORRUPTIONS.items():
+        infected = [f for f in states if fn(f) != f]
+        assert infected, name  # some state this corruption actually damages
+        for frozen in infected:
+            with pytest.raises(CorruptSnapshot):
+                Replica.thaw(inst.policy, fn(frozen))
+            unsafe = Replica.thaw(inst.policy, fn(frozen), validate=False)
+            unsafe.head("L")  # inconsistent state fails closed, never raises
+
+
+def test_exact_state_does_not_use_the_serializer_under_test(monkeypatch):
+    from assurance_lab.distributed.metamorphic import exact_state
+    from assurance_lab.distributed.replica import Replica
+    inst = instances()[1]
+    rep = run(inst, inst.events, {})
+    monkeypatch.setattr(Replica, "freeze", lambda self: (_ for _ in ()).throw(AssertionError("freeze used")))
+    assert exact_state(rep)  # works without freeze
+
+
+def test_serialization_claims_are_scoped_to_the_declared_universe():
+    from assurance_lab.distributed.metamorphic import event_universe, serialization_round_trip
+    from assurance_lab.distributed.metamorphic import boundary_events
+    u = event_universe(instances())
+    assert len(u) == len(set(u)) and any(getattr(e, "lineage", None) == "M" for e in u)
+    assert set(boundary_events()) <= set(u)  # invalid and boundary-case events are declared too
+    assert serialization_round_trip(instances(), universe=u).held

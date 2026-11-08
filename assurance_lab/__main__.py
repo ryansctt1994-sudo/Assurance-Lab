@@ -386,8 +386,24 @@ def metamorphic_results() -> tuple[list[Result], str]:
         r = rel()
         out.append(Result(f"METAMORPHIC: {r.relation}", Verdict.PASS if r.held else Verdict.FAIL,
                           "metamorphic-relation", f"{len(mm.KINDS)} replica source instances",
-                          f"{r.checks:,} comparisons", assume,
+                          f"{r.checks:,} comparisons; {r.coverage_note()}", assume,
                           detail="\n".join(w.pretty() for w in r.witnesses)))
+    table = mm.corruption_table()
+    missed = [n for n, inf, thaw, mech in table if thaw != inf or mech["exact-state"] != inf]
+    out.append(Result("METAMORPHIC: corrupted snapshots fail closed at thaw; exact state sees each",
+                      Verdict.FAIL if missed else Verdict.PASS, "corruption-injection",
+                      f"{len(mm.KINDS)} replica source instances",
+                      f"{len(table)} corruption classes, each refused wherever it infects",
+                      detail=f"missed: {missed}"))
+    v1 = mm.instances(mm.KINDS_V1)
+    v1_broken = [n for n, r in [("order", mm.order_invariance(v1)), ("duplicate", mm.duplicate_idempotence(v1)),
+                                ("projection", mm.lineage_projection(v1)),
+                                ("renaming", mm.renaming_equivariance(mm.KINDS_V1)),
+                                ("serialization", mm.serialization_round_trip(v1))] if not r.held]
+    out.append(Result("METAMORPHIC: frozen v1 fixture campaign still holds under the current code",
+                      Verdict.FAIL if v1_broken else Verdict.PASS, "regression",
+                      f"{len(mm.KINDS_V1)} baseline source instances", "all 5 relations",
+                      detail=f"broken: {v1_broken}"))
     pre = mm.precondition_violations()
     out.append(Result("METAMORPHIC: relation preconditions hold on every source instance",
                       Verdict.FAIL if pre else Verdict.PASS, "precondition-check",
@@ -406,9 +422,15 @@ def metamorphic_results() -> tuple[list[Result], str]:
                       f"{len(MALFORMED_CORPUS)}/{len(MALFORMED_CORPUS)} defect classes rejected"
                       if not accepted else f"accepted: {accepted}"))
     m = mm.mutant_matrix()
-    unkilled_rel = [r for r in mm.RELATIONS if not any(m[(r, f)][0] == mm.Cell.KILLED for f in mm.FLAGS)]
-    unkilled_mut = [f for f in mm.FLAGS if not any(m[(r, f)][0] == mm.Cell.KILLED for r in mm.RELATIONS)]
-    errors = [k for k, v in m.items() if str(v[0]).startswith(mm.Cell.ERROR)]
+    m_v1 = mm.mutant_matrix(mm.KINDS_V1)
+    unkilled_rel = [r for r in mm.RELATIONS if not any(m[(r, f)].category == mm.Cell.KILLED for f in mm.FLAGS)]
+    unkilled_mut = [f for f in mm.FLAGS if not any(m[(r, f)].category == mm.Cell.KILLED for r in mm.RELATIONS)]
+    errors = [k for k, v in m.items() if v.errors]
+    partial = [f"{f} × {r}" for (r, f), c in m.items() if c.category == mm.Cell.KILLED and c.detecting != c.eligible]
+    out.append(Result("METAMORPHIC: every kill detects the mutant in every eligible instance",
+                      Verdict.UNKNOWN if errors else (Verdict.FAIL if partial else Verdict.PASS),
+                      "relation-x-mutant-matrix", f"{len(mm.KINDS)} instances, evaluated one at a time",
+                      "kill breadth = detecting / eligible", detail=f"partial: {partial}"))
     vd = lambda bad: Verdict.UNKNOWN if errors else (Verdict.FAIL if bad else Verdict.PASS)  # noqa: E731
     out.append(Result("METAMORPHIC: every relation kills a negative control", vd(unkilled_rel),
                       "relation-x-mutant-matrix", f"{len(mm.RELATIONS)} relations × {len(mm.FLAGS)} mutants",
@@ -424,7 +446,21 @@ def metamorphic_results() -> tuple[list[Result], str]:
            "(source-input adequacy); equivalent? = no relation exercises the mutant (excluded from "
            "the score). Numbers are deviant-branch executions; a kill resting on very few is thin "
            "evidence. Preconditions and justifications: `docs/METAMORPHIC.md`.", "",
-           mm.matrix_markdown(m), "",
+           f"**Matrix v2** ({len(mm.KINDS)} source instances; history and the reasons for changed "
+           "cells: `docs/METAMORPHIC_MATRIX_HISTORY.md`):", "", mm.matrix_markdown(m), "",
+           f"**Frozen v1 fixtures under the current code** ({len(mm.KINDS_V1)} instances; same "
+           "categories, smaller denominators):", "", mm.matrix_markdown(m_v1), "",
+           "**Deliberately corrupted snapshots** (*infected* = instances where the corruption changed "
+           "the frozen state). Thaw validation refuses each; the later columns show what each layer "
+           "catches on its own with validation *off*:", "",
+           "| Corruption | Infected | Refused at thaw | Projection | Next event | Exact state |",
+           "|---|---|---|---|---|---|",
+           *(f"| {n} | {inf}/{len(mm.KINDS)} | {thaw} | {mech['projection']} | {mech['next-event']} | "
+             f"{mech['exact-state']} |" for n, inf, thaw, mech in table),
+           "",
+           "Projection equivalence does not imply behavioral equivalence (a lost pending queue is "
+           "invisible until the deferred event's dependency arrives), and behavioral equivalence does "
+           "not imply exact-state equivalence (a lost duplicate filter never shows in behavior).", "",
            "**Known limitation (outside the precondition):** with Byzantine equivocation (two "
            "different admissions for one record id), the outcome depends on delivery order. The "
            f"precondition checker flags the probe ({'; '.join(flagged)}), which is why it is excluded. "
