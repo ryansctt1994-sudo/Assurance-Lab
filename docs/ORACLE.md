@@ -52,16 +52,19 @@
 
 ## Targets
 
-From the Python campaign. The full-domain targets are the digest table in
-`docs/RESULTS.md`.
+From the Python campaign (full-domain targets: the digest table in
+`docs/RESULTS.md`, bound to `903be71`). Each full-domain digest was produced
+twice by different code paths: merged from 4 pool workers' partition digests
+inside the bound campaign, and recomputed sequentially with no pool in a
+separate process. Both agreed.
 
 | cfg | Domain | Python target (`count:digest`) |
 |---|---|---|
 | `small_reach` | 2 records, 2 principals, 1 lineage, levels 0..1, sem 0..0 | `670:90bd9c18894fdec12916ad1104da9df12c797dbb1fb75752fc6c67bcb3954774` |
 | `small_ind` | same | `812:44e4ac49ad9f94ba7045196517bb4c104cf9fbfa38245566e4ad230d0e0fb54d` |
 | `small_ind_unpruned` | same (278,784 typed candidates) | same as `small_ind` |
-| `full_reach` | 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1 | `reachable` row of `docs/RESULTS.md` (1,314,526 states) |
-| `full_ind` | same (~39.5M candidates; expect a long initial-state phase) | `inv_states` row of `docs/RESULTS.md` (3,587,826 states) |
+| `full_reach` | 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1 | `1314526:c7b12c6dce74e495e7fe7f7174a44319e510d5d9aa6022a62faad6a30cf3b795` |
+| `full_ind` | same (~39.5M candidates; expect a long initial-state phase) | `3587826:f1bd334969eaa3b725436e5155697dfc9e08457c2c002607acfb6e80180a9f1b` |
 | `mutant_*` | 3 records, 2 principals, 1 lineage, levels 0..2, sem 0..1 | TLC must report a violation; each Python twin is non-equivalent in this domain |
 
 ## Procedure
