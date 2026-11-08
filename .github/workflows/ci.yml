@@ -1,0 +1,51 @@
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install pytest
+      - run: python -m pytest -q
+      - name: Quick campaign from a snapshot (platform start method)
+        run: |
+          python -m assurance_lab --out results-quick.md
+          grep -q 'Execution: \*\*snapshot\*\*' results-quick.md
+          grep -q 'outside executed tree: \*\*none\*\*' results-quick.md
+      - name: Quick campaign from a snapshot (spawn workers re-import from disk)
+        run: |
+          python -m assurance_lab --out results-quick-spawn.md --start-method spawn
+          grep -q 'start method `spawn`' results-quick-spawn.md
+          grep -q 'outside executed tree: \*\*none\*\*' results-quick-spawn.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results-quick-${{ matrix.python }}
+          path: results-quick*.md
+
+  full-induction:
+    # Headline domain (~3.6M Inv-states). Runs on main and on demand only.
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: python -m assurance_lab --full --out results-full.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results-full
+          path: results-full.md

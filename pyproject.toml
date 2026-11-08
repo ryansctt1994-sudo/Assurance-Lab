@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "assurance-lab"
+version = "0.1.0"
+description = "Executable finite-state models for controlling how evidence becomes authority"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+include = ["assurance_lab*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
