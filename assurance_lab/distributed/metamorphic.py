@@ -1369,6 +1369,81 @@ def alphabet_exercise(insts=None) -> dict:
     }
 
 
+def valid_state_corpus(insts=None) -> dict:
+    """Genuine states the declared alphabet reaches, delivered to one correct
+    replica: each serialized prefix, alone and followed by each alphabet event
+    or declared sequence. That includes incomplete but valid delivery states:
+    deferred events, events deferred forever because they reference records
+    no event admits, and records whose predecessor never arrives. Each must
+    pass the integrity check, survive freeze and a validating thaw, and never
+    yield UNKNOWN.
+
+    ``deliveries`` counts (instance, prefix, suffix) runs; they are not
+    deduplicated, and ``distinct_states`` counts the distinct (policy, frozen
+    snapshot) pairs they reach. ``domain``, ``deduplication`` and
+    ``not_claimed`` say exactly what the corpus is and is not."""
+    insts = insts or instances()
+    deliveries, problems, kinds, distinct, prefixes, suffixes = 0, [], Counter(), set(), 0, 0
+    kinds_distinct: dict = {}
+    for inst in insts:
+        universe = event_universe([inst])
+        admissible = {e.rid for e in universe if isinstance(e, Admit)}
+        pres = serialization_prefixes(inst)
+        prefixes += len(pres)
+        suffixes += len(_suffixes(universe))
+        for pre in pres:
+            for suffix in [()] + _suffixes(universe):
+                rep = run(inst, list(pre) + list(suffix), {})
+                deliveries += 1
+                key = (tuple(sorted(inst.policy.authorities)), rep.freeze())
+                distinct.add(key)
+                where = f"{inst.name} / {len(pre)} events + {[label(e) for e in suffix]}"
+                for p in rep.integrity_problems():
+                    problems.append(f"{where}: {p}")
+                try:
+                    Replica.thaw(inst.policy, rep.freeze())
+                except CorruptSnapshot as e:
+                    problems.append(f"{where}: refused at thaw: {e}")
+                for lin in ("L", "M"):
+                    if rep.explain_head(lin).status == "UNKNOWN":
+                        problems.append(f"{where}: head({lin}) UNKNOWN")
+                refs = lambda e: {Edge: lambda x: {x.old, x.new}, Invalidate: lambda x: {x.rid},  # noqa: E731
+                                  Admit: lambda x: {x.pred} - {None},
+                                  Resolve: lambda x: {x.source, *x.candidates}}[type(e)](e)
+                for kind, present in (
+                        ("deferred events", bool(rep.pending)),
+                        ("event deferred forever (references a record no event admits)",
+                         any(refs(e) - admissible for e in rep.pending)),
+                        ("admitted record whose predecessor is not admitted",
+                         any(a.pred and a.pred not in rep.admitted for a in rep.admitted.values()))):
+                    if present:
+                        kinds[kind] += 1
+                        kinds_distinct.setdefault(kind, set()).add(key)
+    return {
+        "deliveries": deliveries, "distinct_states": len(distinct),
+        "problem_count": len(problems), "problems": problems[:50],
+        # per kind: (deliveries, distinct states)
+        "incomplete_but_valid": {k: (kinds[k], len(kinds_distinct[k])) for k in sorted(kinds)},
+        "domain": {
+            "instances": [i.name for i in insts],
+            "prefixes": f"{prefixes}: every prefix of each instance's causal order and of its reversed order",
+            "suffixes": f"{suffixes} in all, plus the empty suffix: each event of the instance's serialization "
+                        "alphabet (its own events, the unrelated lineage M's events, the boundary events) and each "
+                        "declared boundary sequence",
+            "replica": "one correct replica (no mutant flags), the instance's policy",
+            "heads_queried": ["L", "M"],
+        },
+        "deduplication": {
+            "prefixes": "the two orders' prefixes, deduplicated as event tuples",
+            "alphabet": "events deduplicated by equality, first occurrence kept",
+            "deliveries": "not deduplicated: one per (instance, prefix, suffix)",
+            "distinct_states": "distinct (policy authorities, frozen snapshot) pairs",
+        },
+        "not_claimed": "not every reachable replica state: only these delivery orders (two per instance), at most "
+                       "one suffix after a prefix, the declared alphabet, one replica, the correct implementation",
+    }
+
+
 def matrix_markdown(m: dict) -> str:
     sym = {Cell.KILLED: "**KILLED**", Cell.SURVIVED: "survived", Cell.NOT_REACHED: "not reached",
            Cell.NOT_APPLICABLE: "n/a", Cell.EQUIVALENT_CANDIDATE: "equivalent?", Cell.ERROR: "ERROR"}

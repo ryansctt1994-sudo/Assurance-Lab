@@ -223,10 +223,26 @@ check every field before and after on every genuine and every damaged
 state. The integrity check covers types, accounting (every effect explained
 by a seen event; every seen event exactly applied, pending or rejected), and
 rules (every applied edge and resolution satisfies the correct rule for
-applying it). No genuine state fails it: every serialized prefix of every
-instance and every snapshot the replica model checker explores passes, and
-the checker treats UNKNOWN on an explored state as a safety violation, per
-state and again at quiescence (each shown failing a negative control).
+applying it). No genuine state fails it, including causally *incomplete*
+ones: every serialized prefix of every instance, alone and followed by every
+alphabet event or declared sequence, and every snapshot the replica model
+checker explores. The alphabet corpus is 4,237 deliveries reaching 1,719
+distinct states, among them states with deferred events, events that can
+never apply because they reference records nothing admits, and records whose
+predecessor never arrives. It is *not* every reachable replica state: two
+delivery orders per instance, at most one suffix after a prefix, the declared
+alphabet, one correct replica (`valid_state_corpus` reports the exact domain
+and deduplication rules). Incompleteness is not inconsistency: only a state
+whose recorded effects contradict its own history is refused.
+
+Inside the replica model checker every explored state is genuine by
+construction, so a disagreement there is a failure of the checked system,
+never a pass and never an escaping exception: UNKNOWN on an explored state
+is a safety violation (per state, and again at quiescence, even when every
+replica agrees on UNKNOWN), and a snapshot the restore boundary refuses
+becomes an `INVALID_SNAPSHOT` violation that keeps the offending snapshot,
+the reasons and the trace. Only an exhausted state budget is inconclusive.
+Each of these is shown failing a negative control.
 
 *Correction.* The `0fe2c2b` commit said the validator accepts "~31k explored
 states". That was the 2-replica scenarios' count of **network states**

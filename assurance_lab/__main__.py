@@ -403,23 +403,18 @@ def snapshot_integrity_results() -> list[Result]:
                       Verdict.FAIL if authority else Verdict.PASS, "defense-in-depth",
                       "thaw(validate=False), diagnostic only", "not evidence that the boundary works; evidence "
                       "that head() does not turn damaged evidence into authority", detail=f"failed: {authority}"))
-    false_rej = []
-    n = 0
-    for inst in mm.instances():
-        for pre in mm.serialization_prefixes(inst):
-            rep = mm.run(inst, list(pre), {})
-            n += 1
-            try:
-                Replica.thaw(inst.policy, rep.freeze())
-            except CorruptSnapshot as e:
-                false_rej.append(f"{inst.name}/{len(pre)}: {e}")
-            if any(rep.explain_head(lin).status == "UNKNOWN" for lin in inst.lineages):
-                false_rej.append(f"{inst.name}/{len(pre)}: UNKNOWN")
-    out.append(Result("SNAPSHOT INTEGRITY: genuine snapshots are never refused and never UNKNOWN",
-                      Verdict.FAIL if false_rej else Verdict.PASS, "false-rejection-check",
-                      f"{n} genuine serialized states (plus every replica-checker state, thawed through the "
-                      "validator with UNKNOWN as a safety violation)", "zero false rejections",
-                      detail="\n".join(false_rej)))
+    corpus = mm.valid_state_corpus()
+    kinds = corpus["incomplete_but_valid"]
+    out.append(Result("SNAPSHOT INTEGRITY: genuine states are never refused and never UNKNOWN, incomplete ones included",
+                      Verdict.FAIL if corpus["problem_count"] or len(kinds) < 3 else Verdict.PASS,
+                      "false-rejection-check",
+                      f"{corpus['deliveries']:,} deliveries reaching {corpus['distinct_states']:,} distinct genuine "
+                      "states: every serialized prefix, alone and followed by every alphabet event or declared "
+                      "sequence; not every reachable replica state (plus every replica-checker state, thawed through "
+                      "the validator with a refusal or UNKNOWN recorded as a failure)",
+                      "zero false rejections; incomplete but valid states present (distinct): "
+                      + ", ".join(f"{k} {d:,}" for k, (_n, d) in kinds.items()),
+                      detail="\n".join(corpus["problems"])))
     ce_bad = []
     for spec in mm.RETAINED_COUNTEREXAMPLES:
         inst, _pre, damaged = mm.counterexample_snapshot(spec)
@@ -574,6 +569,22 @@ def metamorphic_results() -> tuple[list[Result], str]:
     return out, "\n".join(sec)
 
 
+def mc_verdict(r, anticipated: set) -> tuple:
+    """Disposition of one replica-checker run. Only an exhausted state budget
+    is inconclusive; a refused snapshot or an UNKNOWN head on an explored
+    state is a failure, with the evidence kept in the detail."""
+    if r.violation and r.violation.startswith("UNKNOWN"):
+        return Verdict.UNKNOWN, r.violation
+    if r.violation and r.violation.startswith("INVALID_SNAPSHOT"):
+        return Verdict.FAIL, "\n".join([r.violation, "refusal reasons:", *r.invalid_reasons,
+                                         "offending snapshot:", repr(r.invalid_snapshot), "trace:", *r.trace])
+    if r.violation:
+        return Verdict.FAIL, f"{r.violation}\n" + "\n".join(r.trace)
+    if r.issued_sets != anticipated:
+        return Verdict.FAIL, f"vacuity: anticipated outcomes {anticipated} reached {r.issued_sets}"
+    return Verdict.PASS, ""
+
+
 def replica_mc_results(full: bool) -> list[Result]:
     """Replica-level model checking: concurrent origination, reordering,
     bounded duplication, concurrent resolutions."""
@@ -586,15 +597,7 @@ def replica_mc_results(full: bool) -> list[Result]:
              "outcomes checked only for the scripted scenarios")
     for sc, dom in scenarios:
         r = check_scenario(sc)
-        anticipated = set(dict(sc.expect))
-        if r.violation and r.violation.startswith("UNKNOWN"):
-            v, detail = Verdict.UNKNOWN, r.violation
-        elif r.violation:
-            v, detail = Verdict.FAIL, f"{r.violation}\n" + "\n".join(r.trace)
-        elif r.issued_sets != anticipated:
-            v, detail = Verdict.FAIL, f"vacuity: anticipated outcomes {anticipated} reached {r.issued_sets}"
-        else:
-            v, detail = Verdict.PASS, ""
+        v, detail = mc_verdict(r, set(dict(sc.expect)))
         out.append(Result(f"replica MC: {sc.name}", v, "bfs-exhaustive-replica-network", dom,
                           f"{r.states:,} states, {r.quiescent} quiescent, "
                           f"{len(r.issued_sets)} resolution outcome(s) reached",

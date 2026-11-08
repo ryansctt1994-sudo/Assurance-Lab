@@ -41,7 +41,8 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from .replica import (
-    CONFLICT, UNKNOWN, Admit, Edge, Event, Invalidate, Replica, ResolutionPolicy, Resolve, make_resolution,
+    CONFLICT, UNKNOWN, Admit, CorruptSnapshot, Edge, Event, Invalidate, Replica, ResolutionPolicy, Resolve,
+    make_resolution,
 )
 
 POLICY = ResolutionPolicy(frozenset({"alice", "bob", "carol"}), 2)
@@ -153,6 +154,12 @@ class MCReport:
     trace: list = field(default_factory=list)
     quiescent_heads: set = field(default_factory=set)
     issued_sets: set = field(default_factory=set)
+    #: Set when an explored state held a replica snapshot that the restore
+    #: boundary refused: the frozen snapshot and the refusal reasons, kept
+    #: so the failure can be replayed (``violation`` then starts with
+    #: INVALID_SNAPSHOT, and ``trace`` leads to the state).
+    invalid_snapshot: Optional[tuple] = None
+    invalid_reasons: tuple = ()
 
 
 def _label(ev) -> str:
@@ -189,7 +196,12 @@ def _resolver_enabled(rep: Replica, rv: Resolver) -> bool:
 def check_scenario(sc: Scenario, max_states: int = 2_000_000) -> MCReport:
     n = len(sc.scripts)
     flags = {"first_applied_wins": sc.first_applied_wins, "naive_stale_guard": sc.naive_stale_guard}
-    thaw = lambda fr: Replica.thaw(sc.policy, fr, **flags)  # noqa: E731
+    def thaw(fr):
+        try:
+            return Replica.thaw(sc.policy, fr, **flags)
+        except CorruptSnapshot as e:  # becomes a recorded failure below, never an escaping exception
+            e.snapshot = fr
+            raise
     s0 = (tuple(Replica(sc.policy, **flags).freeze() for _ in range(n)), (0,) * n, frozenset(), (),
           sc.max_dups)
     parent = {s0: (None, None)}
@@ -215,76 +227,85 @@ def check_scenario(sc: Scenario, max_states: int = 2_000_000) -> MCReport:
         return MCReport(sc.name, len(parent), transitions, quiescent, msg, trace(st),
                         heads_at_quiescence, issued_seen)
 
-    while q:
-        s = q.popleft()
-        reps, prog, issued, inflight, dups = s
-        for i, fr in enumerate(reps):
-            v = safety_violations(thaw(fr), sc.lineage)
-            if v:
-                return fail(s, f"replica {i}: {v[0]}")
-        succs = []
-        for i in range(n):  # originate scripted events
-            if prog[i] < len(sc.scripts[i]):
-                ev = sc.scripts[i][prog[i]]
-                rep = thaw(reps[i])
-                if _ready_to_originate(rep, ev):
+    s = s0
+    try:
+        while q:
+            s = q.popleft()
+            reps, prog, issued, inflight, dups = s
+            for i, fr in enumerate(reps):
+                v = safety_violations(thaw(fr), sc.lineage)
+                if v:
+                    return fail(s, f"replica {i}: {v[0]}")
+            succs = []
+            for i in range(n):  # originate scripted events
+                if prog[i] < len(sc.scripts[i]):
+                    ev = sc.scripts[i][prog[i]]
+                    rep = thaw(reps[i])
+                    if _ready_to_originate(rep, ev):
+                        rep.deliver(ev)
+                        succs.append((f"R{i} originates {_label(ev)}",
+                                      (reps[:i] + (rep.freeze(),) + reps[i + 1:],
+                                       prog[:i] + (prog[i] + 1,) + prog[i + 1:], issued,
+                                       broadcast(inflight, i, ev), dups)))
+            for k, rv in enumerate(sc.resolvers):  # authorities resolve
+                if k in issued:
+                    continue
+                rep = thaw(reps[rv.replica])
+                if _resolver_enabled(rep, rv):
+                    ev = make_resolution(rep, rv.source, rv.winner, rv.loser, rv.approvals, epoch=rv.epoch)
                     rep.deliver(ev)
-                    succs.append((f"R{i} originates {_label(ev)}",
-                                  (reps[:i] + (rep.freeze(),) + reps[i + 1:],
-                                   prog[:i] + (prog[i] + 1,) + prog[i + 1:], issued,
+                    i = rv.replica
+                    succs.append((f"R{i} authority issues {_label(ev)}",
+                                  (reps[:i] + (rep.freeze(),) + reps[i + 1:], prog, issued | {k},
                                    broadcast(inflight, i, ev), dups)))
-        for k, rv in enumerate(sc.resolvers):  # authorities resolve
-            if k in issued:
-                continue
-            rep = thaw(reps[rv.replica])
-            if _resolver_enabled(rep, rv):
-                ev = make_resolution(rep, rv.source, rv.winner, rv.loser, rv.approvals, epoch=rv.epoch)
+            for idx, (j, ev) in enumerate(inflight):  # deliver / duplicate one message
+                if idx and inflight[idx - 1] == (j, ev):
+                    continue  # identical copies give identical successors
+                rest = inflight[:idx] + inflight[idx + 1:]
+                rep = thaw(reps[j])
                 rep.deliver(ev)
-                i = rv.replica
-                succs.append((f"R{i} authority issues {_label(ev)}",
-                              (reps[:i] + (rep.freeze(),) + reps[i + 1:], prog, issued | {k},
-                               broadcast(inflight, i, ev), dups)))
-        for idx, (j, ev) in enumerate(inflight):  # deliver / duplicate one message
-            if idx and inflight[idx - 1] == (j, ev):
-                continue  # identical copies give identical successors
-            rest = inflight[:idx] + inflight[idx + 1:]
-            rep = thaw(reps[j])
-            rep.deliver(ev)
-            succs.append((f"deliver {_label(ev)} to R{j}",
-                          (reps[:j] + (rep.freeze(),) + reps[j + 1:], prog, issued, rest, dups)))
-            if dups > 0:
-                succs.append((f"duplicate {_label(ev)} to R{j}",
-                              (reps, prog, issued, tuple(sorted(inflight + ((j, ev),), key=repr)),
-                               dups - 1)))
-        if not succs:
-            quiescent += 1
-            live = [thaw(fr) for fr in reps]
-            canon = {r.canonical() for r in live}
-            heads = {r.head(sc.lineage) for r in live}
-            if UNKNOWN in heads:  # checked here too, independently of the per-state check above
-                return fail(s, "NoFalseIntegrityFailure: head UNKNOWN at quiescence")
-            heads_at_quiescence |= heads
-            issued_seen.add(issued)
-            if len(canon) > 1 or len(heads) > 1:
-                return fail(s, f"divergence at quiescence: heads={sorted(map(str, heads))}")
-            if any(r.pending for r in live):
-                return fail(s, "events still pending at quiescence")
-            if any(prog[i] < len(sc.scripts[i]) for i in range(n)):
-                return fail(s, "a replica's script never completed")
-            table = dict(sc.expect)
-            if issued not in table:
-                return fail(s, f"unexpected set of issued resolutions at quiescence: {sorted(issued)}")
-            if heads != {table[issued]}:
-                return fail(s, f"quiescent head {heads.pop()} != expected {table[issued]} "
-                               f"(issued: {sorted(issued)})")
-        for lbl, t in succs:
-            transitions += 1
-            if t not in parent:
-                if len(parent) >= max_states:
-                    return MCReport(sc.name, len(parent), transitions, quiescent,
-                                    "UNKNOWN: state budget exhausted", [], heads_at_quiescence)
-                parent[t] = (s, lbl)
-                q.append(t)
+                succs.append((f"deliver {_label(ev)} to R{j}",
+                              (reps[:j] + (rep.freeze(),) + reps[j + 1:], prog, issued, rest, dups)))
+                if dups > 0:
+                    succs.append((f"duplicate {_label(ev)} to R{j}",
+                                  (reps, prog, issued, tuple(sorted(inflight + ((j, ev),), key=repr)),
+                                   dups - 1)))
+            if not succs:
+                quiescent += 1
+                live = [thaw(fr) for fr in reps]
+                canon = {r.canonical() for r in live}
+                heads = {r.head(sc.lineage) for r in live}
+                if UNKNOWN in heads:  # checked here too, independently of the per-state check above
+                    return fail(s, "NoFalseIntegrityFailure: head UNKNOWN at quiescence")
+                heads_at_quiescence |= heads
+                issued_seen.add(issued)
+                if len(canon) > 1 or len(heads) > 1:
+                    return fail(s, f"divergence at quiescence: heads={sorted(map(str, heads))}")
+                if any(r.pending for r in live):
+                    return fail(s, "events still pending at quiescence")
+                if any(prog[i] < len(sc.scripts[i]) for i in range(n)):
+                    return fail(s, "a replica's script never completed")
+                table = dict(sc.expect)
+                if issued not in table:
+                    return fail(s, f"unexpected set of issued resolutions at quiescence: {sorted(issued)}")
+                if heads != {table[issued]}:
+                    return fail(s, f"quiescent head {heads.pop()} != expected {table[issued]} "
+                                   f"(issued: {sorted(issued)})")
+            for lbl, t in succs:
+                transitions += 1
+                if t not in parent:
+                    if len(parent) >= max_states:
+                        return MCReport(sc.name, len(parent), transitions, quiescent,
+                                        "UNKNOWN: state budget exhausted", [], heads_at_quiescence)
+                    parent[t] = (s, lbl)
+                    q.append(t)
+    except CorruptSnapshot as e:
+        # An explored state is genuine by construction, so a refusal here is a
+        # false rejection (or a broken scenario): a FAIL that keeps the evidence.
+        r = fail(s, "INVALID_SNAPSHOT: a replica snapshot of an explored state was refused at thaw: "
+                    + "; ".join(e.problems[:3]))
+        r.invalid_snapshot, r.invalid_reasons = getattr(e, "snapshot", None), e.problems
+        return r
     return MCReport(sc.name, len(parent), transitions, quiescent, None, [], heads_at_quiescence,
                     issued_seen)
 

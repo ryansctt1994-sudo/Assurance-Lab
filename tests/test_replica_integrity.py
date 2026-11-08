@@ -160,3 +160,48 @@ def test_unknown_fails_model_checking_at_quiescence_even_without_the_per_state_c
     monkeypatch.setattr(Replica, "explain_head", _unknown_when(lambda r: len(r.seen) == total and not r.pending))
     v = check_scenario(sc).violation
     assert v == "NoFalseIntegrityFailure: head UNKNOWN at quiescence"
+
+
+def test_a_refused_snapshot_is_a_recorded_failure_of_the_model_checker(monkeypatch):
+    """Negative control: make the restore boundary refuse one explored
+    snapshot. The checker must not raise and must not pass: it returns an
+    INVALID_SNAPSHOT violation that keeps the offending snapshot, the
+    reasons and the trace, and the campaign scores it FAIL."""
+    from assurance_lab.__main__ import Verdict, mc_verdict
+    real = Replica.integrity_problems
+    monkeypatch.setattr(Replica, "integrity_problems",
+                        lambda self: ["injected refusal"] if len(self.seen) == 2 else real(self))
+    sc = SCENARIOS[0]
+    r = check_scenario(sc)
+    assert r.violation.startswith("INVALID_SNAPSHOT") and r.invalid_reasons == ("injected refusal",)
+    assert isinstance(r.invalid_snapshot, tuple) and len(r.invalid_snapshot) == 7
+    assert len(r.invalid_snapshot[6]) == 2  # the very snapshot that was refused (its seen-set)
+    assert r.trace  # leads from the initial state to the explored state that held it
+    verdict, detail = mc_verdict(r, set(dict(sc.expect)))
+    assert verdict == Verdict.FAIL and "offending snapshot" in detail and "injected refusal" in detail
+
+
+def test_only_an_exhausted_budget_is_inconclusive():
+    from assurance_lab.__main__ import Verdict, mc_verdict
+    from assurance_lab.distributed.mc import MCReport
+    assert mc_verdict(MCReport("x", 1, 0, 0, "UNKNOWN: state budget exhausted"), set())[0] == Verdict.UNKNOWN
+    for v in ("replica 0: NoFalseIntegrityFailure: head UNKNOWN on an explored state (integrity: x)",
+              "NoFalseIntegrityFailure: head UNKNOWN at quiescence", "INVALID_SNAPSHOT: refused"):
+        assert mc_verdict(MCReport("x", 1, 0, 0, v), set())[0] == Verdict.FAIL, v
+
+
+def test_incomplete_but_valid_delivery_states_are_accepted():
+    """A causally incomplete state (deferred events, events that can never
+    apply, records whose predecessor never arrives) is genuine and must be
+    accepted. Only a state whose recorded effects contradict its own history
+    is refused (the corruption classes cover that side)."""
+    r = mm.valid_state_corpus()
+    assert r["problem_count"] == 0, r["problems"][:5]
+    # deliveries are not distinct states: both are pinned, and neither stands in for the other
+    assert (r["deliveries"], r["distinct_states"]) == (4237, 1719)
+    assert set(r["incomplete_but_valid"]) == {
+        "deferred events", "event deferred forever (references a record no event admits)",
+        "admitted record whose predecessor is not admitted"}
+    assert all(0 < distinct <= n for n, distinct in r["incomplete_but_valid"].values())
+    assert "not every reachable replica state" in r["not_claimed"]
+    assert r["domain"]["prefixes"].startswith("164:") and r["domain"]["heads_queried"] == ["L", "M"]

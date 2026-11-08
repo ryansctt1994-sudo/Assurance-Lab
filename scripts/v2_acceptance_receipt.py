@@ -274,6 +274,7 @@ def mc_accounting() -> dict:
 
 
 def valid_corpus() -> dict:
+    corpus = mm.valid_state_corpus()
     n, problems, statuses = 0, [], Counter()
     for inst in mm.instances():
         for pre in mm.serialization_prefixes(inst):
@@ -287,8 +288,10 @@ def valid_corpus() -> dict:
                 problems.append(f"{inst.name}/{len(pre)}: refused: {e}")
             for lin in inst.lineages:
                 statuses[rep.explain_head(lin).status] += 1
-    return {"serialized_states": n, "false_rejections_or_problems": problems,
-            "head_statuses": dict(sorted(statuses.items()))}
+    return {"serialized_states": n, "false_rejections_or_problems": problems + corpus["problems"],
+            "head_statuses": dict(sorted(statuses.items())),
+            "alphabet_corpus": {k: corpus[k] for k in ("deliveries", "distinct_states", "problem_count",
+                                                       "incomplete_but_valid", "domain", "deduplication", "not_claimed")}}
 
 
 def counterexamples() -> dict:
@@ -340,6 +343,14 @@ def dispositions(data) -> list:
         {"failure": "consistent omission (missing evidence, rolled-back snapshot)", "disposition": "accepted; may restore a stale head (residual risk)",
          "assigned_by": "none in production (integrity is not authenticity); exact-state comparison against a reference in tests",
          "evidence": "corruptions.rows, class omission"},
+        {"failure": "a replica snapshot of an explored state refused at thaw", "disposition":
+         "INVALID_SNAPSHOT violation: FAIL, with the offending snapshot, the reasons and the trace kept",
+         "assigned_by": "replica model checker (check_scenario) and campaign (mc_verdict)",
+         "evidence": "test_a_refused_snapshot_is_a_recorded_failure_of_the_model_checker; clean scenarios refused: "
+                     f"{data['mc_accounting']['clean_totals'].get('refused', 'n/a')}"},
+        {"failure": "causally incomplete but genuine state (deferred, deferred forever, predecessor never arrives)",
+         "disposition": "accepted: not an integrity failure", "assigned_by": "integrity check",
+         "evidence": data["valid_corpus"].get("alphabet_corpus")},
         {"failure": "UNKNOWN on a state the replica model checker explores", "disposition": "safety violation: FAIL, not inconclusive",
          "assigned_by": "replica model checker, per state and again at quiescence",
          "evidence": "tests test_unknown_fails_model_checking_*; clean scenarios: "
@@ -366,16 +377,26 @@ def run_tests(r: Receipt) -> dict:
     r.file("pytest.stdout.log", p.stdout)
     r.file("pytest.stderr.log", p.stderr)
     lines = p.stdout.splitlines()
+    import re
+    # "tests/x.py::test_y[2 records, 2 principals] PASSED   [ 12%]": ids may hold spaces, so the
+    # outcome token is matched before the progress marker, never found by splitting on whitespace
+    # (the 3c6fad1 receipt's D-1 defect).
+    line_re = re.compile(r"^(?P<id>\S.*::.*?) (?P<outcome>PASSED|FAILED|SKIPPED|ERROR|XFAIL|XPASS)\s+\[\s*\d+%\]$")
     per_test = {}
-    for ln in lines:  # "tests/x.py::test_y[param] PASSED   [ 12%]"
-        parts = ln.split()
-        if len(parts) >= 2 and "::" in parts[0] and parts[1] in ("PASSED", "FAILED", "SKIPPED", "ERROR", "XFAIL", "XPASS"):
-            per_test[parts[0]] = parts[1]
+    for ln in lines:
+        m = line_re.match(ln)
+        if m:
+            per_test[m["id"]] = m["outcome"]
     r.file("pytest-outcomes.json", canon(per_test) + "\n")
+    summary = next((ln for ln in reversed(lines) if re.search(r"\d+ (passed|failed|error)", ln)), "")
+    reported = {k.lower(): int(n) for n, k in re.findall(r"(\d+) (passed|failed|skipped|errors?|xfailed|xpassed)", summary)}
+    reported = {("error" if k.startswith("error") else k): n for k, n in reported.items()}
+    counted = Counter({"PASSED": "passed", "FAILED": "failed", "SKIPPED": "skipped", "ERROR": "error",
+                       "XFAIL": "xfailed", "XPASS": "xpassed"}[v] for v in per_test.values())
     return {"command": "python -m pytest -v -p no:cacheprovider", "exit_code": p.returncode, "per_test_outcomes": per_test,
-            "seconds": round(time.monotonic() - t0, 1),
-            "summary": next((ln for ln in reversed(lines) if " passed" in ln or " failed" in ln), ""),
-            "outcomes": dict(Counter(per_test.values())), "per_test": "pytest-outcomes.json",
+            "seconds": round(time.monotonic() - t0, 1), "summary": summary,
+            "outcomes": dict(Counter(per_test.values())), "summary_counts": reported,
+            "index_matches_summary": dict(counted) == reported, "per_test": "pytest-outcomes.json",
             "stdout": "pytest.stdout.log", "stderr": "pytest.stderr.log"}
 
 
@@ -437,11 +458,16 @@ def main(argv=None) -> int:
         and r.data["mc_accounting"]["clean_totals"].get("clean_violations") == 0
         and passed("test_unknown_fails_model_checking_at_an_intermediate_state",
                    "test_unknown_fails_model_checking_at_quiescence_even_without_the_per_state_check"),
+        "refused_snapshot_is_a_recorded_failure": passed(
+            "test_a_refused_snapshot_is_a_recorded_failure_of_the_model_checker",
+            "test_only_an_exhausted_budget_is_inconclusive"),
         "read_only_queries": r.data["corruptions"]["summary"]["state_changed_by_head"] == 0
         and passed("test_head_is_read_only_on_genuine_and_damaged_states",
                    "test_bypassed_boundary_gives_unknown_not_conflict_and_changes_nothing"),
         "valid_state_preservation": not r.data["valid_corpus"]["false_rejections_or_problems"]
-        and r.data["mc_accounting"]["clean_totals"].get("refused") == 0,
+        and r.data["valid_corpus"]["alphabet_corpus"]["problem_count"] == 0
+        and r.data["mc_accounting"]["clean_totals"].get("refused") == 0
+        and passed("test_incomplete_but_valid_delivery_states_are_accepted"),
         "mutation_accounting_and_anomalies": r.data["matrices"]["v2"]["anomalies_uncached"] == []
         and r.data["matrices"]["v1_fixtures"]["anomalies_uncached"] == [],
         "corruption_attribution": all("credited_control" in x for x in r.data["corruptions"]["rows"]),
@@ -459,7 +485,8 @@ def main(argv=None) -> int:
                                and all(f.get("exception") == "KeyError" for f in c["replayed_now"].values())
                                for c in r.data["counterexamples"]["counterexamples"])
         and passed("test_snapshot_counterexamples.py"),
-        "tests": (r.data["tests"].get("exit_code") == 0) if not a.skip_tests else "skipped",
+        "tests": (r.data["tests"].get("exit_code") == 0 and r.data["tests"].get("index_matches_summary") is True)
+        if not a.skip_tests else "skipped",
     }
     summary = {"receipt_version": 1, "scope": SCOPE, "started_utc": started, "finished_utc": finished,
                "commit": r.data["source"]["commit"], "section_seconds": r.timing, "gates": gates,
