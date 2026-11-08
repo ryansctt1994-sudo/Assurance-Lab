@@ -1,0 +1,8 @@
+{
+ "covers": "canonical v2 and v1-fixture matrices (uncached), corruption table, alphabet exercise, cache keys",
+ "digests": {
+  "PYTHONHASHSEED=1": "29ce5324cc6c2fda24e30718b11761cb52995910a95fd75c54e205f8307c4501",
+  "PYTHONHASHSEED=2": "29ce5324cc6c2fda24e30718b11761cb52995910a95fd75c54e205f8307c4501"
+ },
+ "identical": true
+}

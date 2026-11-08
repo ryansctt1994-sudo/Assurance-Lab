@@ -1,0 +1,58 @@
+{
+ "alphabet_corpus": {
+  "deduplication": {
+   "alphabet": "events deduplicated by equality, first occurrence kept",
+   "deliveries": "not deduplicated: one per (instance, prefix, suffix)",
+   "distinct_states": "distinct (policy authorities, frozen snapshot) pairs",
+   "prefixes": "the two orders' prefixes, deduplicated as event tuples"
+  },
+  "deliveries": 4237,
+  "distinct_states": 1719,
+  "domain": {
+   "heads_queried": [
+    "L",
+    "M"
+   ],
+   "instances": [
+    "chain",
+    "chain+invalidate",
+    "fork",
+    "fork+resolution",
+    "fork+beneficiary-only",
+    "fork+dispute",
+    "fork+dispute+escalation",
+    "fork+resolution+invalidate-winner",
+    "chain+invalidate-middle",
+    "chain+invalidate-root",
+    "chain+invalidate-head-and-middle",
+    "fork+resolution+invalidate-loser"
+   ],
+   "prefixes": "164: every prefix of each instance's causal order and of its reversed order",
+   "replica": "one correct replica (no mutant flags), the instance's policy",
+   "suffixes": "297 in all, plus the empty suffix: each event of the instance's serialization alphabet (its own events, the unrelated lineage M's events, the boundary events) and each declared boundary sequence"
+  },
+  "incomplete_but_valid": {
+   "admitted record whose predecessor is not admitted": [
+    1180,
+    742
+   ],
+   "deferred events": [
+    2818,
+    1495
+   ],
+   "event deferred forever (references a record no event admits)": [
+    328,
+    160
+   ]
+  },
+  "not_claimed": "not every reachable replica state: only these delivery orders (two per instance), at most one suffix after a prefix, the declared alphabet, one replica, the correct implementation",
+  "problem_count": 0
+ },
+ "false_rejections_or_problems": [],
+ "head_statuses": {
+  "CONFLICT": 13,
+  "HEAD": 68,
+  "NONE": 83
+ },
+ "serialized_states": 164
+}

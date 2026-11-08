@@ -1,0 +1,14 @@
+{
+ "branch": "ccr-305e61c7-7vpbq7",
+ "commit": "52db4d74dc03b168e088e63576f0085baf6a2d6d",
+ "cpu_count": 4,
+ "implementation": "CPython",
+ "platform": "Linux-6.18.44-fc-v310-x86_64-with-glibc2.39",
+ "python": "3.13.18",
+ "scope": "development lineage (PR #2, branch ccr-305e61c7-7vpbq7). Not main: the published baseline c175fbd has the same head() KeyError defect (reproduced below) and is not repaired or re-validated here.",
+ "source_sha256_assurance_lab": "5df34b89d9ceb3f7b518eb1e0b8266d81a275020f84c477f9223c6721bd854f4",
+ "tracked_changes": "",
+ "tree": "a6c472710375271ee663dc5fcd233a237ce22821",
+ "tree_assurance_lab": "139d177d8b96adbddec0f56d7878b350264a4a6f",
+ "untracked": []
+}

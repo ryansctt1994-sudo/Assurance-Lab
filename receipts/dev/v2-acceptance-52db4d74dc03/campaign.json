@@ -1,0 +1,8 @@
+{
+ "commit_line": "- Commit: `52db4d74dc03b168e088e63576f0085baf6a2d6d` (tree `139d177d8b96adbddec0f56d7878b350264a4a6f`)",
+ "gate": "Non-compensating gate over all 76 obligations and provenance: **all PASS**",
+ "path": "docs/reports/dev-52db4d74dc03.md",
+ "provenance_verdict": "- Provenance verdict: **BOUND** to commit `52db4d74dc03`",
+ "sha256": "12df48cab29cee9b929ac0404c031169cf07d64828590fb5ae2a3e22d2867287",
+ "stored_as": "campaign-report.md"
+}
