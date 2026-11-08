@@ -15,41 +15,42 @@ Pure Python ≥3.10, no runtime dependencies.
 
 ```bash
 pip install pytest
-python -m pytest -q                 # ~100 tests, a few minutes
-python -m assurance_lab             # quick verification campaign
-python -m assurance_lab --full --out docs/RESULTS.md   # headline domain, ~6 min on 4 cores
+python -m pytest -q                 # ~115 tests, ~1 min
+python -m assurance_lab             # quick campaign, in-place, no report
+python -m assurance_lab --full --out docs/RESULTS.md   # headline domain from a snapshot, ~6 min on 4 cores
 ```
 
 | Exit | Meaning | What it guarantees |
 |---|---|---|
-| `0` | every obligation PASS; source hash at end = hash in start receipt | results are bound to the recorded commit (modulo the edit-and-revert gap below) |
+| `0` | every obligation PASS; with `--out`: snapshot-bound, origins verified, source unchanged | results are bound to the recorded commit |
 | `1` | some obligation FAIL or UNKNOWN | non-compensating gate: no PASS elsewhere offsets it |
-| `2` | refused before running: `--out` with a dirty `assurance_lab/` tree | we won't anchor a report to a tree that isn't a commit (pre-execution check) |
-| `3` | `assurance_lab/` changed between the start receipt and the end | the anchor did not hold. Deliberately conservative: it fires even when the change could not have affected execution |
+| `2` | refused before running: dirty `assurance_lab/` tree, or snapshot integrity not established | we won't anchor a report to a tree that isn't a commit (pre-execution check) |
+| `3` | provenance invalid or unbound: executed source changed, an import came from outside the executed tree, or an in-place report | the anchor did not hold, or never existed. Deliberately conservative |
 
 ## How results are bound to code
 
-- A **start receipt** (commit, SHA-256 over `assurance_lab/**/*.py`, domains,
-  worker count, command) is captured *before* enumeration and never recomputed.
-- `--out` **refuses a dirty `assurance_lab/` tree** unless `--allow-dirty`,
-  which is then flagged at the top of the report.
-- The source is **re-hashed at the end**; a mismatch marks the report
-  INVALID PROVENANCE and fails the gate even if every obligation passed.
-  Why it is load-bearing: pool workers started with *spawn* (macOS and
-  Windows default) or *forkserver* (Linux default from Python 3.14)
-  re-import the package from disk when they start, and this campaign creates
-  its pool only after the reachability phase (~105 s into a full run). Under
-  *fork* (Linux default through 3.13) workers inherit the imported code, so
-  an edit after pool startup cannot change execution, and the hash also
-  covers modules the campaign never imports. Exit 3 fires anyway; a
-  development drift demo edited `reliance.py`, which the campaign never
-  imports, and got exit 3.
-- **Known gap: the re-hash detects *net* change, not transient change.**
-  An edit that is reverted before the end (A→B→A) passes, yet a
-  spawn/forkserver worker started in between would have run B. Closing that
-  needs execution from an immutable snapshot of the commit (e.g. a
-  `git archive` export), which makes the working tree irrelevant. Not done
-  yet.
+Details, limits and the demo transcript are in [`docs/PROVENANCE.md`](docs/PROVENANCE.md).
+
+- **Reports run from a snapshot.** With `--out`, the committed
+  `assurance_lab/` tree is exported with `git archive` into a fresh temp
+  directory, its bytes are checked against the git objects, and the
+  campaign runs there under an isolated interpreter (`-I -S -B`). Working-tree
+  edits, including edit-and-revert, cannot reach the run.
+- **Import origins are verified, not assumed.** The parent and every pool
+  worker that ran a job report the files they imported `assurance_lab`
+  from; anything outside the executed tree invalidates the report.
+- A **start receipt** (commit, tree id, source SHA-256, domains, workers,
+  start method, command) is captured *before* enumeration and never
+  recomputed. The executed source is **re-hashed at the end** as a second,
+  independent check.
+- **In-place reports are rejected** (UNBOUND, exit 3).
+  `scripts/demo_edit_and_revert.sh in-place` swaps in a sabotaged checker
+  mid-run and reverts it: every per-line provenance check passes while 38% of
+  the inductive check is silently skipped. The same demo in `snapshot` mode
+  is unaffected.
+- **Limit:** snapshot files are read-only, but permissions don't bind root.
+  The protection is that nothing else knows the snapshot's random path;
+  tampering by something that does is detected only as a net change.
 - **Claims carry no run-dependent values.** Timing and environment sit in a
   trailing "Run metadata" section, so two reports of the same code differ
   only there.
