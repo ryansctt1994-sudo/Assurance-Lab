@@ -83,10 +83,11 @@ CONFLICT = "CONFLICT"
 class Replica:
     policy: ResolutionPolicy
     naive_stale_guard: bool = False  # mutant: reproduce handoff failure #3
+    first_applied_wins: bool = False  # mutant: reproduce the split-brain counterexample
     admitted: dict[str, Admit] = field(default_factory=dict)
     edges: set[tuple[str, str]] = field(default_factory=set)
     invalidated: set[str] = field(default_factory=set)
-    resolutions: dict[str, Resolve] = field(default_factory=dict)  # by source
+    resolutions: dict[str, set] = field(default_factory=dict)  # source -> all valid resolutions
     rejected: list[tuple[Event, str]] = field(default_factory=list)
     pending: list[Event] = field(default_factory=list)
     seen: set[Event] = field(default_factory=set)
@@ -160,9 +161,12 @@ class Replica:
         need = max(r.quorum, self.policy.min_quorum)
         if len(independent) < need:
             return f"quorum not met ({len(independent)}/{need} independent approvals)"
-        prev = self.resolutions.get(r.source)
-        if prev is not None:
-            return "conflict already resolved" if prev != r else None
+        if self.first_applied_wins and self.resolutions.get(r.source):
+            # MUTANT. Rejecting a valid competing resolution because another
+            # arrived first lets delivery order pick the authority: the
+            # replica-level model checker found replicas converging on
+            # different heads (split-brain) and the dispute becoming invisible.
+            return "conflict already resolved"
         return None
 
     def _apply_resolution(self, r: Resolve) -> str:
@@ -176,8 +180,26 @@ class Replica:
         why = self.validate_resolution(r)
         if why:
             return self._reject(r, why)
-        self.resolutions[r.source] = r
+        self.resolutions.setdefault(r.source, set()).add(r)
         return "applied"
+
+    def decision(self, source: str) -> tuple[str, Optional[str], Optional[str]]:
+        """Effective resolution of a fork, as a function of the *set* of valid
+        resolutions held (never of their arrival order).
+
+        ("none", -, -) no resolution; ("agreed", winner, loser) all top-epoch
+        resolutions agree; ("disputed", -, -) top-epoch resolutions disagree,
+        which fails closed until a higher-epoch resolution settles it.
+        """
+        rs = self.resolutions.get(source)
+        if not rs:
+            return "none", None, None
+        top = max(r.epoch for r in rs)
+        decisions = {(r.winner, r.loser) for r in rs if r.epoch == top}
+        if len(decisions) > 1:
+            return "disputed", None, None
+        (winner, loser), = decisions
+        return "agreed", winner, loser
 
     # ------------------------------------------------------------- derivation
     def _superseded(self, rid: str) -> bool:
@@ -202,7 +224,8 @@ class Replica:
     def _losers(self) -> set[str]:
         """Rejected branch roots and everything reachable after them."""
         out: set[str] = set()
-        frontier = [r.loser for r in self.resolutions.values()]
+        frontier = [lo for src in self.resolutions
+                    for status, _w, lo in [self.decision(src)] if status == "agreed"]
         while frontier:
             n = frontier.pop()
             if n in out:
@@ -219,6 +242,9 @@ class Replica:
         order: the answer is a function of the delivered *set*.
         """
         members = [a for a in self.admitted.values() if a.lineage == lineage]
+        if any(self.admitted[src].lineage == lineage and self.decision(src)[0] == "disputed"
+               for src in self.resolutions):
+            return CONFLICT  # authorities disagree: fail closed
         losers = self._losers()
         for a in members:
             succ = [b for x, b in self.edges if x == a.rid and b not in losers]
@@ -238,12 +264,35 @@ class Replica:
             return CONFLICT
         return cands[0] if cands else None
 
+    def freeze(self) -> tuple:
+        """Exact, hashable internal state (order-sensitive parts kept in order),
+        so a model checker can explore replica states without assuming the
+        order-independence it is trying to establish."""
+        return (
+            tuple(sorted(self.admitted.items())),
+            frozenset(self.edges),
+            frozenset(self.invalidated),
+            tuple(sorted((k, frozenset(v)) for k, v in self.resolutions.items())),
+            tuple(self.rejected),
+            tuple(self.pending),
+            frozenset(self.seen),
+        )
+
+    @classmethod
+    def thaw(cls, policy: ResolutionPolicy, frozen: tuple, **flags) -> "Replica":
+        adm, edges, inv, res, rej, pend, seen = frozen
+        return cls(policy, admitted=dict(adm), edges=set(edges), invalidated=set(inv),
+                   resolutions={k: set(v) for k, v in res}, rejected=list(rej),
+                   pending=list(pend), seen=set(seen), **flags)
+
     def canonical(self) -> tuple:
         return (
             tuple(sorted(self.admitted)),
             tuple(sorted(self.edges)),
             tuple(sorted(self.invalidated)),
-            tuple(sorted((k, v.winner) for k, v in self.resolutions.items())),
+            tuple(sorted(
+                (k, tuple(sorted((r.epoch, r.winner, r.loser, tuple(sorted(r.approvals))) for r in v)))
+                for k, v in self.resolutions.items())),
         )
 
 

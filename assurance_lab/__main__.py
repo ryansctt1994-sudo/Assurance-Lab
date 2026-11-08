@@ -41,6 +41,7 @@ from .checker.explore import explore
 from .checker.induction import check_induction, unmatched_reachable
 from .core.model import Config, CoreModel
 from .core.mutants import ALL_MUTANTS
+from .distributed.mc import SCENARIOS, check_scenario, mutant_scenarios, with_observer
 from .distributed.replica import Admit, Edge, Replica, ResolutionPolicy, make_resolution
 from .provenance import (
     PKG, Manifest, ProvenanceError, commit_digest, foreign_origins, git,
@@ -187,6 +188,40 @@ def mutant_results(cfg: Config) -> list[Result]:
             v, detail, b = Verdict.UNKNOWN, "budget exhausted", f"{r.states:,} states"
         out.append(Result(f"mutant detected: {M.name}", v, "bfs-reachability", cfg.describe(), b,
                           detail=detail))
+    return out
+
+
+def replica_mc_results(full: bool) -> list[Result]:
+    """Replica-level model checking: concurrent origination, reordering,
+    bounded duplication, concurrent resolutions."""
+    out = []
+    scenarios = [(sc, f"2 replicas, ≤{sc.max_dups} duplicated messages") for sc in SCENARIOS]
+    if full:
+        scenarios += [(with_observer(sc, 1), "3 replicas, ≤1 duplicated message")
+                      for sc in SCENARIOS if sc.resolvers]
+    risks = ("no message loss, crashes, or Byzantine replicas modeled",
+             "outcomes checked only for the scripted scenarios")
+    for sc, dom in scenarios:
+        r = check_scenario(sc)
+        anticipated = set(dict(sc.expect))
+        if r.violation and r.violation.startswith("UNKNOWN"):
+            v, detail = Verdict.UNKNOWN, r.violation
+        elif r.violation:
+            v, detail = Verdict.FAIL, f"{r.violation}\n" + "\n".join(r.trace)
+        elif r.issued_sets != anticipated:
+            v, detail = Verdict.FAIL, f"vacuity: anticipated outcomes {anticipated} reached {r.issued_sets}"
+        else:
+            v, detail = Verdict.PASS, ""
+        out.append(Result(f"replica MC: {sc.name}", v, "bfs-exhaustive-replica-network", dom,
+                          f"{r.states:,} states, {r.quiescent} quiescent, "
+                          f"{len(r.issued_sets)} resolution outcome(s) reached",
+                          ("reliable eventual delivery (no loss)",), risks, detail=detail))
+    for sc in mutant_scenarios():
+        r = check_scenario(sc)
+        v = Verdict.PASS if r.violation and "divergence" in r.violation else Verdict.FAIL
+        out.append(Result(f"replica mutant detected: {sc.name}", v, "bfs-exhaustive-replica-network",
+                          f"2 replicas, ≤{sc.max_dups} duplicated messages",
+                          f"counterexample schedule length {len(r.trace)}", detail=r.violation or ""))
     return out
 
 
@@ -393,7 +428,7 @@ def main(argv=None) -> int:
     t1 = time.perf_counter()
     results += mutant_results(MUTANT_CFG)
     t2 = time.perf_counter()
-    results += distributed_results()
+    results += distributed_results() + replica_mc_results(a.full)
     t3 = time.perf_counter()
     procs_checked, foreign = origin_check(ir.origins)
     drifted = source_drifted(receipt)

@@ -31,8 +31,8 @@ Status key: **modeled** (in the exhaustively checked core), **tested**
 | 22 | Mutation testing | modeled | 13 mutants, BFS + induction |
 | 23–25 | Store seam | tested | `store/retrieval.py` |
 | 26 | Crash recovery + epoch checkpoint | tested | `store/recovery.py` (anchor trust is an assumption) |
-| 27 | Schedule convergence | tested | 120 chain schedules + duplicates |
-| 28 | Successor conflict resolution | tested | 720 fork+resolution schedules; self-auth / quorum / root tampering rejected |
+| 27 | Schedule convergence | **modeled** (replica level) + tested | `distributed/mc.py`: 2 replicas (3 in `--full`), concurrent origination, reordering, ≤3 duplicates; convergence at every quiescent state. Plus 120 single-replica schedules |
+| 28 | Successor conflict resolution | **modeled** (replica level) + tested | concurrent resolutions by different authorities; disagreement fails closed; higher epoch settles it. Found and fixed a split-brain (see below). Plus 720 schedules; self-auth / quorum / root tampering rejected |
 | 29 | Execution-authority boundary | **not covered** | handoff text was truncated at this heading |
 
 ## Modeling choices to challenge
@@ -46,10 +46,20 @@ Status key: **modeled** (in the exhaustively checked core), **tested**
   transition properties checked on every step from every Inv-state.
 * **Authority levels are a toy.** Principal 0 starts at max level, others at
   0; Grant needs a strictly more authoritative, distinct grantor.
-* **The distributed layer is scenario-based**, not model-checked over
-  arbitrary replica interleavings. It shows eventual convergence for the
-  enumerated schedules only. A replica may serve a once-legitimate head
-  that later loses a conflict (asserted in `test_valid_resolution_*`).
+* **The distributed model checker covers scripted scenarios**, not arbitrary
+  workloads: 2 replicas (3 in `--full`), bounded duplication, no message
+  loss, crashes or Byzantine replicas. A replica may still serve a
+  once-legitimate head that later loses a conflict (asserted in
+  `test_valid_resolution_*`); reliance receipts are the mitigation.
+* **Split-brain found by the replica model checker.** The first resolution
+  rule kept whichever valid resolution arrived first and rejected the other
+  as "already resolved". When two authorities resolved one fork
+  concurrently, replicas converged on *different* heads, and the dispute
+  was invisible, so escalation could never happen. Now every valid
+  resolution is kept and the decision is a function of the set: top-epoch
+  agreement decides, disagreement fails closed to CONFLICT, and a
+  higher-epoch resolution settles it. The old rule is retained as the
+  `first_applied_wins` mutant, which the checker must keep detecting.
 * **Atomic successor+edge** in recovery (§8 option 1). A design that writes
   them separately would need its invariants reproved over the microsteps.
 
@@ -58,8 +68,8 @@ Status key: **modeled** (in the exhaustively checked core), **tested**
 1. Port the core to TLA+ and check it with TLC at the same bounds, as an
    independent oracle (I_6R: a second implementation that doesn't share code).
 2. Model I_1 (execution witness vs correctness) and BasisBound.
-3. Replace scenario permutations in `distributed/` with a small replica-level
-   model checker (2 replicas, bounded message buffer, partitions).
+3. ~~Replica-level model checker~~: done (`distributed/mc.py`). Next: message
+   loss with retransmission, crash/recovery, and Byzantine replicas.
 4. Write out §29 and model the execution boundary.
 5. ~~Run `--full` from an immutable snapshot~~: done; see `docs/PROVENANCE.md`.
 6. ~~Metadata precision~~: done (`.3f`).

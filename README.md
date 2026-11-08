@@ -73,7 +73,7 @@ Details, limits and the demo transcript are in [`docs/PROVENANCE.md`](docs/PROVE
 | Mutants | `core/mutants.py` | 13 single-guard mutations (negative controls) |
 | Store seam | `store/retrieval.py` | filter-before-rank, effect-time read repair, compaction |
 | Recovery | `store/recovery.py` | graph = truth / head = cache, 4 torn-write combos, monotone checkpoint vs rollback |
-| Distributed | `distributed/replica.py` | causal deferral, idempotence, 120/720-schedule convergence, `SUCCESSOR_CONFLICT_RESOLUTION` |
+| Distributed | `distributed/replica.py`, `distributed/mc.py` | causal deferral, idempotence, `SUCCESSOR_CONFLICT_RESOLUTION`; replica-level model checker (concurrent origination, reordering, duplication, concurrent resolutions) |
 | Admission | `admission.py` | I_2 projection view with read-set logging and receipt ρ_A |
 | Reliance | `reliance.py` | use receipts, descendant closure, BoundaryCompleteness triage |
 
@@ -105,7 +105,13 @@ is and is not modeled.
    delivered before `Edge(r0,r1)`, both r0 and r2 looked like heads. Fixed
    by requiring the full predecessor chain to be linked. Retained as
    `test_retained_partial_chain_counterexample`.
-2. **Equivalent mutants.** `self_grant` (levels 0..1), `stale_successor`
+2. **Split-brain on concurrent resolutions (replica model checker).** Two
+   authorities validly resolving one fork at the same time left replicas on
+   different heads, because each kept the resolution it saw first; the
+   dispute was also invisible, so it could never be escalated. Now a
+   disagreement fails closed to CONFLICT until a higher-epoch resolution
+   settles it. Retained as the `first_applied_wins` mutant.
+3. **Equivalent mutants.** `self_grant` (levels 0..1), `stale_successor`
    (2 records), and the lineage mutants (1 lineage) cannot fire in those
    domains. Each mutant is now checked in the smallest domain where it is
    non-equivalent, and the equivalence is asserted, not hidden.
