@@ -46,7 +46,9 @@ from .core.mutants import ALL_MUTANTS
 from .distributed import metamorphic as mm
 from .distributed.mc import SCENARIOS, check_scenario, mutant_scenarios, with_observer
 from .distributed.replica import Admit, Edge, Replica, ResolutionPolicy, make_resolution
-from .statedigest import ENCODING, round_trip_failures, set_digest
+from .statedigest import (
+    ENCODING, MALFORMED_CORPUS, decanon, malformed_accepted, round_trip_failures, set_digest,
+)
 from .provenance import (
     PKG, Manifest, ProvenanceError, commit_digest, foreign_origins, git,
     interpreter_isolation, loaded_origins, make_snapshot, remove_snapshot,
@@ -250,6 +252,22 @@ def witness_results(cfg: Config) -> tuple[list[Result], str]:
     return out, "\n".join(lines) + "\n"
 
 
+def domain_adequacy(cfg: Config) -> str:
+    """Which intended behaviors the run's own core domain can exercise. A
+    behavior it cannot reach means the domain's claims say nothing about it:
+    shown as NOT EXERCISED rather than omitted."""
+    lines = [f"## Domain adequacy: {cfg.describe()}", "",
+             "Whether this run's core domain can exhibit each intended behavior at all "
+             "(existential BFS). The witness obligations above are always checked on the headline "
+             "domain; this table qualifies the core claims of *this* run.", "",
+             "| Behavior | On this domain |", "|---|---|"]
+    for w in all_witnesses(cfg):
+        lines.append(f"| {w.spec.name} | " + (f"exercised (path length {len(w.actions)})" if w.found
+                                             else "**NOT EXERCISED**: claims on this domain say nothing about it")
+                     + " |")
+    return "\n".join(lines) + "\n"
+
+
 def metamorphic_results() -> tuple[list[Result], str]:
     """METAMORPHIC_CONSISTENCY: relations on the corrected replica, calibrated
     by negative controls; plus the core encoding round-trip."""
@@ -262,16 +280,27 @@ def metamorphic_results() -> tuple[list[Result], str]:
                           "metamorphic-relation", f"{len(mm.KINDS)} replica source instances",
                           f"{r.checks:,} comparisons", assume,
                           detail="\n".join(w.pretty() for w in r.witnesses)))
+    pre = mm.precondition_violations()
+    out.append(Result("METAMORPHIC: relation preconditions hold on every source instance",
+                      Verdict.FAIL if pre else Verdict.PASS, "precondition-check",
+                      f"{len(mm.KINDS)} instances, renamings, added lineage",
+                      "ids issued once; no cross-lineage references; disjoint added lineage; "
+                      "renamings are bijections keeping seq and lineage", detail="\n".join(pre)))
     cfg = Config(n_records=2, n_lineages=1)
     states = list(inv_states(cfg))
-    bad = round_trip_failures(states, model=CoreModel(cfg))
-    out.append(Result(f"METAMORPHIC: {ENCODING} encoding round-trip", Verdict.FAIL if bad else Verdict.PASS,
-                      "metamorphic-relation", cfg.describe(),
+    bad = round_trip_failures(states, decode=lambda line: decanon(line, cfg), model=CoreModel(cfg))
+    out.append(Result(f"METAMORPHIC: {ENCODING} encoding round-trip (strict decoder)",
+                      Verdict.FAIL if bad else Verdict.PASS, "metamorphic-relation", cfg.describe(),
                       f"all {len(states):,} Inv-states decode to the same state with the same steps"))
+    accepted = malformed_accepted(cfg)
+    out.append(Result(f"{ENCODING} strict decoder rejects every malformed encoding",
+                      Verdict.FAIL if accepted else Verdict.PASS, "negative-corpus", cfg.describe(),
+                      f"{len(MALFORMED_CORPUS)}/{len(MALFORMED_CORPUS)} defect classes rejected"
+                      if not accepted else f"accepted: {accepted}"))
     m = mm.mutant_matrix()
-    unkilled_rel = [r for r in mm.RELATIONS if not any(m[(r, f)] == mm.Cell.KILLED for f in mm.FLAGS)]
-    unkilled_mut = [f for f in mm.FLAGS if not any(m[(r, f)] == mm.Cell.KILLED for r in mm.RELATIONS)]
-    errors = [k for k, v in m.items() if str(v).startswith(mm.Cell.ERROR)]
+    unkilled_rel = [r for r in mm.RELATIONS if not any(m[(r, f)][0] == mm.Cell.KILLED for f in mm.FLAGS)]
+    unkilled_mut = [f for f in mm.FLAGS if not any(m[(r, f)][0] == mm.Cell.KILLED for r in mm.RELATIONS)]
+    errors = [k for k, v in m.items() if str(v[0]).startswith(mm.Cell.ERROR)]
     vd = lambda bad: Verdict.UNKNOWN if errors else (Verdict.FAIL if bad else Verdict.PASS)  # noqa: E731
     out.append(Result("METAMORPHIC: every relation kills a negative control", vd(unkilled_rel),
                       "relation-x-mutant-matrix", f"{len(mm.RELATIONS)} relations × {len(mm.FLAGS)} mutants",
@@ -280,12 +309,17 @@ def metamorphic_results() -> tuple[list[Result], str]:
                       "relation-x-mutant-matrix", f"{len(mm.RELATIONS)} relations × {len(mm.FLAGS)} mutants",
                       detail=f"unkilled mutants: {unkilled_mut}"))
     probe = mm.order_invariance([mm.EQUIVOCATION_PROBE])
+    flagged = mm.shared_precondition(mm.EQUIVOCATION_PROBE)
     sec = ["## Metamorphic relations × negative controls", "",
-           "KILLED = relation violated; survived = the mutant's deviant branch ran and the relation "
-           "held; not exercised = the relation's inputs never reach that branch. "
-           "Preconditions and justifications: `docs/METAMORPHIC.md`.", "", mm.matrix_markdown(m), "",
+           "KILLED = relation violated; survived = the deviant branch ran and the relation held; "
+           "not reached = this relation's inputs never reach a branch another relation does exercise "
+           "(source-input adequacy); equivalent? = no relation exercises the mutant (excluded from "
+           "the score). Numbers are deviant-branch executions; a kill resting on very few is thin "
+           "evidence. Preconditions and justifications: `docs/METAMORPHIC.md`.", "",
+           mm.matrix_markdown(m), "",
            "**Known limitation (outside the precondition):** with Byzantine equivocation (two "
-           "different admissions for one record id), the outcome depends on delivery order. "
+           "different admissions for one record id), the outcome depends on delivery order. The "
+           f"precondition checker flags the probe ({'; '.join(flagged)}), which is why it is excluded. "
            "Minimal witness:", "", "```", *(w.pretty() for w in probe.witnesses), "```", ""]
     return out, "\n".join(sec)
 
@@ -572,7 +606,7 @@ def main(argv=None) -> int:
     if a.out:
         with open(a.out, "w") as f:
             f.write(render(results, receipt, meta, drifted, procs_checked, foreign, digests,
-                           (wit_section, cov_section, mm_section)))
+                           (wit_section, domain_adequacy(core_cfg), cov_section, mm_section)))
     if not provenance_valid(drifted, foreign, receipt["execution"], bool(a.out)):
         if receipt["execution"] != "snapshot" and not (drifted or foreign):
             print("provenance UNBOUND: in-place reports are not accepted", file=sys.stderr)

@@ -6,20 +6,23 @@ from assurance_lab.checker.induction import inv_states
 from assurance_lab.core.model import Config, CoreModel
 from assurance_lab.distributed.metamorphic import (
     EQUIVOCATION_PROBE, FLAGS, KINDS, RELATIONS, Cell, _shrink, duplicate_idempotence,
-    instances, mutant_matrix, observe, order_invariance, renaming_equivariance, run,
+    instances, mutant_matrix, mutation_score, observe, order_invariance, precondition_violations,
+    renaming_equivariance, run, shared_precondition,
 )
-from assurance_lab.statedigest import canon_parts, round_trip_failures
+from assurance_lab.statedigest import (
+    MalformedEncoding, canon, canon_parts, decanon, malformed_accepted, round_trip_failures,
+)
 
 # The calibrated relation x mutant matrix. A change here is a change in what
 # the suite can detect, so it must be reviewed, not just re-recorded.
 EXPECTED = {
     "first_applied_wins": ("KILLED", "SURVIVED", "SURVIVED", "SURVIVED", "SURVIVED"),
-    "naive_stale_guard": ("KILLED", "NOT_EXERCISED", "NOT_EXERCISED", "NOT_EXERCISED", "NOT_EXERCISED"),
-    "replay_readmits": ("NOT_EXERCISED", "KILLED", "NOT_EXERCISED", "NOT_EXERCISED", "SURVIVED"),
-    "global_dispute": ("NOT_EXERCISED", "NOT_EXERCISED", "KILLED", "NOT_EXERCISED", "NOT_EXERCISED"),
+    "naive_stale_guard": ("KILLED", "NOT_REACHED", "NOT_REACHED", "NOT_REACHED", "NOT_REACHED"),
+    "replay_readmits": ("NOT_REACHED", "KILLED", "NOT_REACHED", "NOT_REACHED", "SURVIVED"),
+    "global_dispute": ("NOT_REACHED", "NOT_REACHED", "KILLED", "NOT_REACHED", "NOT_REACHED"),
     "rid_tiebreak": ("SURVIVED", "SURVIVED", "SURVIVED", "KILLED", "SURVIVED"),
     "principal_order_quorum": ("SURVIVED", "SURVIVED", "SURVIVED", "KILLED", "SURVIVED"),
-    "freeze_drops_invalidated": ("NOT_EXERCISED", "NOT_EXERCISED", "NOT_EXERCISED", "NOT_EXERCISED", "KILLED"),
+    "freeze_drops_invalidated": ("NOT_REACHED", "NOT_REACHED", "NOT_REACHED", "NOT_REACHED", "KILLED"),
 }
 
 
@@ -32,12 +35,15 @@ def test_relation_holds_on_the_corrected_implementation(name):
 
 def test_relation_mutant_matrix_is_calibrated():
     m = mutant_matrix()
-    got = {flag: tuple(m[(rel, flag)] for rel in RELATIONS) for flag in FLAGS}
+    got = {flag: tuple(m[(rel, flag)][0] for rel in RELATIONS) for flag in FLAGS}
     assert got == EXPECTED
     for rel in RELATIONS:  # every relation kills at least one negative control
-        assert any(m[(rel, f)] == Cell.KILLED for f in FLAGS), rel
+        assert any(m[(rel, f)][0] == Cell.KILLED for f in FLAGS), rel
     for f in FLAGS:  # every negative control is killed by some relation
-        assert any(m[(rel, f)] == Cell.KILLED for rel in RELATIONS), f
+        assert any(m[(rel, f)][0] == Cell.KILLED for rel in RELATIONS), f
+    for (rel, f), (cell, hits) in m.items():  # SURVIVED means the branch really ran
+        assert (cell == Cell.SURVIVED) <= (hits > 0)
+    assert mutation_score(m) == (len(FLAGS), len(FLAGS))
 
 
 def test_witness_replays_and_is_one_minimal():
@@ -67,6 +73,12 @@ def test_checker_rejects_a_wrong_expected_observation():
     assert not duplicate_idempotence(instances()[:1], compare=lambda a, b: False).held
 
 
+def test_preconditions_are_machine_checked():
+    assert precondition_violations() == []
+    # The equivocation probe is excluded because the checker flags it, not by prose.
+    assert any("issued 2 times" in v for v in shared_precondition(EQUIVOCATION_PROBE))
+
+
 def test_equivocation_is_a_documented_limitation_with_a_minimal_witness():
     """Outside the shared precondition (Byzantine origin): two different
     admissions for one id make the outcome order-dependent. Recorded, not
@@ -84,7 +96,18 @@ def test_shrink_keeps_only_what_the_failure_needs():
 def test_core_encoding_round_trip_and_dropped_field_control():
     cfg = Config(n_records=2, n_lineages=1)
     states = list(inv_states(cfg))
-    assert round_trip_failures(states, model=CoreModel(cfg)) == []
+    strict = lambda line: decanon(line, cfg)  # noqa: E731
+    assert round_trip_failures(states, decode=strict, model=CoreModel(cfg)) == []
     lossy = lambda s: canon_parts([r._replace(retracted=False) for r in s.recs],  # noqa: E731
                                   s.current, s.edges, s.levels, s.sem_now)
-    assert round_trip_failures(states, encode=lossy)
+    failed = set(round_trip_failures(states, encode=lossy, decode=strict))
+    infected = {s for s in states if lossy(s) != canon(s)}
+    # Not a partially passing control: it fails on exactly the inputs it
+    # corrupts (states with a retracted record); the rest are not infected.
+    assert failed == infected == {s for s in states if any(r.retracted for r in s.recs)}
+
+
+def test_strict_decoder_rejects_every_malformed_encoding():
+    assert malformed_accepted(Config(n_records=2, n_lineages=1)) == []
+    with pytest.raises(MalformedEncoding):
+        decanon("1,0,1,0,0,0,0,-1;1,0,0,1,0,0,0,-1|1,0||2,0|0")  # unsorted: not canonical

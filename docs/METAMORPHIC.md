@@ -49,18 +49,25 @@ path from Init (BFS with recorded predecessors) in the headline domain, and
 
 - These are **existential** claims ("this can happen"), **not liveness**
   ("this eventually happens"). Nothing here checks progress or fairness.
-- Behaviors about *order* are **transition witnesses**. The first version of
-  "re-admission after X_⊥" was a state predicate, and a calibration test
-  showed it accepting a path where the invalidation came *after* the
-  re-admission. Each remaining state witness is either order-free or has its
+- Behaviors about *order* are **transition witnesses**. A state predicate can
+  only assert that a configuration *occurs*; it cannot assert ordering or
+  causation. The first version of "re-admission after X_⊥" was a state
+  predicate, and a calibration test showed it accepting a path where the
+  invalidation came *after* the re-admission. That wasn't the model
+  misbehaving: it was the model correctly answering the wrong question. The
+  fix moves the property from the state space to the edge structure (an
+  `Admit` step whose pre-state's X_⊥ was *caused* by invalidation). Each remaining state witness is either order-free or has its
   order forced by the model's guards (for example, an invalidated record can't
   be superseded afterwards, so "superseded and invalidated" implies the
   invalidation came second).
 - Calibration: in deliberately over-constrained models (no re-admission
   after invalidation; no grants), the search must report **unreachable**.
-- **Caveat on the quick profile:** its domain has a single semantic version,
-  so role revision is unreachable there; its claims are not evidence about
-  I_5. Witnesses therefore always use the headline domain.
+- **Domain adequacy is reported, not assumed.** The quick profile's domain
+  has a single semantic version, so role revision is unreachable there and
+  its claims are not evidence about I_5. Every report has a *Domain adequacy*
+  table for its own core domain, which shows such a behavior as **NOT
+  EXERCISED** instead of omitting it. The witness obligations themselves always
+  run on the headline domain.
 
 ## 3. Metamorphic relations (`distributed/metamorphic.py`)
 
@@ -89,10 +96,42 @@ global state (authority levels, semantic version), so adding a lineage is
 not semantics-preserving there.
 
 **Calibration.** Each mutant counts executions of its deviant branch, so the
-relation × mutant matrix in `docs/RESULTS.md` distinguishes **KILLED**
-(relation violated), **survived** (the branch ran and the relation held, as
-it should when the relation can't see that kind of fault) and **not
-exercised** (the relation's inputs never reach the branch). Each negative
+relation × mutant matrix in `docs/RESULTS.md` distinguishes:
+
+- **KILLED**: the relation was violated;
+- **survived**: the branch ran and the relation held (correct when the
+  relation can't see that kind of fault);
+- **not reached**: this relation's inputs never reach a branch that some
+  other relation does exercise. That's a source-input adequacy observation
+  about this relation, often by design, because its precondition excludes the
+  triggering input (order invariance has no duplicates, so it can't reach
+  `replay_readmits`);
+- **equivalent?**: no relation ever exercises the mutant. It's a candidate
+  equivalent or unreachable mutant, excluded from the mutation score's
+  denominator (currently none: the score is 7/7).
+
+Cells carry the raw deviant-branch counts. **A kill resting on very few
+executions is thin evidence**: `freeze_drops_invalidated` (2) and
+`naive_stale_guard` (2) are killed, but by almost no inputs; more source
+instances exercising invalidation and out-of-order edges would thicken them.
+
+**Preconditions are machine-checked**, not just stated:
+`precondition_violations()` verifies on every source instance that ids are
+issued once, that no event references two lineages, that the added lineage is
+disjoint, and that renamings are bijections keeping `seq` and lineage. The
+equivocation probe is excluded *because* this checker flags it.
+
+**Strict decoding.** `decanon` accepts only the canonical encoding: every
+field a well-formed integer in range for the domain, and re-encoding
+reproduces the input byte for byte. The first decoder accepted wrong record
+counts, out-of-range values, non-boolean flags (silently coerced) and unsorted
+sets. A lax decoder would let the round-trip relation miss an encoder emitting
+non-canonical text, which would still change the digest. A corpus of 13
+malformed lines, one per defect class, must be rejected 100%. The
+dropped-field codec is **not** a partially passing control: it fails on
+exactly the 9,888 states it corrupts (those with a retracted record). The
+other 3,106 are not infected, since dropping a field that is false loses
+nothing. Each negative
 control is killed by exactly its intended relation. The tests pin the whole
 matrix, so any change to what kills what has to be reviewed. A meta-test
 injects deliberately wrong expected observations (an identity map instead

@@ -91,30 +91,128 @@ def set_digest(states: Iterable[State]) -> SetDigest:
     return d
 
 
-def decanon(line: str) -> State:
-    """Inverse of ``canon``: parse an ``ac-state-v1`` line back into a State."""
+class MalformedEncoding(ValueError):
+    """An ``ac-state-v1`` line that is not the canonical encoding of a state."""
+
+
+_INT = __import__("re").compile(r"-?(0|[1-9][0-9]*)$")
+
+
+def decanon(line: str, cfg=None) -> State:
+    """Strict inverse of ``canon``.
+
+    Accepts a line only if every field is a well-formed integer, booleans are
+    0/1, absent values are -1, and re-encoding the result reproduces the line
+    byte for byte (so unsorted sets, duplicates, leading zeros or extra
+    whitespace are rejected). With ``cfg``, also checks record count,
+    principal count and every value range. A lax decoder would let the
+    round-trip relation miss an encoder emitting non-canonical text, which
+    would still change the digest.
+    """
     from .core.model import Rec
 
-    def opt(v: str):
-        return None if v == "-1" else int(v)
+    def num(v: str) -> int:
+        if not _INT.match(v):
+            raise MalformedEncoding(f"not a canonical integer: {v!r}")
+        return int(v)
 
-    recs_s, cur_s, edges_s, levels_s, sem_s = line.split("|")
+    def flag(v: str) -> bool:
+        if v not in ("0", "1"):
+            raise MalformedEncoding(f"not a boolean: {v!r}")
+        return v == "1"
+
+    def opt(v: str, n):
+        x = num(v)
+        if x == -1:
+            return None
+        if x < 0 or (n is not None and x >= n):
+            raise MalformedEncoding(f"value out of range: {v!r}")
+        return x
+
+    parts = line.split("|")
+    if len(parts) != 5:
+        raise MalformedEncoding(f"expected 5 sections, got {len(parts)}")
+    recs_s, cur_s, edges_s, levels_s, sem_s = parts
+    nl = cfg.n_lineages if cfg else None
+    np_ = cfg.n_principals if cfg else None
+    ns = cfg.n_sem if cfg else None
     recs = []
     for r in recs_s.split(";"):
-        a, lin, own, appr, sem, inv, ret, adj = r.split(",")
-        recs.append(Rec(a == "1", opt(lin), opt(own), opt(appr), opt(sem), inv == "1", ret == "1", opt(adj)))
-    current = frozenset(int(x) for x in cur_s.split(",") if x)
-    edges = frozenset(tuple(int(v) for v in e.split(">")) for e in edges_s.split(",") if e)
-    levels = tuple(int(x) for x in levels_s.split(","))
-    return State(tuple(recs), current, edges, levels, int(sem_s))
+        f = r.split(",")
+        if len(f) != 8:
+            raise MalformedEncoding(f"record needs 8 fields, got {len(f)}")
+        recs.append(Rec(flag(f[0]), opt(f[1], nl), opt(f[2], np_), opt(f[3], np_), opt(f[4], ns),
+                        flag(f[5]), flag(f[6]), opt(f[7], ns)))
+    n = len(recs)
+    if cfg and n != cfg.n_records:
+        raise MalformedEncoding(f"expected {cfg.n_records} records, got {n}")
+
+    def rid(v: str) -> int:
+        x = num(v)
+        if not 0 <= x < n:
+            raise MalformedEncoding(f"record index out of range: {v!r}")
+        return x
+
+    current = frozenset(rid(x) for x in cur_s.split(",")) if cur_s else frozenset()
+    edges = set()
+    for e in edges_s.split(",") if edges_s else []:
+        ab = e.split(">")
+        if len(ab) != 2:
+            raise MalformedEncoding(f"malformed edge: {e!r}")
+        edges.add((rid(ab[0]), rid(ab[1])))
+    levels = tuple(num(x) for x in levels_s.split(","))
+    if cfg and (len(levels) != cfg.n_principals or any(not 0 <= v <= cfg.max_level for v in levels)):
+        raise MalformedEncoding(f"levels malformed or out of range: {levels_s!r}")
+    sem_now = num(sem_s)
+    if cfg and not 0 <= sem_now < cfg.n_sem:
+        raise MalformedEncoding(f"sem_now out of range: {sem_s!r}")
+    st = State(tuple(recs), current, frozenset(edges), levels, sem_now)
+    if canon(st) != line:
+        raise MalformedEncoding("not canonical: re-encoding differs from the input")
+    return st
 
 
 def round_trip_failures(states, encode=canon, decode=decanon, model=None) -> list:
     """Serialization round-trip for the versioned encoding: decode(encode(s))
-    must equal s and, if ``model`` is given, enable exactly the same steps."""
+    must equal s and, if ``model`` is given, enable exactly the same steps.
+    A decode that raises counts as a failure."""
     bad = []
     for s in states:
-        t = decode(encode(s))
+        try:
+            t = decode(encode(s))
+        except MalformedEncoding:
+            bad.append(s)
+            continue
         if t != s or (model is not None and set(model.next(t)) != set(model.next(s))):
             bad.append(s)
     return bad
+
+
+#: One malformed line per defect class; a strict decoder must reject all.
+MALFORMED_CORPUS = (
+    ("wrong record count", "0,-1,-1,-1,-1,0,0,-1|||2,0|0"),
+    ("edge to a nonexistent record", "1,0,1,0,0,0,0,-1;0,-1,-1,-1,-1,0,0,-1|0|0>5|2,0|0"),
+    ("lineage out of range", "1,7,1,0,0,0,0,-1;0,-1,-1,-1,-1,0,0,-1|0||2,0|0"),
+    ("non-boolean flag", "1,0,1,0,0,2,0,-1;0,-1,-1,-1,-1,0,0,-1|0||2,0|0"),
+    ("unsorted set", "1,0,1,0,0,0,0,-1;1,0,0,1,0,0,0,-1|1,0||2,0|0"),
+    ("duplicate set element", "1,0,1,0,0,0,0,-1;0,-1,-1,-1,-1,0,0,-1|0,0||2,0|0"),
+    ("leading zero", "1,0,1,0,0,0,0,-1;0,-1,-1,-1,-1,0,0,-1|00||2,0|0"),
+    ("whitespace", "1,0,1,0,0,0,0,-1;0,-1,-1,-1,-1,0,0,-1|0|| 2,0|0"),
+    ("missing section", "1,0,1,0,0,0,0,-1;0,-1,-1,-1,-1,0,0,-1|0||2,0"),
+    ("short record", "1,0,1,0,0,0,0;0,-1,-1,-1,-1,0,0,-1|0||2,0|0"),
+    ("level out of range", "1,0,1,0,0,0,0,-1;0,-1,-1,-1,-1,0,0,-1|0||3,0|0"),
+    ("sem_now out of range", "1,0,1,0,0,0,0,-1;0,-1,-1,-1,-1,0,0,-1|0||2,0|2"),
+    ("unsorted edges", "1,0,1,0,0,0,0,-1;1,0,0,1,0,0,0,-1|1|1>0,0>1|2,0|0"),
+)
+
+
+def malformed_accepted(cfg) -> list:
+    """Corpus entries the strict decoder wrongly accepts (must be empty)."""
+    out = []
+    for name, line in MALFORMED_CORPUS:
+        try:
+            decanon(line, cfg)
+            out.append(name)
+        except MalformedEncoding:
+            pass
+    return out

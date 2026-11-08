@@ -27,7 +27,7 @@ from dataclasses import dataclass, field, replace
 from typing import Callable, Optional
 
 from .replica import (
-    CONFLICT, Admit, Edge, Invalidate, Replica, ResolutionPolicy, Resolve, make_resolution,
+    Admit, Edge, Invalidate, Replica, ResolutionPolicy, Resolve, make_resolution,
 )
 
 PRINCIPALS = ("alice", "bob", "carol")
@@ -72,12 +72,14 @@ def build(kind: str, rid=lambda r: r, who=lambda p: p, lineage: str = "L") -> In
         "fork+beneficiary-only": fork + (res("r2", "r1", ("carol",)),),
         "fork+dispute": fork + (a, b),
         "fork+dispute+escalation": fork + (a, b, res("r2", "r1", ("alice", "bob", "carol"), epoch=2)),
+        # the resolved winner is later invalidated: X_⊥, never a fallback to the loser
+        "fork+resolution+invalidate-winner": fork + (b, Invalidate(r2)),
     }[kind]
     return Instance(kind, events, pol, (lineage,))
 
 
 KINDS = ("chain", "chain+invalidate", "fork", "fork+resolution", "fork+beneficiary-only",
-         "fork+dispute", "fork+dispute+escalation")
+         "fork+dispute", "fork+dispute+escalation", "fork+resolution+invalidate-winner")
 
 
 def instances() -> list[Instance]:
@@ -406,33 +408,109 @@ EQUIVOCATION_PROBE = Instance(
 
 
 class Cell:
-    KILLED = "KILLED"
-    SURVIVED = "SURVIVED"
-    NOT_EXERCISED = "NOT_EXERCISED"
+    KILLED = "KILLED"  # the relation was violated
+    SURVIVED = "SURVIVED"  # deviant branch ran, relation held
+    # Deviant branch never ran on this relation's inputs, but some other
+    # relation does exercise the mutant: a source-input adequacy observation
+    # about this relation (often by design: its precondition excludes the
+    # triggering input).
+    NOT_REACHED = "NOT_REACHED"
+    # No relation ever exercises the mutant: candidate equivalent/unreachable
+    # mutant, excluded from the mutation-score denominator.
+    EQUIVALENT_CANDIDATE = "EQUIVALENT_CANDIDATE"
     ERROR = "ERROR"
 
 
 def mutant_matrix() -> dict:
-    """(relation, mutant flag) -> Cell, plus the clean implementation's results."""
+    """(relation, flag) -> (Cell, deviant-branch hits)."""
     out = {}
     for flag in FLAGS:
+        row = {}
         for name, rel in RELATIONS.items():
             try:
                 r = rel({flag: True})
-                out[(name, flag)] = (Cell.KILLED if not r.held else
-                                     Cell.SURVIVED if r.hits else Cell.NOT_EXERCISED)
+                row[name] = (not r.held, r.hits)
             except Exception as e:  # infrastructure failure: never a kill
-                out[(name, flag)] = Cell.ERROR + f": {type(e).__name__}"
+                row[name] = (Cell.ERROR + f": {type(e).__name__}", 0)
+        exercised = any(k is True or h > 0 for k, h in row.values())
+        for name, (killed, hits) in row.items():
+            if isinstance(killed, str):
+                out[(name, flag)] = (killed, hits)
+            elif killed:
+                out[(name, flag)] = (Cell.KILLED, hits)
+            elif hits:
+                out[(name, flag)] = (Cell.SURVIVED, hits)
+            else:
+                out[(name, flag)] = (Cell.NOT_REACHED if exercised else Cell.EQUIVALENT_CANDIDATE, 0)
     return out
 
 
+def mutation_score(m: dict) -> tuple[int, int]:
+    """(mutants killed by some relation, mutants not equivalent-candidates)."""
+    killed = {f for (r, f), (c, _h) in m.items() if c == Cell.KILLED}
+    equiv = {f for f in FLAGS if all(m[(r, f)][0] == Cell.EQUIVALENT_CANDIDATE for r in RELATIONS)}
+    return len(killed), len(FLAGS) - len(equiv)
+
+
 def matrix_markdown(m: dict) -> str:
-    sym = {Cell.KILLED: "KILLED", Cell.SURVIVED: "survived", Cell.NOT_EXERCISED: "not exercised"}
+    sym = {Cell.KILLED: "**KILLED**", Cell.SURVIVED: "survived", Cell.NOT_REACHED: "not reached",
+           Cell.EQUIVALENT_CANDIDATE: "equivalent?"}
     lines = ["| mutant | " + " | ".join(RELATIONS) + " |", "|---|" + "---|" * len(RELATIONS)]
     for flag in FLAGS:
-        lines.append(f"| `{flag}` | " + " | ".join(sym.get(m[(r, flag)], m[(r, flag)])
-                                               for r in RELATIONS) + " |")
+        cells = []
+        for r in RELATIONS:
+            c, h = m[(r, flag)]
+            cells.append(f"{sym.get(c, c)} ({h})")
+        lines.append(f"| `{flag}` | " + " | ".join(cells) + " |")
+    k, n = mutation_score(m)
+    lines += ["", f"Cells show the outcome and the number of deviant-branch executions. "
+                  f"Suite mutation score: {k}/{n} (killed / non-equivalent)."]
     return "\n".join(lines)
 
 
-__all__ = ["CONFLICT", "Resolve"]
+# ------------------------------------------------------------ preconditions
+
+
+def shared_precondition(inst: Instance) -> list[str]:
+    """Each record id is issued once; edges, predecessors and resolution
+    sources only reference records of their own lineage."""
+    out, admits = [], {}
+    for e in inst.events:
+        if isinstance(e, Admit):
+            admits.setdefault(e.rid, set()).add(e)
+    out += [f"{inst.name}: id {rid!r} issued {len(evs)} times" for rid, evs in admits.items() if len(evs) > 1]
+    lin = {rid: next(iter(evs)).lineage for rid, evs in admits.items()}
+    for e in inst.events:
+        refs = {Edge: lambda x: (x.old, x.new), Admit: lambda x: (x.rid, x.pred) if x.pred else (x.rid,),
+                Resolve: lambda x: (x.source, *x.candidates), Invalidate: lambda x: (x.rid,)}[type(e)](e)
+        if len({lin.get(r) for r in refs}) > 1:
+            out.append(f"{inst.name}: {label(e)} references more than one lineage")
+    return out
+
+
+def precondition_violations() -> list[str]:
+    """Machine-checked preconditions of every relation on its own inputs."""
+    out = []
+    for inst in instances():
+        out += shared_precondition(inst)
+    other = build("fork+dispute", rid=lambda r: "m" + r[1:], lineage="M")  # R3
+    out += shared_precondition(other)
+    for inst in instances():
+        l_ids = {e.rid for e in inst.events if isinstance(e, Admit)}
+        m_ids = {e.rid for e in other.events if isinstance(e, Admit)}
+        if l_ids & m_ids:
+            out.append(f"projection: {inst.name} shares ids with the added lineage")
+    for kind in KINDS:  # R4: bijections that keep seq and lineage
+        src = build(kind)
+        for rp in itertools.permutations(("r0", "r1", "r2")):
+            rmap = dict(zip(("r0", "r1", "r2"), rp))
+            for wp in itertools.permutations(PRINCIPALS):
+                pmap = dict(zip(PRINCIPALS, wp))
+                if len(set(rmap.values())) != 3 or len(set(pmap.values())) != 3:
+                    out.append(f"renaming: {rmap}/{pmap} is not a bijection")
+                inst = build(kind, rid=lambda x, m=rmap: m[x], who=lambda q, m=pmap: m[q])
+                key = lambda ev: sorted((a.seq, a.lineage) for a in ev if isinstance(a, Admit))  # noqa: E731
+                if key(inst.events) != key(src.events):
+                    out.append(f"renaming changed seq/lineage in {kind}")
+                out += shared_precondition(inst)
+    return out
