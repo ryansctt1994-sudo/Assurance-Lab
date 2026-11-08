@@ -4,6 +4,7 @@ from assurance_lab.admission import ProjectionViolation, run_admission
 from assurance_lab.reliance import (
     BoundaryVerdict, Impact, Receipt, RelianceLedger, classify_boundary,
 )
+from assurance_lab.core.model import Config
 from assurance_lab.verdict import Result, Verdict, authorize
 
 STATE = {"evidence": {"hash": "abc", "witness": True}, "policy": "p1",
@@ -108,13 +109,53 @@ def test_label_carries_scope():
     assert r.label() == "PASS[finite-exhaustive-induction; 3 records; all Inv-states]"
 
 
-# --- report provenance ----------------------------------------------------------
+# --- report provenance -----------------------------------------------------------
 
 
-def test_report_records_provenance_and_ci_caveat():
-    from assurance_lab.__main__ import provenance, render
-    p = provenance()
-    assert len(p["source_sha256"]) == 64
-    assert p["model_tree"] in {"clean", "DIRTY", "unknown"}
-    md = render([R("a", Verdict.PASS)], "full")
-    assert p["source_sha256"] in md and "Green CI ≠ full induction completed" in md
+def _receipt(**kw):
+    from assurance_lab.__main__ import QUICK_CORE, start_receipt
+    r = start_receipt(QUICK_CORE, 1, ["--out", "x.md"])
+    r.update(kw)
+    return r
+
+
+def test_start_receipt_binds_source_before_run():
+    from assurance_lab.__main__ import source_digest
+    r = _receipt()
+    assert r["source_sha256"] == source_digest() and len(r["receipt_id"]) == 16
+    assert r["model_tree"] in {"clean", "DIRTY", "unknown"}
+
+
+def test_dirty_tree_refused_unless_allowed():
+    from assurance_lab.__main__ import preflight
+    dirty = _receipt(model_tree="DIRTY")
+    assert preflight(dirty, writing_report=True, allow_dirty=False)
+    assert preflight(dirty, writing_report=True, allow_dirty=True) is None
+    assert preflight(dirty, writing_report=False, allow_dirty=False) is None
+    assert preflight(_receipt(model_tree="clean"), True, False) is None
+
+
+def test_source_change_during_run_is_detected():
+    from assurance_lab.__main__ import source_drifted
+    assert not source_drifted(_receipt())
+    assert source_drifted(_receipt(source_sha256="0" * 64))
+
+
+def test_claims_are_stable_under_run_metadata_and_drift_is_flagged():
+    from assurance_lab.__main__ import METADATA_HEADING, render
+    rec = _receipt(model_tree="clean")
+    res = [R("a", Verdict.PASS)]
+    a = render(res, rec, {"started_utc": "t0", "induction_s": 1.0}, drifted=False)
+    b = render(res, rec, {"started_utc": "t1", "induction_s": 999.0}, drifted=False)
+    assert a != b and a.split(METADATA_HEADING)[0] == b.split(METADATA_HEADING)[0]
+    assert "Green CI ≠ full induction completed" in a
+    bad = render(res, rec, {}, drifted=True)
+    assert "INVALID PROVENANCE" in bad and "NOT all PASS" in bad
+
+
+def test_claim_labels_contain_no_timing():
+    from assurance_lab.__main__ import core_results
+    cfg = Config(n_records=2, n_lineages=1, max_level=1, n_sem=1)
+    labels1 = [r.label() for r in core_results(cfg, 1)[0]]
+    labels2 = [r.label() for r in core_results(cfg, 1)[0]]
+    assert labels1 == labels2

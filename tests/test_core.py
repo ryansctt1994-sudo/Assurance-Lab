@@ -88,3 +88,19 @@ def test_inv_implies_safety_is_not_trivially_satisfied():
     cfg = Config(n_records=1)
     bad = State((UNADMITTED,), frozenset({0}), frozenset(), cfg.levels0(), 0)
     assert safety_failures(cfg, bad)
+
+
+# --- determinism: worker-count invariance -------------------------------------
+
+
+@pytest.mark.parametrize("cfg", [Config(n_records=2, n_lineages=2), Config(n_records=3, n_lineages=1, max_level=1, n_sem=1)],
+                         ids=lambda c: c.describe())
+def test_induction_totals_are_worker_count_invariant(cfg):
+    """R_1 = R_2: the no-pool sequential loop (workers=1) and the process pool
+    (workers=2) enumerate the same Inv-states and transitions."""
+    r1 = check_induction(CoreModel(cfg), workers=1)
+    r2 = check_induction(CoreModel(cfg), workers=2)
+    key = lambda r: (r.inv_state_count, r.transitions_checked, r.init_ok, r.step_ok,  # noqa: E731
+                     r.safety_ok, r.complete)
+    assert key(r1) == key(r2)
+    assert r1.complete and r1.inv_state_count > 0
