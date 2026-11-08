@@ -37,6 +37,7 @@ import time
 from pathlib import Path
 from typing import Optional
 
+from .checker.coverage import Outcome, property_coverage
 from .checker.explore import explore
 from .checker.induction import check_induction, unmatched_reachable
 from .core.model import Config, CoreModel
@@ -198,6 +199,39 @@ def mutant_results(cfg: Config) -> list[Result]:
     return out
 
 
+def coverage_results() -> tuple[list[Result], str]:
+    """Mutant × property matrix (each mutant explored once, completely, in its
+    own graph). Returns obligations and the matrix as a report section."""
+    cov = property_coverage()
+    errs = [r.mutant for r in cov.rows if Outcome.ERROR in r.outcomes.values()]
+    invalid = [r.mutant for r in cov.rows if Outcome.INVALID in r.outcomes.values()]
+    dom = "each mutant in its smallest non-equivalent domain"
+    unkilled, survivors = cov.unkilled_properties(), cov.surviving_mutants()
+
+    def verdict(bad: list) -> Verdict:
+        return Verdict.UNKNOWN if errs else (Verdict.FAIL if bad else Verdict.PASS)
+
+    out = [
+        Result("coverage: every property kills at least one mutant", verdict(unkilled),
+               "mutant-x-property-matrix", dom,
+               f"{len(cov.rows)} mutants × {len(cov.rows[0].outcomes)} properties",
+               residual_risks=("a kill shows sensitivity, not completeness",),
+               detail=f"unkilled: {unkilled}"),
+        Result("coverage: no mutant survives every property", verdict(survivors + invalid),
+               "mutant-x-property-matrix", dom, f"{len(cov.rows)} mutants, none equivalent",
+               detail=f"survivors: {survivors}; invalid: {invalid}; errors: {errs}"),
+    ]
+    sole = {p: cov.sole_witnesses(p) for p in cov.rows[0].outcomes}
+    section = ["## Property coverage (mutant × property)", "",
+               "K = killed, **K** = sole detector, · = survived, I = invalid (equivalent mutant), "
+               "E = error. Each row is one complete exploration of that mutant's own graph.", "",
+               cov.markdown(), "",
+               "Sole witnesses: " + "; ".join(f"`{p}`: {', '.join(m)}" for p, m in sole.items() if m) + ".",
+               "`NoResurrection` cannot have a sole witness: it is implied by "
+               "`NoSilentAuthorityIncrease` (a newly current record must be freshly admitted).", ""]
+    return out, "\n".join(section)
+
+
 def replica_mc_results(full: bool) -> list[Result]:
     """Replica-level model checking: concurrent origination, reordering,
     bounded duplication, concurrent resolutions."""
@@ -296,7 +330,7 @@ def provenance_verdict(receipt: dict, drifted: bool, foreign: list[str]) -> str:
 
 def render(results: list[Result], receipt: dict, meta: dict, drifted: bool,
            procs_checked: int = 0, foreign: Optional[list[str]] = None,
-           digests: Optional[dict] = None) -> str:
+           digests: Optional[dict] = None, sections: tuple = ()) -> str:
     foreign = foreign or []
     lines = ["# Verification Results", ""]
     if drifted:
@@ -362,6 +396,8 @@ def render(results: list[Result], receipt: dict, meta: dict, drifted: bool,
         for name, d in digests.items():
             lines.append(f"| {name} | {d.count:,} | `{d.hexdigest()}` |" if d else
                          f"| {name} | — | not computed (incomplete) |")
+    for sec in sections:
+        lines += ["", sec]
     lines += ["", "## Assumptions and residual risks", ""]
     seen = set()
     for r in results:
@@ -447,6 +483,9 @@ def main(argv=None) -> int:
     t2 = time.perf_counter()
     results += distributed_results() + replica_mc_results(a.full)
     t3 = time.perf_counter()
+    cov_results, cov_section = coverage_results()
+    results += cov_results
+    timing["coverage_s"] = time.perf_counter() - t3
     procs_checked, foreign = origin_check(ir.origins)
     drifted = source_drifted(receipt)
 
@@ -470,7 +509,8 @@ def main(argv=None) -> int:
               file=sys.stderr)
     if a.out:
         with open(a.out, "w") as f:
-            f.write(render(results, receipt, meta, drifted, procs_checked, foreign, digests))
+            f.write(render(results, receipt, meta, drifted, procs_checked, foreign, digests,
+                           (cov_section,)))
     if not provenance_valid(drifted, foreign, receipt["execution"], bool(a.out)):
         if receipt["execution"] != "snapshot" and not (drifted or foreign):
             print("provenance UNBOUND: in-place reports are not accepted", file=sys.stderr)

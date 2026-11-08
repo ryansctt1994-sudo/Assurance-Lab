@@ -8,7 +8,7 @@ transitions are reachable in principle and the checks would see them.
 
 from __future__ import annotations
 
-from .model import CoreModel, State, _set
+from .model import CoreModel, State, _set, no_current, superseded
 
 
 class SupersedeWithoutFreshAdmission(CoreModel):
@@ -145,6 +145,94 @@ class LatchedLive(CoreModel):
             yield lbl, t._replace(current=t.current | {lbl[1]})
 
 
+# --- negative controls added from the property-coverage matrix -----------
+# Each targets a property that no earlier mutant showed to be load-bearing.
+
+
+class UnboundedGrant(CoreModel):
+    """Authority can be granted one step past the top level by an equal peer
+    (TypeOK). Bounded at max_level+1 so the mutant's graph stays finite."""
+
+    name = "unbounded_grant"
+
+    def grant(self, s: State):
+        for p in range(self.cfg.n_principals):
+            for q in range(self.cfg.n_principals):
+                if q != p and s.levels[q] >= s.levels[p] and s.levels[p] <= self.cfg.max_level:
+                    yield ("Grant", p, q), s._replace(levels=_set(s.levels, p, s.levels[p] + 1))
+
+
+class AdmitUnauthorizedApprover(CoreModel):
+    """An independent but unauthorized principal approves (ApproverAuthorized)."""
+
+    name = "admit_unauthorized_approver"
+
+    def approval_ok(self, s: State, owner: int, approver: int) -> bool:
+        return approver != owner
+
+
+class RoleReviseRollback(CoreModel):
+    """The semantic version can move backwards (SemBound; I_5)."""
+
+    name = "role_revise_rollback"
+
+    def role_revise(self, s: State):
+        yield from super().role_revise(s)
+        if s.sem_now > 0:
+            yield ("RoleRevise", s.sem_now - 1), s._replace(sem_now=s.sem_now - 1)
+
+
+class AdmitWithoutHead(CoreModel):
+    """Admission leaves a live record that is not current: an ambiguous
+    lineage that a later admission can silently fill (NoOrphanLive)."""
+
+    name = "admit_without_head"
+
+    def admit(self, s: State):
+        for lbl, t in super().admit(s):
+            yield lbl, t._replace(current=s.current)
+
+
+class DiagnosisRevisesRoles(CoreModel):
+    """Diagnosis silently bumps the semantic version: a meaning change
+    without an explicit ROLE_REVISION (DiagnosisInert; I_5)."""
+
+    name = "diagnosis_revises_roles"
+
+    def diagnose(self, s: State):
+        for lbl, t in super().diagnose(s):
+            if s.sem_now + 1 < self.cfg.n_sem:
+                yield lbl, t._replace(sem_now=s.sem_now + 1)
+            else:
+                yield lbl, t
+
+
+class Unretract(CoreModel):
+    """Retraction is rolled back by clearing the flag; the record is current
+    again. Every *state* invariant still holds afterwards: only the step
+    properties can see it (rollback resurrection, §10)."""
+
+    name = "unretract"
+
+    def extra(self, s: State):
+        for x, r in enumerate(s.recs):
+            if r.retracted and not r.invalidated and not superseded(s, x) and no_current(s, r.lineage):
+                yield ("Unretract", x), s._replace(recs=_set(s.recs, x, r._replace(retracted=False)),
+                                                   current=s.current | {x})
+
+
+class CompactionDropsEdge(CoreModel):
+    """Compaction discards the supersession edge out of an invalidated
+    record: "dead" history, so no state invariant notices (§25)."""
+
+    name = "compaction_drops_edge"
+
+    def extra(self, s: State):
+        for a, b in sorted(s.edges):
+            if s.recs[a].invalidated:
+                yield ("Compact", a, b), s._replace(edges=s.edges - {(a, b)})
+
+
 ALL_MUTANTS = [
     SupersedeWithoutFreshAdmission,
     ResurrectOnRetract,
@@ -159,4 +247,11 @@ ALL_MUTANTS = [
     InvalidateFallsBack,
     DiagnosisRewritesAdjudication,
     LatchedLive,
+    UnboundedGrant,
+    AdmitUnauthorizedApprover,
+    RoleReviseRollback,
+    AdmitWithoutHead,
+    DiagnosisRevisesRoles,
+    Unretract,
+    CompactionDropsEdge,
 ]
