@@ -8,21 +8,21 @@ job is skipped on PRs by design. Green CI ≠ full induction completed.
 
 ## Provenance (start receipt, captured before enumeration)
 
-- Command: `python -m assurance_lab --full --out docs/reports/dev-3c6fad143994.md`
-- Commit: `3c6fad1439944a965c6769fd9e26ed3e88c2a2d4` (tree `208e1723f38459dd844abb5ce5cfacaf0eed335f`)
+- Command: `python -m assurance_lab --full --out docs/reports/dev-52db4d74dc03.md`
+- Commit: `52db4d74dc03b168e088e63576f0085baf6a2d6d` (tree `139d177d8b96adbddec0f56d7878b350264a4a6f`)
 - Execution: **snapshot**: committed tree exported with `git archive` into a fresh temp directory, run by an isolated interpreter (`-I -S -B`)
 - Snapshot bytes = git objects: **yes**
 - `assurance_lab/` working tree at start: **clean**
-- SHA-256 over executed `assurance_lab/**/*.py` at start: `8a65f632bfb9781c420287749b3a9936964336e0dd05c5498bc31a2ee3f52a64`
-- Same digest from git objects at the commit: `8a65f632bfb9781c420287749b3a9936964336e0dd05c5498bc31a2ee3f52a64`
+- SHA-256 over executed `assurance_lab/**/*.py` at start: `5df34b89d9ceb3f7b518eb1e0b8266d81a275020f84c477f9223c6721bd854f4`
+- Same digest from git objects at the commit: `5df34b89d9ceb3f7b518eb1e0b8266d81a275020f84c477f9223c6721bd854f4`
 - Import origins verified in every process that ran campaign code: the parent + 4 pool worker(s) that executed jobs (start method `fork`); outside executed tree: **none**
 - Executed source re-hashed at end: **unchanged**
 - Core domain: 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1
 - Mutant domain: 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1
 - Workers: 4
 - Partition manifest (frozen before execution): 18 partitions, content sha256 bac6c4698fb004bf91a4d9098f71b60ba30e12493532e7322dfc57f09c4e970a
-- Receipt id: `76e62984cfb87131`
-- Provenance verdict: **BOUND** to commit `3c6fad143994`
+- Receipt id: `783474106249b58f`
+- Provenance verdict: **BOUND** to commit `52db4d74dc03`
 
 ## Claims
 
@@ -92,7 +92,7 @@ job is skipped on PRs by design. Green CI ≠ full induction completed.
 | METAMORPHIC: serialization round-trip | `PASS[metamorphic-relation; 12 replica source instances; 5,412 comparisons; all 12 instances exhaustive]` |
 | SNAPSHOT INTEGRITY: every inconsistent or malformed snapshot is refused at thaw (INVALID_SNAPSHOT) | `PASS[corruption-injection; 10 corruption classes × every serialized prefix of 12 instances; 810 damaged snapshots refused, deterministically, no other exception type]` |
 | SNAPSHOT INTEGRITY (diagnostic, boundary bypassed): head() answers UNKNOWN on every damaged state, never CONFLICT or a record, and changes nothing | `PASS[defense-in-depth; thaw(validate=False), diagnostic only; not evidence that the boundary works; evidence that head() does not turn damaged evidence into authority]` |
-| SNAPSHOT INTEGRITY: genuine snapshots are never refused and never UNKNOWN | `PASS[false-rejection-check; 164 genuine serialized states (plus every replica-checker state, thawed through the validator with UNKNOWN as a safety violation); zero false rejections]` |
+| SNAPSHOT INTEGRITY: genuine states are never refused and never UNKNOWN, incomplete ones included | `PASS[false-rejection-check; 4,237 deliveries reaching 1,719 distinct genuine states: every serialized prefix, alone and followed by every alphabet event or declared sequence; not every reachable replica state (plus every replica-checker state, thawed through the validator with a refusal or UNKNOWN recorded as a failure); zero false rejections; incomplete but valid states present (distinct): admitted record whose predecessor is not admitted 742, deferred events 1,495, event deferred forever (references a record no event admits) 160]` |
 | SNAPSHOT INTEGRITY: retained KeyError counterexamples are refused, and UNKNOWN when bypassed | `PASS[regression; 2 counterexamples (crash b535b1a and main c175fbd); INVALID_SNAPSHOT at thaw; UNKNOWN, not CONFLICT, with the boundary bypassed]` |
 | METAMORPHIC: exact-state comparison detects every consistent omission | `PASS[corruption-injection; 3 omission classes, which pass the boundary by construction; against a never-serialized reference (a deployment has no such reference)]` |
 | METAMORPHIC: frozen v1 fixture campaign still holds under the current code | `PASS[regression; 8 baseline source instances; all 5 relations]` |
@@ -316,16 +316,16 @@ Non-compensating gate over all 76 obligations and provenance: **all PASS**
 
 ## Run metadata (varies between runs; not part of any claim)
 
-- started_utc: 2026-11-08 14:27:25
-- run_id (partition evidence binding): 9294b70415369631
+- started_utc: 2026-11-08 15:23:20
+- run_id (partition evidence binding): 9792ced4291af03f
 - python: 3.13.18
 - interpreter: isolated=1 no_site=1 dont_write_bytecode=1
-- reachability_s: 122.893
-- induction_s: 374.085
-- subset_check_s: 54.856
-- digest_s: 180.242
-- oracle_s: 188.750
-- coverage_witness_metamorphic_s: 202.877
-- core_total_s: 921.631
-- mutants_s: 0.046
-- distributed_s: 162.486
+- reachability_s: 123.757
+- induction_s: 393.516
+- subset_check_s: 56.618
+- digest_s: 198.340
+- oracle_s: 191.653
+- coverage_witness_metamorphic_s: 211.029
+- core_total_s: 964.791
+- mutants_s: 0.045
+- distributed_s: 160.621
