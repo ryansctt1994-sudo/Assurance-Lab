@@ -159,3 +159,17 @@ def test_claim_labels_contain_no_timing():
     labels1 = [r.label() for r in core_results(cfg, 1)[0]]
     labels2 = [r.label() for r in core_results(cfg, 2)[0]]  # worker count must not leak into claims
     assert labels1 == labels2
+
+
+def test_in_place_reports_are_unbound_and_fail_the_gate():
+    from assurance_lab.__main__ import provenance_valid, render
+    rec = _receipt(model_tree="clean")  # in-place receipt
+    md = render([R("a", Verdict.PASS)], rec, {}, drifted=False)
+    assert "**UNBOUND**" in md and "NOT all PASS" in md
+    assert not provenance_valid(False, [], "in-place", writing_report=True)
+    assert provenance_valid(False, [], "in-place", writing_report=False)  # no report, no claim
+    snap = dict(rec, execution="snapshot", snapshot_sha256=rec["source_sha256"])
+    md = render([R("a", Verdict.PASS)], snap, {}, drifted=False)
+    assert "**BOUND** to commit" in md and "all PASS" in md and "NOT all PASS" not in md
+    assert not provenance_valid(True, [], "snapshot", True)
+    assert not provenance_valid(False, ["/x.py"], "snapshot", True)

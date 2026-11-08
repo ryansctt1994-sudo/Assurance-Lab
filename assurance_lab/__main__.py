@@ -231,8 +231,25 @@ def distributed_results() -> list[Result]:
 METADATA_HEADING = "## Run metadata (varies between runs; not part of any claim)"
 
 
-def provenance_valid(drifted: bool, foreign: list[str]) -> bool:
-    return not drifted and not foreign
+def provenance_valid(drifted: bool, foreign: list[str], execution: str,
+                     writing_report: bool) -> bool:
+    """A report is accepted only if its results are bound to a commit.
+
+    In-place reports are never accepted: scripts/demo_edit_and_revert.sh
+    shows every per-line provenance check passing while sabotaged code ran.
+    """
+    if drifted or foreign:
+        return False
+    return execution == "snapshot" or not writing_report
+
+
+def provenance_verdict(receipt: dict, drifted: bool, foreign: list[str]) -> str:
+    if drifted or foreign:
+        return "**INVALID** (see warnings above)"
+    if receipt["execution"] != "snapshot":
+        return ("**UNBOUND**: in-place execution cannot bind results to a commit "
+                "(an edit reverted mid-run is invisible; see `scripts/demo_edit_and_revert.sh`)")
+    return f"**BOUND** to commit `{receipt['commit'][:12]}`"
 
 
 def render(results: list[Result], receipt: dict, meta: dict, drifted: bool,
@@ -284,6 +301,7 @@ def render(results: list[Result], receipt: dict, meta: dict, drifted: bool,
         f"- Mutant domain: {receipt['mutant_domain']}",
         f"- Workers: {receipt['workers']}",
         f"- Receipt id: `{receipt['receipt_id']}`",
+        f"- Provenance verdict: {provenance_verdict(receipt, drifted, foreign)}",
         "",
         "## Claims",
         "",
@@ -300,7 +318,8 @@ def render(results: list[Result], receipt: dict, meta: dict, drifted: bool,
                 seen.add(a)
                 lines.append(f"- {a}")
     required = [r.obligation for r in results]
-    gate = authorize(results, required) and provenance_valid(drifted, foreign)
+    gate = authorize(results, required) and provenance_valid(
+        drifted, foreign, receipt["execution"], writing_report=True)
     lines += ["", f"Non-compensating gate over all {len(required)} obligations"
               f" and provenance: **{'all PASS' if gate else 'NOT all PASS'}**", ""]
     # Run metadata goes last, so two reports of the same code differ only below
@@ -398,7 +417,9 @@ def main(argv=None) -> int:
     if a.out:
         with open(a.out, "w") as f:
             f.write(render(results, receipt, meta, drifted, procs_checked, foreign))
-    if not provenance_valid(drifted, foreign):
+    if not provenance_valid(drifted, foreign, receipt["execution"], bool(a.out)):
+        if receipt["execution"] != "snapshot" and not (drifted or foreign):
+            print("provenance UNBOUND: in-place reports are not accepted", file=sys.stderr)
         return 3
     return 0 if authorize(results, [r.obligation for r in results]) else 1
 
