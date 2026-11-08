@@ -1,0 +1,255 @@
+{
+  "anchor": {
+    "recorded": {
+      "commit": "6449c59c1290284b8b616f435745bd9ce7258945",
+      "kind": "git push to GitHub (author-controlled repository)",
+      "note": "Weak anchor: GitHub is not an append-only third-party log, and the operator (the author's agent) has seen every expected value. Harness validation only.",
+      "server_side_time": "2026-11-08T13:27:01Z",
+      "server_side_time_source": "created_at of GitHub Actions run 42485013938, which GitHub created for this push: https://github.com/ryansctt1994-sudo/Assurance-Lab/actions/runs/42485013938",
+      "url": "https://github.com/ryansctt1994-sudo/Assurance-Lab/commit/6449c59c1290284b8b616f435745bd9ce7258945"
+    },
+    "verified_by_reconcile": false
+  },
+  "claims": [
+    {
+      "baseline": "PASS[bfs-exhaustive-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; 1,314,526 reachable states, 10,580,311 transitions, depth 15]",
+      "id": "C01",
+      "obligation": "Reachable ⊨ Inv ∧ Safety ∧ TransitionProps",
+      "reproduction": "PASS[bfs-exhaustive-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; 1,314,526 reachable states, 10,580,311 transitions, depth 15]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[finite-exhaustive-induction; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; 3,587,826 Inv-states, 29,053,749 transitions]",
+      "id": "C02",
+      "obligation": "Init ⇒ Inv",
+      "reproduction": "PASS[finite-exhaustive-induction; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; 3,587,826 Inv-states, 29,053,749 transitions]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[finite-exhaustive-induction; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; 3,587,826 Inv-states, 29,053,749 transitions]",
+      "id": "C03",
+      "obligation": "Inv ∧ Next ⇒ Inv'",
+      "reproduction": "PASS[finite-exhaustive-induction; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; 3,587,826 Inv-states, 29,053,749 transitions]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[finite-exhaustive-induction; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; 3,587,826 Inv-states, 29,053,749 transitions]",
+      "id": "C04",
+      "obligation": "Inv ⇒ Safety",
+      "reproduction": "PASS[finite-exhaustive-induction; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; 3,587,826 Inv-states, 29,053,749 transitions]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[exhaustive-cross-check; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; all 1,314,526 reachable states produced by the generator]",
+      "id": "C05",
+      "obligation": "Reach ⊆ Inv-states (BFS vs generator)",
+      "reproduction": "PASS[exhaustive-cross-check; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; all 1,314,526 reachable states produced by the generator]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 2]",
+      "id": "C06",
+      "obligation": "mutant detected: supersede_without_fresh_admission",
+      "reproduction": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 2]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 3]",
+      "id": "C07",
+      "obligation": "mutant detected: resurrect_on_retract",
+      "reproduction": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 3]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 2]",
+      "id": "C08",
+      "obligation": "mutant detected: sem_rewrite_on_role_revise",
+      "reproduction": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 2]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 1]",
+      "id": "C09",
+      "obligation": "mutant detected: beneficiary_self_approval",
+      "reproduction": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 1]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 2]",
+      "id": "C10",
+      "obligation": "mutant detected: self_grant",
+      "reproduction": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 2]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 1]",
+      "id": "C11",
+      "obligation": "mutant detected: adjudicate_unadmitted",
+      "reproduction": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 1]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 2]",
+      "id": "C12",
+      "obligation": "mutant detected: lineage_rewrite",
+      "reproduction": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 2]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 2]",
+      "id": "C13",
+      "obligation": "mutant detected: cross_lineage_supersede",
+      "reproduction": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 2]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 3]",
+      "id": "C14",
+      "obligation": "mutant detected: stale_successor",
+      "reproduction": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 3]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 2]",
+      "id": "C15",
+      "obligation": "mutant detected: admit_into_occupied_lineage",
+      "reproduction": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 2]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 3]",
+      "id": "C16",
+      "obligation": "mutant detected: invalidate_falls_back",
+      "reproduction": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 3]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 3]",
+      "id": "C17",
+      "obligation": "mutant detected: diagnosis_rewrites_adjudication",
+      "reproduction": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 3]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 2]",
+      "id": "C18",
+      "obligation": "mutant detected: latched_live",
+      "reproduction": "PASS[bfs-reachability; 3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1; counterexample length 2]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[permutation-exhaustive; 5 events; 120/120 schedules]",
+      "id": "C19",
+      "obligation": "eventual convergence (chain r0→r1→r2)",
+      "reproduction": "PASS[permutation-exhaustive; 5 events; 120/120 schedules]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[permutation-exhaustive; 6 events (fork + resolution); 720/720 schedules]",
+      "id": "C20",
+      "obligation": "successor conflict resolves only via independent quorum",
+      "reproduction": "PASS[permutation-exhaustive; 6 events (fork + resolution); 720/720 schedules]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-exhaustive-replica-network; 2 replicas, ≤3 duplicated messages; 2,730 states, 4 quiescent, 1 resolution outcome(s) reached]",
+      "id": "C21",
+      "obligation": "replica MC: chain across replicas",
+      "reproduction": "PASS[bfs-exhaustive-replica-network; 2 replicas, ≤3 duplicated messages; 2,730 states, 4 quiescent, 1 resolution outcome(s) reached]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-exhaustive-replica-network; 2 replicas, ≤3 duplicated messages; 8,562 states, 4 quiescent, 1 resolution outcome(s) reached]",
+      "id": "C22",
+      "obligation": "replica MC: invalidated head is X_⊥, not fallback",
+      "reproduction": "PASS[bfs-exhaustive-replica-network; 2 replicas, ≤3 duplicated messages; 8,562 states, 4 quiescent, 1 resolution outcome(s) reached]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-exhaustive-replica-network; 2 replicas, ≤3 duplicated messages; 3,990 states, 4 quiescent, 1 resolution outcome(s) reached]",
+      "id": "C23",
+      "obligation": "replica MC: fork, one independent resolver",
+      "reproduction": "PASS[bfs-exhaustive-replica-network; 2 replicas, ≤3 duplicated messages; 3,990 states, 4 quiescent, 1 resolution outcome(s) reached]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-exhaustive-replica-network; 2 replicas, ≤3 duplicated messages; 3,990 states, 4 quiescent, 1 resolution outcome(s) reached]",
+      "id": "C24",
+      "obligation": "replica MC: fork, beneficiary-only resolution",
+      "reproduction": "PASS[bfs-exhaustive-replica-network; 2 replicas, ≤3 duplicated messages; 3,990 states, 4 quiescent, 1 resolution outcome(s) reached]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-exhaustive-replica-network; 2 replicas, ≤3 duplicated messages; 5,730 states, 12 quiescent, 3 resolution outcome(s) reached]",
+      "id": "C25",
+      "obligation": "replica MC: fork, two authorities may resolve concurrently and disagree",
+      "reproduction": "PASS[bfs-exhaustive-replica-network; 2 replicas, ≤3 duplicated messages; 5,730 states, 12 quiescent, 3 resolution outcome(s) reached]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-exhaustive-replica-network; 2 replicas, ≤3 duplicated messages; 6,610 states, 12 quiescent, 3 resolution outcome(s) reached]",
+      "id": "C26",
+      "obligation": "replica MC: fork, disagreement escalated at epoch 2",
+      "reproduction": "PASS[bfs-exhaustive-replica-network; 2 replicas, ≤3 duplicated messages; 6,610 states, 12 quiescent, 3 resolution outcome(s) reached]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-exhaustive-replica-network; 3 replicas, ≤1 duplicated message; 24,454 states, 2 quiescent, 1 resolution outcome(s) reached]",
+      "id": "C27",
+      "obligation": "replica MC: fork, one independent resolver (+ passive 3rd replica)",
+      "reproduction": "PASS[bfs-exhaustive-replica-network; 3 replicas, ≤1 duplicated message; 24,454 states, 2 quiescent, 1 resolution outcome(s) reached]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-exhaustive-replica-network; 3 replicas, ≤1 duplicated message; 24,454 states, 2 quiescent, 1 resolution outcome(s) reached]",
+      "id": "C28",
+      "obligation": "replica MC: fork, beneficiary-only resolution (+ passive 3rd replica)",
+      "reproduction": "PASS[bfs-exhaustive-replica-network; 3 replicas, ≤1 duplicated message; 24,454 states, 2 quiescent, 1 resolution outcome(s) reached]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-exhaustive-replica-network; 3 replicas, ≤1 duplicated message; 64,174 states, 6 quiescent, 3 resolution outcome(s) reached]",
+      "id": "C29",
+      "obligation": "replica MC: fork, two authorities may resolve concurrently and disagree (+ passive 3rd replica)",
+      "reproduction": "PASS[bfs-exhaustive-replica-network; 3 replicas, ≤1 duplicated message; 64,174 states, 6 quiescent, 3 resolution outcome(s) reached]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-exhaustive-replica-network; 3 replicas, ≤1 duplicated message; 204,286 states, 6 quiescent, 3 resolution outcome(s) reached]",
+      "id": "C30",
+      "obligation": "replica MC: fork, disagreement escalated at epoch 2 (+ passive 3rd replica)",
+      "reproduction": "PASS[bfs-exhaustive-replica-network; 3 replicas, ≤1 duplicated message; 204,286 states, 6 quiescent, 3 resolution outcome(s) reached]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-exhaustive-replica-network; 2 replicas, ≤3 duplicated messages; counterexample schedule length 14]",
+      "id": "C31",
+      "obligation": "replica mutant detected: split-brain: first-applied-wins resolution",
+      "reproduction": "PASS[bfs-exhaustive-replica-network; 2 replicas, ≤3 duplicated messages; counterexample schedule length 14]",
+      "result": "MATCH"
+    },
+    {
+      "baseline": "PASS[bfs-exhaustive-replica-network; 2 replicas, ≤3 duplicated messages; counterexample schedule length 10]",
+      "id": "C32",
+      "obligation": "replica mutant detected: handoff failure #3: naive stale-successor guard",
+      "reproduction": "PASS[bfs-exhaustive-replica-network; 2 replicas, ≤3 duplicated messages; counterexample schedule length 10]",
+      "result": "MATCH"
+    }
+  ],
+  "denominator": 32,
+  "evidence_id": "R0-SELF-dry-run:7b1537e4-cb46-4756-bb44-2d60eff0e339",
+  "extra_claims": [],
+  "failed_commands": [],
+  "g1": "not eligible: R0-SELF-dry-run is not an independent (R1) run",
+  "label": "R0-SELF-dry-run",
+  "matched": 32,
+  "mismatched": [],
+  "missing": [],
+  "operator_declaration": "The baseline author's coding agent (Claude Code session on PR #2). Role in the baseline: built it. Prior exposure: has seen every expected value. NOT independent; harness validation only; never counts toward G1.",
+  "outcome": "MATCH",
+  "reconciled_utc": "2026-11-08T13:27:16Z",
+  "reconciler_preregistered": true,
+  "reconciler_sha256": "214471d8194022a611c9a8a955979b04ec8036784e66df9c4290171ea3026a04",
+  "subject": "c175fbd7b7eb5efdbd3a7b07bbf9d41bc998139c",
+  "targets_revealed": true
+}
