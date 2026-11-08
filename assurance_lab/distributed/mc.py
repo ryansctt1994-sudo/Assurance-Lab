@@ -41,7 +41,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from .replica import (
-    CONFLICT, Admit, Edge, Event, Invalidate, Replica, ResolutionPolicy, Resolve, make_resolution,
+    CONFLICT, UNKNOWN, Admit, Edge, Event, Invalidate, Replica, ResolutionPolicy, Resolve, make_resolution,
 )
 
 POLICY = ResolutionPolicy(frozenset({"alice", "bob", "carol"}), 2)
@@ -108,8 +108,11 @@ def _after(rep: Replica, roots: set[str]) -> set[str]:
 
 
 def safety_violations(rep: Replica, lineage: str) -> list[str]:
-    head = rep.head(lineage)
+    verdict = rep.explain_head(lineage)
+    head = verdict.value
     out = []
+    if verdict.status == "UNKNOWN":  # every explored state is genuine: this is a false integrity failure
+        return [f"NoFalseIntegrityFailure: head UNKNOWN on an explored state ({verdict.reason})"]
     sources = {a for a, _ in rep.edges}
     losers: set[str] = set()
     for x in sources:
@@ -258,6 +261,8 @@ def check_scenario(sc: Scenario, max_states: int = 2_000_000) -> MCReport:
             live = [thaw(fr) for fr in reps]
             canon = {r.canonical() for r in live}
             heads = {r.head(sc.lineage) for r in live}
+            if UNKNOWN in heads:  # checked here too, independently of the per-state check above
+                return fail(s, "NoFalseIntegrityFailure: head UNKNOWN at quiescence")
             heads_at_quiescence |= heads
             issued_seen.add(issued)
             if len(canon) > 1 or len(heads) > 1:

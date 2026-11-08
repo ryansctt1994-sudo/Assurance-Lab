@@ -21,7 +21,10 @@ log, pending queue, arrival order) is deliberately not observed.
 
 from __future__ import annotations
 
+import hashlib
 import itertools
+import json
+from collections import Counter
 import random
 from dataclasses import dataclass, field, replace
 from typing import Callable, Optional
@@ -208,7 +211,35 @@ def _shrink(events: list, still_fails: Callable[[list], bool]) -> list:
 Compare = Callable[[tuple, tuple], bool]
 
 
-def order_invariance(insts, flags=None, max_perms: int = 5040, seed: int = 0,
+#: Execution configuration of the relations, read at call time (so it is
+#: part of every matrix cache key, and one place states it).
+EXECUTION_CONFIG = {"order_max_perms": 5040, "order_seed": 0, "projection_interleavings": 40,
+                    "projection_seed": 0, "projection_max_exhaustive": 8000}
+
+
+def order_executions(inst: Instance, max_perms: Optional[int] = None, seed: Optional[int] = None):
+    """Delivery orders the order relation compares for one instance:
+    every permutation, or a deterministic sample (both orders of the causal
+    sequence plus seeded shuffles) reported as (distinct, total)."""
+    max_perms = EXECUTION_CONFIG["order_max_perms"] if max_perms is None else max_perms
+    seed = EXECUTION_CONFIG["order_seed"] if seed is None else seed
+    base = list(inst.events)
+    total = __import__("math").factorial(len(base))
+    if total <= max_perms:
+        return list(itertools.permutations(base)), None
+    rng = random.Random(seed)
+    perms = [tuple(base), tuple(reversed(base))] + [tuple(rng.sample(base, len(base)))
+                                                  for _ in range(max_perms - 2)]
+    return perms, (len(set(perms)), total)
+
+
+def duplicate_executions(inst: Instance) -> list:
+    """(i, duplicated event, delivery sequence) for every redelivery position."""
+    base = list(inst.events)
+    return [(i, dup, base[:i] + [dup] + base[i:]) for i in range(1, len(base) + 1) for dup in base[:i]]
+
+
+def order_invariance(insts, flags=None, max_perms: Optional[int] = None, seed: Optional[int] = None,
                      compare: Compare = lambda a, b: a == b) -> RelationResult:
     """R1 complete-delivery order invariance.
 
@@ -225,14 +256,9 @@ def order_invariance(insts, flags=None, max_perms: int = 5040, seed: int = 0,
         res.instances += 1
         base = list(inst.events)
         want = run_obs(inst, base, flags, ctr)
-        total = __import__("math").factorial(len(base))
-        if total > max_perms:  # deterministic sample, reported as such
-            rng = random.Random(seed)
-            perms = [tuple(base), tuple(reversed(base))] + [tuple(rng.sample(base, len(base)))
-                                                          for _ in range(max_perms - 2)]
-            res.coverage.append((inst.name, len(set(perms)), total))
-        else:
-            perms = list(itertools.permutations(base))
+        perms, sampled = order_executions(inst, max_perms, seed)
+        if sampled:
+            res.coverage.append((inst.name, *sampled))
         for p in perms:
             res.checks += 1
             got = run_obs(inst, p, flags, ctr)
@@ -263,21 +289,15 @@ def duplicate_idempotence(insts, flags=None, compare: Compare = lambda a, b: a =
         res.instances += 1
         base = list(inst.events)
         final = run_obs(inst, base, flags, ctr)
-        done = False
-        for i in range(1, len(base) + 1):
-            for dup in base[:i]:
-                res.checks += 1
-                order = base[:i] + [dup] + base[i:]
-                before = run_obs(inst, base[:i], flags, ctr)
-                at = run_obs(inst, base[:i] + [dup], flags, ctr)
-                end = run_obs(inst, order, flags, ctr)
-                if not (compare(at, before) and compare(end, final)):
-                    res.witnesses.append(Witness(res.relation, inst.name,
-                                                 f"redelivering {label(dup)} changed the observation",
-                                                 [base, order]))
-                    done = True
-                    break
-            if done:
+        for i, dup, order in duplicate_executions(inst):
+            res.checks += 1
+            before = run_obs(inst, base[:i], flags, ctr)
+            at = run_obs(inst, base[:i] + [dup], flags, ctr)
+            end = run_obs(inst, order, flags, ctr)
+            if not (compare(at, before) and compare(end, final)):
+                res.witnesses.append(Witness(res.relation, inst.name,
+                                             f"redelivering {label(dup)} changed the observation",
+                                             [base, order]))
                 break
     res.hits = ctr[0]
     return res
@@ -292,8 +312,40 @@ def _project(obs: tuple, lineage: str, ids: set) -> tuple:
             tuple(d for d in decisions if d[0] in ids))
 
 
-def lineage_projection(insts, flags=None, interleavings: int = 40, seed: int = 0,
-                       compare: Compare = lambda a, b: a == b, max_exhaustive: int = 8000) -> RelationResult:
+def unrelated_lineage() -> Instance:
+    """The added lineage M of the projection relation (also part of the
+    serialization alphabet)."""
+    return build("fork+dispute", rid=lambda r: "m" + r[1:], lineage="M")
+
+
+def projection_executions(inst: Instance, rng=None, interleavings: Optional[int] = None,
+                          max_exhaustive: Optional[int] = None):
+    """(merged instance, interleavings of L and M that keep each lineage's own
+    order, (distinct, total) if sampled)."""
+    interleavings = EXECUTION_CONFIG["projection_interleavings"] if interleavings is None else interleavings
+    max_exhaustive = EXECUTION_CONFIG["projection_max_exhaustive"] if max_exhaustive is None else max_exhaustive
+    rng = rng or random.Random(EXECUTION_CONFIG["projection_seed"])
+    L, M = list(inst.events), list(unrelated_lineage().events)
+    total = __import__("math").comb(len(L) + len(M), len(M))
+    sampled = None
+    if total <= max_exhaustive:  # every interleaving preserving each lineage's own order
+        slot_sets = list(itertools.combinations(range(len(L) + len(M)), len(M)))
+    else:
+        slot_sets = [tuple(range(len(M))), tuple(range(len(L), len(L) + len(M)))] + \
+            [tuple(sorted(rng.sample(range(len(L) + len(M)), len(M)))) for _ in range(interleavings)]
+        sampled = (len(set(slot_sets)), total)
+    mixes = []
+    for slots in slot_sets:
+        chosen, mix, li, mi = set(slots), [], iter(L), iter(M)
+        for k in range(len(L) + len(M)):
+            mix.append(next(mi) if k in chosen else next(li))
+        mixes.append(mix)
+    merged = Instance(inst.name + " + unrelated M", tuple(L + M), inst.policy, ("L", "M"))
+    return merged, mixes, sampled
+
+
+def lineage_projection(insts, flags=None, interleavings: Optional[int] = None, seed: Optional[int] = None,
+                       compare: Compare = lambda a, b: a == b, max_exhaustive: Optional[int] = None) -> RelationResult:
     """R3 unrelated-lineage projection.
 
     Precondition: the added lineage M shares no record ids with L and no
@@ -306,27 +358,15 @@ def lineage_projection(insts, flags=None, interleavings: int = 40, seed: int = 0
     """
     flags = flags or {}
     res, ctr = RelationResult("unrelated-lineage projection"), [0]
-    other = build("fork+dispute", rid=lambda r: "m" + r[1:], lineage="M")
-    rng = random.Random(seed)
+    rng = random.Random(EXECUTION_CONFIG["projection_seed"] if seed is None else seed)
     for inst in insts:
         res.instances += 1
-        L, M = list(inst.events), list(other.events)
+        L = list(inst.events)
         ids = {e.rid for e in L if isinstance(e, Admit)}
         want = _project(run_obs(inst, L, flags, ctr, ("L",)), "L", ids)
-        total = __import__("math").comb(len(L) + len(M), len(M))
-        if total <= max_exhaustive:  # every interleaving preserving each lineage's own order
-            slot_sets = itertools.combinations(range(len(L) + len(M)), len(M))
-        else:
-            slot_sets = [tuple(range(len(M))), tuple(range(len(L), len(L) + len(M)))] + \
-                [tuple(sorted(rng.sample(range(len(L) + len(M)), len(M)))) for _ in range(interleavings)]
-            res.coverage.append((inst.name, len(set(slot_sets)), total))
-        mixes = []
-        for slots in slot_sets:
-            chosen, mix, li, mi = set(slots), [], iter(L), iter(M)
-            for k in range(len(L) + len(M)):
-                mix.append(next(mi) if k in chosen else next(li))
-            mixes.append(mix)
-        merged = Instance(inst.name + " + unrelated M", tuple(L + M), inst.policy, ("L", "M"))
+        merged, mixes, sampled = projection_executions(inst, rng, interleavings, max_exhaustive)
+        if sampled:
+            res.coverage.append((inst.name, *sampled))
         for mix in mixes:
             res.checks += 1
             got = _project(run_obs(merged, mix, flags, ctr, ("L", "M")), "L", ids)
@@ -351,6 +391,18 @@ def _rename_obs(obs: tuple, rmap: dict, pmap: dict) -> tuple:
                          for src, (st, w, lo) in decisions)))
 
 
+def renaming_executions(kind: str) -> list:
+    """(record-id map, principal map, renamed instance) for every pair of
+    bijections the renaming relation applies."""
+    out = []
+    for rp in itertools.permutations(("r0", "r1", "r2")):
+        rmap = dict(zip(("r0", "r1", "r2"), rp))
+        for wp in itertools.permutations(PRINCIPALS):
+            pmap = dict(zip(PRINCIPALS, wp))
+            out.append((rmap, pmap, build(kind, rid=lambda x, m=rmap: m[x], who=lambda q, m=pmap: m[q])))
+    return out
+
+
 def renaming_equivariance(insts_kinds=KINDS, flags=None,
                           expected_map: Optional[Callable] = None) -> RelationResult:
     """R4 identifier-renaming equivariance.
@@ -364,28 +416,18 @@ def renaming_equivariance(insts_kinds=KINDS, flags=None,
     """
     flags = flags or {}
     res, ctr = RelationResult("identifier-renaming equivariance"), [0]
-    rid_perms = list(itertools.permutations(("r0", "r1", "r2")))
-    who_perms = list(itertools.permutations(PRINCIPALS))
     for kind in insts_kinds:
         res.instances += 1
         src = build(kind)
         base = run_obs(src, src.events, flags, ctr)
-        done = False
-        for rp in rid_perms:
-            rmap = dict(zip(("r0", "r1", "r2"), rp))
-            for wp in who_perms:
-                pmap = dict(zip(PRINCIPALS, wp))
-                inst = build(kind, rid=lambda x, m=rmap: m[x], who=lambda p, m=pmap: m[p])
-                res.checks += 1
-                got = run_obs(inst, inst.events, flags, ctr)
-                want = (expected_map or _rename_obs)(base, rmap, pmap)
-                if got != want:
-                    res.witnesses.append(Witness(res.relation, kind,
-                                                 f"renaming {rmap} / {pmap} did not rename the outcome",
-                                                 [list(src.events), list(inst.events)]))
-                    done = True
-                    break
-            if done:
+        for rmap, pmap, inst in renaming_executions(kind):
+            res.checks += 1
+            got = run_obs(inst, inst.events, flags, ctr)
+            want = (expected_map or _rename_obs)(base, rmap, pmap)
+            if got != want:
+                res.witnesses.append(Witness(res.relation, kind,
+                                             f"renaming {rmap} / {pmap} did not rename the outcome",
+                                             [list(src.events), list(inst.events)]))
                 break
     res.hits = ctr[0]
     return res
@@ -419,22 +461,52 @@ def exact_state(rep: Replica) -> tuple:
     )
 
 
-def boundary_events() -> list:
-    """Invalid and boundary-case events for the declared alphabet: each must
-    be handled identically by a restored replica and its reference."""
+def named_boundary_events() -> list:
+    """(name, event): invalid and boundary-case events of the declared
+    alphabet. Each must be handled identically by a restored replica and its
+    reference; ``BOUNDARY_EXPECT`` states how the replica's rules may handle
+    each one."""
     from dataclasses import replace as _replace
     fork = build("fork+resolution")
-    valid_res = fork.events[-1]
+    valid_res = next(e for e in fork.events if isinstance(e, Resolve))  # r2 wins over r1 (alice, bob)
+    scratch = Replica(fork.policy)
+    for e in fork.events:
+        if not isinstance(e, Resolve):
+            scratch.deliver(e)
+    under_quorum = make_resolution(scratch, "r0", "r2", "r1", {"alice"}, rule="under-quorum")
     return [
-        Edge("r2", "r0"),  # backward (non-forward)
-        Edge("r0", "m0"),  # cross-lineage
-        Edge("rX", "r0"),  # unknown record: deferred forever
-        Edge("r0", "r2"),  # undeclared in a chain (r2's declared pred is r1)
-        Invalidate("rX"),  # unknown record: deferred forever
-        Admit("r3", "L", 3, "alice", pred="rX"),  # unknown predecessor
-        Admit("r1", "L", 1, "carol", pred="r0"),  # conflicting re-admission of an existing id
-        _replace(valid_res, pre_state_root="0" * 16),  # tampered resolution
+        ("Edge(r2->r0)", Edge("r2", "r0")),  # backward (non-forward)
+        ("Edge(r0->m0)", Edge("r0", "m0")),  # cross-lineage
+        ("Edge(rX->r0)", Edge("rX", "r0")),  # unknown record: deferred forever
+        ("Edge(r0->r2)", Edge("r0", "r2")),  # undeclared in a chain (r2's declared pred is r1)
+        ("Invalidate(rX)", Invalidate("rX")),  # unknown record: deferred forever
+        ("Admit(r3, L, seq=3, owner=alice, pred=rX)", Admit("r3", "L", 3, "alice", pred="rX")),  # unknown predecessor
+        ("Admit(r1, L, seq=1, owner=carol, pred=r0)", Admit("r1", "L", 1, "carol", pred="r0")),  # conflicting re-admission
+        ("tampered resolution (pre-state root)", _replace(valid_res, pre_state_root="0" * 16)),
+        # added in v2 so every resolution rejection rule is reachable from the alphabet
+        ("tampered resolution (post-state root)", _replace(valid_res, post_state_root="0" * 16)),
+        ("malformed resolution (winner = loser)", _replace(valid_res, winner="r1", loser="r1")),
+        ("under-quorum resolution (one independent approver)", under_quorum),
     ]
+
+
+def boundary_events() -> list:
+    return [e for _name, e in named_boundary_events()]
+
+
+def boundary_sequences() -> list:
+    """(name, events): short declared sequences delivered after a serialized
+    prefix, for rules no single next event can reach. A cross-lineage edge
+    needs both ends admitted, and the prefix only holds L's records, so its M
+    end is admitted first."""
+    m0 = unrelated_lineage().events[0]  # Admit(m0, M, seq=0)
+    return [("cross-lineage edge, after admitting its M end", (m0, Edge("r0", "m0")))]
+
+
+def _suffixes(universe) -> list:
+    """What the serialization relation delivers after restoring: each
+    alphabet event on its own, then each declared boundary sequence."""
+    return [(e,) for e in universe] + [seq for _name, seq in boundary_sequences()]
 
 
 def event_universe(insts) -> list:
@@ -442,13 +514,22 @@ def event_universe(insts) -> list:
     every event of every source instance, plus the unrelated lineage's
     events. Not every event the replica API could accept (that is
     unbounded); claims are scoped to this alphabet."""
-    other = build("fork+dispute", rid=lambda r: "m" + r[1:], lineage="M")
+    other = unrelated_lineage()
     seen, out = set(), []
     for e in [e for inst in insts for e in inst.events] + list(other.events) + boundary_events():
         if e not in seen:
             seen.add(e)
             out.append(e)
     return out
+
+
+def serialization_prefixes(inst: Instance) -> list:
+    """Delivered prefixes the serialization relation freezes: of the causal
+    order and of the reversed order (in which events get deferred), so
+    states with pending events are serialized too. Deterministic order."""
+    orders = [list(inst.events), list(reversed(inst.events))]
+    prefixes = {tuple(o[:i]) for o in orders for i in range(len(o) + 1)}
+    return sorted(prefixes, key=lambda t: (len(t), [label(e) for e in t]))
 
 
 def serialization_round_trip(insts, flags=None, compare: Compare = lambda a, b: a == b,
@@ -481,14 +562,14 @@ def serialization_round_trip(insts, flags=None, compare: Compare = lambda a, b: 
     res.mechanisms = {"thaw-validation": 0, "projection": 0, "next-event": 0, "exact-state": 0}
     for inst in insts:
         res.instances += 1
-        orders = [list(inst.events), list(reversed(inst.events))]  # reversed: events get deferred
-        prefixes = {tuple(o[:i]) for o in orders for i in range(len(o) + 1)}
         infected_here = False
         caught: set = set()
         witness = None
-        for pre in sorted(prefixes, key=lambda t: (len(t), [label(e) for e in t])):
+        for pre in serialization_prefixes(inst):
             base = list(pre)
-            frozen = run(inst, base, flags).freeze()
+            source = run(inst, base, flags)
+            frozen = source.freeze()
+            ctr[0] += source.hits  # a lossy freeze is counted on the replica that froze
             if corrupt:
                 damaged = corrupt(frozen)
                 infected_here |= damaged != frozen
@@ -515,13 +596,14 @@ def serialization_round_trip(insts, flags=None, compare: Compare = lambda a, b: 
             if exact and exact_state(copy) != exact_state(reference):
                 here.add("exact-state")
             ctr[0] += copy.hits + reference.hits
-            for nxt in universe:  # response to every event of the declared universe
+            for suffix in _suffixes(universe):  # every alphabet event, then each declared sequence
                 restored = Replica.thaw(inst.policy, frozen, validate=validate, **flags)
                 ref = run(inst, base, flags)
-                restored.deliver(nxt)
-                ref.deliver(nxt)
+                for nxt in suffix:
+                    restored.deliver(nxt)
+                    ref.deliver(nxt)
                 res.checks += 1
-                lins = tuple(sorted(set(inst.lineages) | ({nxt.lineage} if isinstance(nxt, Admit) else set())))
+                lins = tuple(sorted(set(inst.lineages) | {e.lineage for e in suffix if isinstance(e, Admit)}))
                 if not compare(observe(restored, lins), observe(ref, lins)):
                     here.add("next-event")
                 if exact and exact_state(restored) != exact_state(ref):
@@ -543,36 +625,175 @@ def serialization_round_trip(insts, flags=None, compare: Compare = lambda a, b: 
     return res
 
 
-def corruption_table(insts=None) -> list[tuple]:
-    """(corruption, infected, rejected at thaw, {mechanism: instances} with
-    thaw validation *off*).
+def _inject_backward_edge(f: tuple) -> tuple:
+    """Consistently record (seen *and* applied) an edge the edge rule forbids."""
+    adm = dict(f[0])
+    back = sorted((x, y) for x in adm for y in adm
+                  if adm[x].lineage == adm[y].lineage and adm[x].seq > adm[y].seq)
+    if not back:
+        return f
+    x, y = back[0]
+    return (f[0], f[1] | {(x, y)}, *f[2:6], f[6] | {Edge(x, y)})
 
-    With validation on, a corrupted snapshot is refused at thaw (fail
-    closed), so the later detectors never see it. Running again with
-    validation off shows what each later layer would catch on its own:
-    ``projection`` (observation right after thaw), ``next-event`` (response
-    to some event of the declared universe), ``exact-state`` (independent
-    extraction of the exact-state contract)."""
+
+def _inject_self_authorized_resolution(f: tuple) -> tuple:
+    """Consistently record a resolution approved only by its beneficiary."""
+    rep = Replica.thaw(ResolutionPolicy(frozenset(PRINCIPALS), 2), f)
+    forks = sorted((a, sorted(b for x, b in rep.edges if x == a)) for a in {x for x, _ in rep.edges})
+    forks = [(a, bs) for a, bs in forks if len(bs) == 2]
+    if not forks:
+        return f
+    src, (w, lo) = forks[0]
+    r = make_resolution(rep, src, w, lo, {rep.admitted[w].owner}, rule="injected")
+    res = dict(f[3])
+    res[src] = frozenset(res.get(src, frozenset()) | {r})
+    return (*f[:3], tuple(sorted(res.items())), f[4], f[5], f[6] | {r})
+
+
+def _mistype_seq(f: tuple) -> tuple:
+    if not f[0]:
+        return f
+    (rid, a), *rest = f[0]
+    bad = replace(a, seq=str(a.seq))
+    return ((rid, bad), *rest), *f[1:6], (f[6] - {a}) | {bad}
+
+
+def _first_event(evs, kind):
+    return min((e for e in evs if isinstance(e, kind)), key=label, default=None)
+
+
+def _roll_back_invalidation(f: tuple) -> tuple:
+    """Consistent omission: the state of a replica that never received one
+    of the invalidations (a rolled-back snapshot)."""
+    if not f[2]:
+        return f
+    rid = min(f[2])
+    return (f[0], f[1], f[2] - {rid}, *f[3:6], f[6] - {Invalidate(rid)})
+
+
+def _omit_pending(f: tuple) -> tuple:
+    if not f[5]:
+        return f
+    e = f[5][0]
+    return (*f[:5], f[5][1:], f[6] - {e})
+
+
+def _omit_rejected(f: tuple) -> tuple:
+    if not f[4]:
+        return f
+    e = f[4][0][0]
+    if any(x == e for x, _why in f[4][1:]):
+        return f
+    return (*f[:4], f[4][1:], f[5], f[6] - {e})
+
+
+#: Deliberate damage to a frozen replica state, by class.
+#:
+#: * ``inconsistent``: effects without evidence, evidence without effects, or
+#:   effects the application rules forbid. Must be refused at thaw wherever it
+#:   changes the snapshot.
+#: * ``malformed``: not the shape or the types ``freeze`` emits. Must be
+#:   refused at thaw.
+#: * ``omission``: the damaged snapshot is *exactly* the state of a replica
+#:   that never received some events. No snapshot-local check can refuse it
+#:   (integrity is not authenticity); listed to bound the claim. A rolled-back
+#:   invalidation restores a stale head: only authenticated snapshots could
+#:   catch it, and none are modeled.
+CORRUPTIONS = {
+    "drop invalidations": ("inconsistent", lambda f: (f[0], f[1], frozenset(), *f[3:])),
+    "drop one applied edge": ("inconsistent", lambda f: (f[0], frozenset(sorted(f[1])[1:]), *f[2:])),
+    "drop one admitted record": ("inconsistent", lambda f: (f[0][1:], *f[1:])),
+    "drop resolutions": ("inconsistent", lambda f: (f[0], f[1], f[2], (), *f[4:])),
+    "drop pending queue": ("inconsistent", lambda f: (*f[:5], (), f[6])),
+    "drop seen-set (duplicate filter)": ("inconsistent", lambda f: (*f[:6], frozenset())),
+    "inject a backward edge (seen and applied)": ("inconsistent", _inject_backward_edge),
+    "inject a self-authorized resolution (seen and applied)": ("inconsistent", _inject_self_authorized_resolution),
+    "truncate the snapshot": ("malformed", lambda f: f[:6]),
+    "mistype a field (seq as text)": ("malformed", _mistype_seq),
+    "roll back an applied invalidation": ("omission", _roll_back_invalidation),
+    "omit a pending event": ("omission", _omit_pending),
+    "omit a rejected event": ("omission", _omit_rejected),
+}
+
+
+def corruption_snapshots(fn, insts=None):
+    """(instance, prefix, genuine snapshot, damaged snapshot) wherever ``fn``
+    changes the snapshot, over every serialization prefix of every instance."""
+    for inst in insts or instances():
+        for pre in serialization_prefixes(inst):
+            frozen = run(inst, list(pre), {}).freeze()
+            damaged = fn(frozen)
+            if damaged != frozen:
+                yield inst, pre, frozen, damaged
+
+
+def _fields(rep: Replica) -> tuple:
+    return (dict(rep.admitted), set(rep.edges), set(rep.invalidated),
+            {k: set(v) for k, v in rep.resolutions.items()}, list(rep.rejected), list(rep.pending), set(rep.seen))
+
+
+def corruption_table(insts=None) -> list[dict]:
+    """One row per corruption, with each control reported separately.
+
+    * ``validator`` (production boundary, ``thaw`` validating): snapshots
+      refused, exceptions other than CorruptSnapshot (must be none), and
+      whether two refusals of one snapshot give identical reasons.
+    * ``bypass`` (diagnostic only: ``thaw(validate=False)``; not evidence
+      that the boundary works): what ``explain_head`` answers on the damaged
+      state, whether it ever answers with authority (a record, X_⊥ or
+      CONFLICT) from a damaged state, and whether it changed the state.
+    * ``relation`` (omissions only, with the boundary on, since they pass
+      it): which layer of the serialization relation notices the damage
+      against a never-serialized reference.
+    """
     insts = insts or instances()
     rows = []
-    for name, fn in CORRUPTIONS.items():
-        on = serialization_round_trip(insts, corrupt=fn)
-        off = serialization_round_trip(insts, corrupt=fn, validate=False)
-        mech = {k: v for k, v in off.mechanisms.items() if k != "thaw-validation"}
-        rows.append((name, on.infected, on.mechanisms["thaw-validation"], mech))
+    for name, (cls, fn) in CORRUPTIONS.items():
+        row = {"corruption": name, "class": cls, "infected_instances": 0, "infected_snapshots": 0,
+               "validator": {"refused": 0, "accepted": 0, "other_exceptions": [], "deterministic": True},
+               "bypass": {"statuses": {}, "authority_from_damaged_state": 0, "refused_even_unvalidated": 0,
+                          "state_changed_by_head": 0, "exceptions": []},
+               "relation": None}
+        infected = set()
+        for inst, pre, _genuine, damaged in corruption_snapshots(fn, insts):
+            infected.add(inst.name)
+            row["infected_snapshots"] += 1
+            try:
+                Replica.thaw(inst.policy, damaged)
+                row["validator"]["accepted"] += 1
+            except CorruptSnapshot as first:
+                row["validator"]["refused"] += 1
+                try:
+                    Replica.thaw(inst.policy, damaged)
+                except CorruptSnapshot as second:
+                    row["validator"]["deterministic"] &= first.problems == second.problems
+            except Exception as e:  # noqa: BLE001 (recorded: must never happen)
+                row["validator"]["other_exceptions"].append(f"{inst.name}: {type(e).__name__}: {e}")
+            try:
+                rep = Replica.thaw(inst.policy, damaged, validate=False)
+            except CorruptSnapshot:
+                row["bypass"]["refused_even_unvalidated"] += 1
+                continue
+            except Exception as e:  # noqa: BLE001
+                row["bypass"]["exceptions"].append(f"{inst.name}: thaw: {type(e).__name__}")
+                continue
+            before = _fields(rep)
+            for lin in inst.lineages:
+                try:
+                    v = rep.explain_head(lin)
+                except Exception as e:  # noqa: BLE001
+                    row["bypass"]["exceptions"].append(f"{inst.name}: head: {type(e).__name__}")
+                    continue
+                st = row["bypass"]["statuses"]
+                st[v.status] = st.get(v.status, 0) + 1
+                row["bypass"]["authority_from_damaged_state"] += v.status != "UNKNOWN"
+            row["bypass"]["state_changed_by_head"] += _fields(rep) != before
+        row["infected_instances"] = len(infected)
+        if cls == "omission":
+            r = serialization_round_trip(insts, corrupt=fn)
+            row["relation"] = {k: v for k, v in r.mechanisms.items() if k != "thaw-validation"}
+        rows.append(row)
     return rows
-
-
-#: Deliberate damage to a frozen replica state (audit P1). Each must be
-#: rejected in every instance it infects.
-CORRUPTIONS = {
-    "drop invalidations": lambda f: (f[0], f[1], frozenset(), *f[3:]),
-    "drop one applied edge": lambda f: (f[0], frozenset(sorted(f[1])[1:]), *f[2:]),
-    "drop one admitted record": lambda f: (f[0][1:], *f[1:]),
-    "drop resolutions": lambda f: (f[0], f[1], f[2], (), *f[4:]),
-    "drop pending queue": lambda f: (*f[:5], (), f[6]),
-    "drop seen-set (duplicate filter)": lambda f: (*f[:6], frozenset()),
-}
 
 
 RELATIONS = {
@@ -597,17 +818,196 @@ EQUIVOCATION_PROBE = Instance(
 
 
 class Cell:
-    KILLED = "KILLED"  # the relation was violated
-    SURVIVED = "SURVIVED"  # deviant branch ran, relation held
-    # Deviant branch never ran on this relation's inputs, but some other
-    # relation does exercise the mutant: a source-input adequacy observation
-    # about this relation (often by design: its precondition excludes the
-    # triggering input).
+    KILLED = "KILLED"  # the relation detected the mutant on a deviating instance
+    SURVIVED = "SURVIVED"  # the mutant deviated on the relation's inputs; the relation held
+    # Eligible instances exist, but the relation's inputs never make the
+    # mutant deviate (often by design: its precondition excludes the
+    # triggering input), while some other relation's inputs do.
     NOT_REACHED = "NOT_REACHED"
-    # No relation ever exercises the mutant: candidate equivalent/unreachable
-    # mutant, excluded from the mutation-score denominator.
+    # No eligible instance: the relation's alphabet or operations cannot reach
+    # the mutated code region at all.
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+    # No relation's inputs ever make the mutant deviate: candidate equivalent
+    # or unreachable mutant, excluded from the mutation-score denominator.
     EQUIVALENT_CANDIDATE = "EQUIVALENT_CANDIDATE"
     ERROR = "ERROR"
+
+
+# ------------------------------------------------------------ eligibility (frozen, matrix v2)
+
+#: What each relation does to replicas.
+OPERATIONS = {
+    "order": frozenset({"deliver", "head"}),
+    "duplicate": frozenset({"deliver", "head"}),
+    "projection": frozenset({"deliver", "head"}),
+    "renaming": frozenset({"deliver", "head"}),
+    "serialization": frozenset({"deliver", "head", "freeze", "thaw"}),
+}
+
+#: Mutants whose deviation is in ``head()`` alone (they never change replica
+#: state). For every other mutant, equal states imply equal heads, because
+#: ``head()`` reads no other flag; ``test_head_reads_only_the_head_time_flags``
+#: checks that premise against the source.
+HEAD_TIME_FLAGS = ("global_dispute", "rid_tiebreak")
+
+
+def alphabet(relation: str, inst: Instance) -> list:
+    """The events a relation can deliver for one source instance."""
+    if relation in ("order", "duplicate", "renaming"):
+        return list(inst.events)
+    if relation == "projection":
+        return list(inst.events) + list(unrelated_lineage().events)
+    if relation == "serialization":
+        return event_universe([inst])
+    raise KeyError(relation)
+
+
+def _admits(evs):
+    return [e for e in dict.fromkeys(evs) if isinstance(e, Admit)]
+
+
+def _resolutions(evs):
+    return [e for e in dict.fromkeys(evs) if isinstance(e, Resolve)]
+
+
+def _edges(evs):
+    return {(e.old, e.new) for e in evs if isinstance(e, Edge)}
+
+
+def _disputed(evs) -> bool:
+    by_fork = {}
+    for r in _resolutions(evs):
+        by_fork.setdefault((r.source, r.epoch), set()).add(r.winner)
+    return any(len(w) > 1 for w in by_fork.values())
+
+
+def _independent_approver(evs, policy) -> bool:
+    owner = {a.rid: a.owner for a in _admits(evs)}
+    return any(q in policy.authorities and q != owner.get(r.winner) for r in _resolutions(evs) for q in r.approvals)
+
+
+def _revivable(evs) -> bool:
+    admitted = [a.rid for a in _admits(evs)]
+    invalidated = {e.rid for e in evs if isinstance(e, Invalidate)}
+    return bool(invalidated & set(admitted)) or len(admitted) != len(set(admitted))
+
+
+#: Frozen eligibility predicates (matrix v2): (operation the mutated code is
+#: in, what must be present, predicate over the relation's alphabet and the
+#: policy). Defined on the inputs a relation *can* deliver, never on any
+#: execution's outcome. A predicate may over-approximate (eligible but never
+#: deviating lowers the exposure rate, visibly); it must never
+#: under-approximate, and ``mutant_matrix`` checks that: a deviation on an
+#: ineligible instance is reported as an anomaly.
+ELIGIBILITY = {
+    "first_applied_wins": ("deliver", "two distinct resolutions of one fork",
+                           lambda evs, pol: any(n > 1 for n in Counter(r.source for r in _resolutions(evs)).values())),
+    "naive_stale_guard": ("deliver", "a supersession chain: edges a->b and b->c",
+                          lambda evs, pol: any((b, c) in _edges(evs) for a, b in _edges(evs)
+                                               for c in {y for x, y in _edges(evs) if x == b})),
+    "replay_readmits": ("deliver", "a record a replayed admission could revive or replace: an admitted "
+                        "record that is invalidated, or two different admissions of one id",
+                        lambda evs, pol: _revivable(evs)),
+    "global_dispute": ("head", "a dispute (two same-epoch resolutions of one fork with different winners) "
+                       "and records of a second lineage",
+                       lambda evs, pol: _disputed(evs) and len({a.lineage for a in _admits(evs)}) > 1),
+    "rid_tiebreak": ("head", "a fork: two edges from one record",
+                     lambda evs, pol: any(n > 1 for n in Counter(x for x, _ in _edges(evs)).values())),
+    "principal_order_quorum": ("deliver", "a resolution approved by an authority other than the winner's owner",
+                               _independent_approver),
+    "freeze_drops_invalidated": ("freeze", "an invalidation of an admitted record",
+                                 lambda evs, pol: bool({e.rid for e in evs if isinstance(e, Invalidate)}
+                                                       & {a.rid for a in _admits(evs)})),
+}
+
+
+def eligible(relation: str, flag: str, inst: Instance) -> bool:
+    op, _what, pred = ELIGIBILITY[flag]
+    return op in OPERATIONS[relation] and pred(alphabet(relation, inst), inst.policy)
+
+
+# ------------------------------------------------------------ deviation (differential, lockstep)
+
+
+@dataclass
+class Deviation:
+    """First point at which the mutant and the correct replica differ on an
+    execution the relation performs. Replayable: ``steps`` are the operations."""
+    relation: str
+    instance: str
+    execution: int  # index in the relation's execution list
+    step: int  # index of the operation after which they differ
+    what: str  # "state", "head(L)", or "mutant snapshot refused at thaw"
+    steps: list  # [("deliver", label) | ("roundtrip", "")]
+
+
+def _programs(relation: str, inst: Instance):
+    """The relation's executions as operation programs: (policy, steps,
+    lineages observed). Same sets, same order as the relation itself."""
+    dl = lambda evs: [("deliver", e) for e in evs]  # noqa: E731
+    if relation == "order":
+        for p in order_executions(inst)[0]:
+            yield inst.policy, dl(p), inst.lineages
+    elif relation == "duplicate":
+        yield inst.policy, dl(inst.events), inst.lineages
+        for _i, _dup, order in duplicate_executions(inst):
+            yield inst.policy, dl(order), inst.lineages
+    elif relation == "projection":
+        yield inst.policy, dl(inst.events), inst.lineages
+        merged, mixes, _ = projection_executions(inst)
+        for mix in mixes:
+            yield merged.policy, dl(mix), ("L", "M")
+    elif relation == "renaming":
+        src = build(inst.name)
+        yield src.policy, dl(src.events), src.lineages
+        for _rmap, _pmap, ren in renaming_executions(inst.name):
+            yield ren.policy, dl(ren.events), ren.lineages
+    elif relation == "serialization":
+        universe = event_universe([inst])
+        for pre in serialization_prefixes(inst):
+            yield inst.policy, dl(pre) + [("roundtrip", None)], inst.lineages
+            for suffix in _suffixes(universe):
+                lins = tuple(sorted(set(inst.lineages) | {e.lineage for e in suffix if isinstance(e, Admit)}))
+                yield inst.policy, dl(pre) + [("roundtrip", None)] + dl(suffix), lins
+    else:
+        raise KeyError(relation)
+
+
+def _state(rep: Replica) -> tuple:
+    # the exact-state contract minus the flags (which differ by construction)
+    return rep.admitted, rep.edges, rep.invalidated, rep.resolutions, rep.pending, rep.seen
+
+
+def _lockstep(policy, steps, flag: str, lineages):
+    m, c = Replica(policy, **{flag: True}), Replica(policy)
+    for i, (op, arg) in enumerate(steps):
+        if op == "deliver":
+            m.deliver(arg)
+            c.deliver(arg)
+        else:  # roundtrip: freeze and restore through the validating boundary
+            c = Replica.thaw(policy, c.freeze())
+            try:
+                m = Replica.thaw(policy, m.freeze(), **{flag: True})
+            except CorruptSnapshot:
+                return i, "mutant snapshot refused at thaw"
+        if _state(m) != _state(c):
+            return i, "state"
+        if flag in HEAD_TIME_FLAGS:
+            for lin in lineages:
+                if m.head(lin) != c.head(lin):
+                    return i, f"head({lin})"
+    return None
+
+
+def deviation(relation: str, inst: Instance, flag: str) -> Optional[Deviation]:
+    """Does the mutant behave differently from the correct replica on any
+    execution this relation performs on ``inst``? Stops at the first."""
+    for k, (policy, steps, lineages) in enumerate(_programs(relation, inst)):
+        hit = _lockstep(policy, steps, flag, lineages)
+        if hit:
+            return Deviation(relation, inst.name, k, hit[0], hit[1],
+                             [(op, label(a) if a is not None else "") for op, a in steps[:hit[0] + 1]])
+    return None
 
 
 def _relation_on(name: str, inst_or_kind, flags):
@@ -619,51 +1019,179 @@ def _relation_on(name: str, inst_or_kind, flags):
 
 @dataclass
 class MatrixCell:
+    """One (relation, mutant) cell, with all three denominators over the
+    ``evaluated`` source instances. ``eligible``, ``deviating`` and
+    ``detecting`` list instance names; the counts are their lengths."""
     category: str
-    detecting: int  # eligible instances in which the relation caught the mutant
-    eligible: int  # instances in which the mutant's deviant branch executed (or it was caught)
+    eligible: list
+    deviating: list  # eligible instances where the mutant deviates from the correct replica
+    detecting: list  # deviating instances where the relation detects the mutant
     evaluated: int
     errors: int
-    hits: int  # total deviant-branch executions (exercise until detection)
+    deviating_ineligible: list  # must be empty: the predicate missed a deviation
+    detecting_nondeviating: list  # must be empty: a detection with no deviation behind it
+    hits: int  # deviant-branch executions, by the mutant's own counter (cross-check only)
+    deviations: dict = field(default_factory=dict)  # instance -> Deviation (replayable)
 
-    def __iter__(self):  # (category, hits, detecting, eligible) for older callers
-        return iter((self.category, self.hits, self.detecting, self.eligible))
+    @property
+    def counts(self) -> tuple[int, int, int]:
+        return len(self.eligible), len(self.deviating), len(self.detecting)
 
-    def __getitem__(self, i):
-        return tuple(self)[i]
+    @property
+    def exposure(self) -> tuple[int, int]:
+        """(deviating, eligible)."""
+        return len(self.deviating), len(self.eligible)
+
+    @property
+    def detection_breadth(self) -> tuple[int, int]:
+        """(detecting, deviating)."""
+        return len(self.detecting), len(self.deviating)
 
 
-def mutant_matrix(kinds=KINDS) -> dict:
-    """(relation, flag) -> MatrixCell, evaluated one source instance at a time,
-    so kill breadth = detecting eligible instances / eligible instances."""
+def _canon_event(e) -> str:
+    from .snapshot_json import _event
+    return json.dumps(_event(e), sort_keys=True)
+
+
+def code_fingerprint() -> str:
+    """SHA-256 over the live code the matrix executes: every function and
+    method defined in the replica and metamorphic modules (nested functions
+    ride along as constants), marshalled from the live objects, plus each
+    eligibility predicate. A monkeypatch or an edit changes it."""
+    import marshal
+    import sys
+    import types
+    from . import replica as rmod
+    h = hashlib.sha256()
+
+    def add(name, fn):
+        code = getattr(fn, "__code__", None)
+        if code is not None:
+            h.update(name.encode() + b"\0" + marshal.dumps(code))
+
+    for modname, mod in (("replica", rmod), ("metamorphic", sys.modules[__name__])):
+        for name, obj in sorted(vars(mod).items()):
+            if isinstance(obj, types.FunctionType):
+                add(f"{modname}.{name}", obj)
+            elif isinstance(obj, type) and obj.__module__ == mod.__name__:
+                for an, a in sorted(vars(obj).items()):
+                    add(f"{modname}.{name}.{an}", a.__func__ if isinstance(a, (classmethod, staticmethod)) else a)
+    for flag, (op, what, pred) in sorted(ELIGIBILITY.items()):
+        h.update(f"{flag}|{op}|{what}".encode())
+        add(f"eligibility.{flag}", pred)
+    return h.hexdigest()
+
+
+def matrix_inputs_fingerprint(kinds) -> str:
+    """The matrix cache key: binds every input that can change a cell. The
+    fixture set and each instance's events, policy and lineages; for every
+    relation, its alphabet, every eligibility value and its complete
+    execution set; the execution configuration; the mutant and relation
+    lists; and the live code. Stable across processes and hash seeds."""
+    h = hashlib.sha256()
+    h.update(code_fingerprint().encode())
+    h.update(json.dumps(EXECUTION_CONFIG, sort_keys=True).encode())
+    h.update(json.dumps([list(FLAGS), list(RELATIONS), list(kinds)]).encode())
+    for inst in instances(kinds):
+        index: dict = {}
+        canon = lambda e: index.setdefault(e, len(index))  # noqa: E731
+        h.update(json.dumps([inst.name, [_canon_event(e) for e in inst.events], sorted(inst.policy.authorities),
+                             inst.policy.min_quorum, list(inst.lineages)]).encode())
+        for rel in RELATIONS:
+            h.update(json.dumps([rel, [_canon_event(e) for e in alphabet(rel, inst)],
+                                 [eligible(rel, flag, inst) for flag in FLAGS]]).encode())
+            for policy, steps, lineages in _programs(rel, inst):
+                h.update(json.dumps([sorted(policy.authorities), policy.min_quorum, list(lineages),
+                                     [-1 if a is None else canon(a) for _op, a in steps]]).encode())
+            h.update(json.dumps(sorted((_canon_event(e), i) for e, i in index.items())).encode())
+    return h.hexdigest()
+
+
+_MATRIX_CACHE: dict = {}
+
+
+def mutant_matrix(kinds=KINDS, cache: bool = True) -> dict:
+    """(relation, flag) -> MatrixCell, every quantity measured per source
+    instance: eligibility from the frozen predicate, deviation by lockstep
+    differential execution over the relation's own executions, detection by
+    running the relation on that instance alone. Cached under
+    ``matrix_inputs_fingerprint``, so a changed input always recomputes;
+    ``cache=False`` always recomputes. Callers get their own dict."""
+    kinds = tuple(kinds)
+    if not cache:
+        return _compute_matrix(kinds)
+    key = matrix_inputs_fingerprint(kinds)
+    if key not in _MATRIX_CACHE:
+        _MATRIX_CACHE[key] = _compute_matrix(kinds)
+    return dict(_MATRIX_CACHE[key])
+
+
+def matrix_canonical(m: dict) -> dict:
+    """Every cell, every denominator, every recorded deviation, as plain data."""
+    return {f"{rel}/{flag}": {
+        "category": c.category, "eligible": sorted(c.eligible), "deviating": sorted(c.deviating),
+        "detecting": sorted(c.detecting), "evaluated": c.evaluated, "errors": c.errors,
+        "deviating_ineligible": sorted(c.deviating_ineligible),
+        "detecting_nondeviating": sorted(c.detecting_nondeviating), "hits": c.hits,
+        "deviations": {n: [d.execution, d.step, d.what, [list(s) for s in d.steps]]
+                       for n, d in sorted(c.deviations.items())},
+    } for (rel, flag), c in sorted(m.items())}
+
+
+def _compute_matrix(kinds: tuple) -> dict:
     insts = instances(kinds)
     out = {}
     for flag in FLAGS:
         cells = {}
         for name in RELATIONS:
-            detecting = eligible = errors = hits = 0
+            elig, dev, det, dev_out, det_out, devs = [], [], [], [], [], {}
+            errors = hits = 0
             for inst in insts:
+                is_elig = eligible(name, flag, inst)
                 try:
+                    d = deviation(name, inst, flag)
                     r = _relation_on(name, inst, {flag: True})
                 except Exception:  # infrastructure failure: never a kill
                     errors += 1
                     continue
                 hits += r.hits
-                caught = not r.held
-                detecting += caught
-                eligible += bool(caught or r.hits)
-            cells[name] = (detecting, eligible, errors, hits)
-        exercised = any(e for _d, e, _x, _h in cells.values())
-        for name, (d, e, x, h) in cells.items():
-            if d:
+                if d:
+                    devs[inst.name] = d
+                if is_elig:
+                    elig.append(inst.name)
+                    if d:
+                        dev.append(inst.name)
+                        if not r.held:
+                            det.append(inst.name)
+                elif d:
+                    dev_out.append(inst.name)
+                if not r.held and not d:
+                    det_out.append(inst.name)
+            cells[name] = (elig, dev, det, dev_out, det_out, errors, hits, devs)
+        any_deviation = any(c[1] or c[3] for c in cells.values())
+        for name, (elig, dev, det, dev_out, det_out, errors, hits, devs) in cells.items():
+            if det:
                 cat = Cell.KILLED
-            elif e:
+            elif dev:
                 cat = Cell.SURVIVED
-            elif x:
+            elif errors:
                 cat = Cell.ERROR
+            elif not any_deviation:
+                cat = Cell.EQUIVALENT_CANDIDATE
             else:
-                cat = Cell.NOT_REACHED if exercised else Cell.EQUIVALENT_CANDIDATE
-            out[(name, flag)] = MatrixCell(cat, d, e, len(insts), x, h)
+                cat = Cell.NOT_REACHED if elig else Cell.NOT_APPLICABLE
+            out[(name, flag)] = MatrixCell(cat, elig, dev, det, len(insts), errors, dev_out, det_out, hits, devs)
+    return out
+
+
+def matrix_anomalies(m: dict) -> list[str]:
+    """Must be empty: deviations the frozen predicate did not anticipate, and
+    detections without a deviation behind them."""
+    out = []
+    for (rel, flag), c in m.items():
+        out += [f"{rel}/{flag}: deviation on ineligible {i}" for i in c.deviating_ineligible]
+        out += [f"{rel}/{flag}: detection without deviation on {i}" for i in c.detecting_nondeviating]
+        out += [f"{rel}/{flag}: {c.errors} errored instances"] if c.errors else []
     return out
 
 
@@ -674,29 +1202,193 @@ def mutation_score(m: dict) -> tuple[int, int]:
     return len(killed), len(FLAGS) - len(equiv)
 
 
+#: Category labels, shared by the published v1 table and v2.
+CATEGORY_LABEL = {Cell.KILLED: "KILLED", Cell.SURVIVED: "survived", Cell.NOT_REACHED: "not reached",
+                  Cell.NOT_APPLICABLE: "n/a", Cell.EQUIVALENT_CANDIDATE: "equivalent?", Cell.ERROR: "ERROR"}
+
+_NEVER_REACHES_TWO_LINEAGES = ("this relation's alphabet has a single lineage, so the mutated cross-lineage "
+                               "branch is unreachable and no instance is eligible (v1 had no eligibility "
+                               "predicate, so it said 'not reached')")
+_NEVER_SERIALIZES = ("this relation never serializes, so the mutated freeze() never runs and no instance is "
+                     "eligible (v1 had no eligibility predicate, so it said 'not reached')")
+
+#: Every cell whose category differs between the v1 matrix as published at
+#: b535b1a and v2, with the reason. ``test_every_v1_to_v2_change_is_explained``
+#: requires an exact match, so an unexplained change fails the suite.
+V1_TO_V2_CHANGES = {
+    ("serialization", "naive_stale_guard"): (
+        "not reached", "survived", "prefixes of the reversed order make edges arrive out of order, which reaches "
+        "the naive guard; restored and reference replicas share the mutant, so the relation correctly holds"),
+    ("serialization", "global_dispute"): (
+        "not reached", "survived", "the declared alphabet includes the unrelated lineage's admissions, so a "
+        "dispute in L meets a head query for M; restored and reference share the mutant"),
+    ("order", "global_dispute"): ("not reached", "n/a", _NEVER_REACHES_TWO_LINEAGES),
+    ("duplicate", "global_dispute"): ("not reached", "n/a", _NEVER_REACHES_TWO_LINEAGES),
+    ("renaming", "global_dispute"): ("not reached", "n/a", _NEVER_REACHES_TWO_LINEAGES),
+    ("order", "freeze_drops_invalidated"): ("not reached", "n/a", _NEVER_SERIALIZES),
+    ("duplicate", "freeze_drops_invalidated"): ("not reached", "n/a", _NEVER_SERIALIZES),
+    ("projection", "freeze_drops_invalidated"): ("not reached", "n/a", _NEVER_SERIALIZES),
+    ("renaming", "freeze_drops_invalidated"): ("not reached", "n/a", _NEVER_SERIALIZES),
+}
+
+
+#: The v1 matrix rows exactly as published in docs/RESULTS.md at b535b1a
+#: (``test_documented_v1_table_is_the_published_one`` checks them against git).
+PUBLISHED_V1_TABLE = """\
+| `first_applied_wins` | **KILLED** (9) | survived (163) | survived (465) | survived (111) | survived (43) |
+| `naive_stale_guard` | **KILLED** (2) | not reached (0) | not reached (0) | not reached (0) | not reached (0) |
+| `replay_readmits` | not reached (0) | **KILLED** (252) | not reached (0) | not reached (0) | survived (252) |
+| `global_dispute` | not reached (0) | not reached (0) | **KILLED** (89) | not reached (0) | not reached (0) |
+| `rid_tiebreak` | survived (842) | survived (110) | survived (86) | **KILLED** (16) | survived (102) |
+| `principal_order_quorum` | survived (30967) | survived (386) | survived (973) | **KILLED** (26) | survived (123) |
+| `freeze_drops_invalidated` | not reached (0) | not reached (0) | not reached (0) | not reached (0) | **KILLED** (2) |
+"""
+
+
+def published_v1_categories(table: str) -> dict:
+    """{(relation, flag): label} from the v1 table as published at b535b1a."""
+    rels = list(RELATIONS)
+    out = {}
+    for line in table.splitlines():
+        if not line.startswith("| `"):
+            continue
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        flag = cells[0].strip("`")
+        for rel, c in zip(rels, cells[1:]):
+            out[(rel, flag)] = "KILLED" if "KILLED" in c else c.split(" (")[0]
+    return out
+
+
+def v1_to_v2_changes(v1: dict, m: dict) -> dict:
+    """{cell: (v1 label, v2 label)} wherever the category differs."""
+    return {k: (v1[k], CATEGORY_LABEL[m[k].category]) for k in v1 if v1[k] != CATEGORY_LABEL[m[k].category]}
+
+
+# ------------------------------------------------------------ retained counterexamples
+
+#: Corrupted snapshots that made ``head()`` raise KeyError before the repair:
+#: at b535b1a (development lineage) and at c175fbd (published main baseline,
+#: not repaired there). Each is fully determined by this recipe. The data and
+#: the recorded historical failures: tests/fixtures/snapshot_counterexamples.json
+#: (``scripts/make_snapshot_counterexamples.py`` regenerates it).
+RETAINED_COUNTEREXAMPLES = (
+    {"id": "CE-1", "site": "_chain_linked follows a predecessor that is no longer admitted",
+     "instance": "chain", "order": "reversed", "prefix": 4, "corruption": "drop one admitted record"},
+    {"id": "CE-2", "site": "head() looks up the source of a resolution that is no longer admitted",
+     "instance": "fork+dispute", "order": "causal", "prefix": 7, "corruption": "drop one admitted record"},
+)
+
+
+def counterexample_snapshot(spec: dict) -> tuple:
+    """(instance, delivered prefix, damaged snapshot) for a retained recipe."""
+    inst = build(spec["instance"])
+    evs = list(inst.events) if spec["order"] == "causal" else list(reversed(inst.events))
+    prefix = evs[:spec["prefix"]]
+    genuine = run(inst, prefix, {}).freeze()
+    damaged = CORRUPTIONS[spec["corruption"]][1](genuine)
+    assert damaged != genuine
+    return inst, prefix, damaged
+
+
+# ------------------------------------------------------------ declared alphabet, exercised
+
+#: The handling each boundary event may receive under the replica's own
+#: rules, wherever the serialization relation delivers it. Frozen with v2.
+BOUNDARY_EXPECT = {
+    "Edge(r2->r0)": {"deferred", "rejected: non-forward edge"},
+    "Edge(r0->m0)": {"deferred", "rejected: cross-lineage edge"},
+    "Edge(rX->r0)": {"deferred"},
+    # in a fork r2's declared predecessor *is* r0, so there it is a valid edge
+    "Edge(r0->r2)": {"deferred", "applied", "duplicate", "rejected: edge not declared by successor admission"},
+    "Invalidate(rX)": {"deferred"},
+    "Admit(r3, L, seq=3, owner=alice, pred=rX)": {"applied"},  # admitted, never eligible (its edge never comes)
+    "Admit(r1, L, seq=1, owner=carol, pred=r0)": {"applied", "rejected: re-admission of existing id"},
+    "tampered resolution (pre-state root)": {"deferred", "rejected: pre-state root mismatch"},
+    "tampered resolution (post-state root)": {"deferred", "rejected: post-state root mismatch"},
+    "malformed resolution (winner = loser)": {"deferred", "rejected: winner/loser must be the two conflicting candidates"},
+    "under-quorum resolution (one independent approver)": {"deferred", "rejected: quorum not met"},
+    # declared sequence: the edge is the event classified
+    "cross-lineage edge, after admitting its M end": {"deferred", "rejected: cross-lineage edge"},
+}
+
+#: Every rejection reason the correct replica can give (mutant-only reasons excluded).
+REJECTION_RULES = ("re-admission of existing id", "cross-lineage edge", "non-forward edge",
+                   "edge not declared by successor admission",
+                   "winner/loser must be the two conflicting candidates", "pre-state root mismatch",
+                   "post-state root mismatch", "self-authorized: no independent approver", "quorum not met")
+
+
+def _boundary_label(e) -> str:
+    return next((name for name, b in named_boundary_events() if b == e), label(e))
+
+
+def alphabet_exercise(insts=None) -> dict:
+    """Deliver every event of the declared alphabet after every serialized
+    prefix of every instance (as the serialization relation does) to a
+    correct replica, and record how the replica handled *that* event:
+    applied, deferred, rejected (with the rule) or ignored as a duplicate."""
+    insts = insts or instances()
+    boundary = {name for name, _e in named_boundary_events()} | {name for name, _s in boundary_sequences()}
+    seq_name = {seq: name for name, seq in boundary_sequences()}
+    outcomes: dict = {}
+    for inst in insts:
+        universe = event_universe([inst])
+        for pre in serialization_prefixes(inst):
+            for suffix in _suffixes(universe):
+                rep = run(inst, list(pre), {})
+                for e in suffix[:-1]:  # a sequence's leading events set up the one classified
+                    rep.deliver(e)
+                nxt = suffix[-1]
+                dup = nxt in rep.seen
+                n = len(rep.rejected)
+                rep.deliver(nxt)
+                if dup:
+                    o = "duplicate"
+                elif any(e == nxt for e, _ in rep.rejected[n:]):
+                    o = "rejected: " + next(w for e, w in rep.rejected[n:] if e == nxt).split(" (")[0]
+                elif nxt in rep.pending:
+                    o = "deferred"
+                else:
+                    o = "applied"
+                key = seq_name.get(suffix) or _boundary_label(nxt)
+                outcomes.setdefault(key, Counter())[o] += 1
+    rules = Counter()
+    for c in outcomes.values():
+        for o, k in c.items():
+            if o.startswith("rejected: "):
+                rules[o[len("rejected: "):]] += k
+    return {
+        "boundary": {b: dict(outcomes.get(b, {})) for b in sorted(boundary)},
+        "unexpected": {b: sorted(set(outcomes.get(b, {})) - BOUNDARY_EXPECT[b]) for b in sorted(boundary)
+                       if set(outcomes.get(b, {})) - BOUNDARY_EXPECT[b]},
+        "never_delivered": sorted(b for b in boundary if not outcomes.get(b)),
+        "rejection_rules_exercised": dict(sorted(rules.items())),
+        "rejection_rules_not_exercised": [r for r in REJECTION_RULES if r not in rules],
+        "events": len(outcomes),
+        "deliveries": sum(sum(c.values()) for c in outcomes.values()),
+    }
+
+
 def matrix_markdown(m: dict) -> str:
     sym = {Cell.KILLED: "**KILLED**", Cell.SURVIVED: "survived", Cell.NOT_REACHED: "not reached",
-           Cell.EQUIVALENT_CANDIDATE: "equivalent?"}
+           Cell.NOT_APPLICABLE: "n/a", Cell.EQUIVALENT_CANDIDATE: "equivalent?", Cell.ERROR: "ERROR"}
     lines = ["| mutant | " + " | ".join(RELATIONS) + " |", "|---|" + "---|" * len(RELATIONS)]
     for flag in FLAGS:
         cells = []
         for r in RELATIONS:
             c = m[(r, flag)]
-            if c.category == Cell.KILLED:
-                cells.append(f"**KILLED** {c.detecting}/{c.eligible} eligible")
-            elif c.category == Cell.SURVIVED:
-                cells.append(f"survived 0/{c.eligible} eligible")
-            else:
-                cells.append(sym.get(c.category, c.category))
+            e, d, k = c.counts
+            cells.append(f"{sym.get(c.category, c.category)} E{e} D{d} K{k}" if e or d else sym[c.category])
         lines.append(f"| `{flag}` | " + " | ".join(cells) + " |")
     k, n = mutation_score(m)
     some = next(iter(m.values()))
-    errs = sum(c.errors for c in m.values())
-    lines += ["", f"Kill breadth = detecting eligible instances / eligible instances, of {some.evaluated} "
-                  "evaluated per cell. An instance is *eligible* when the mutant's deviant branch makes an "
-                  "effective deviation in it (changes state or result relative to the correct rule); "
-                  f"the rest are ineligible. Errored instances: {errs}. Suite mutation score: "
-                  f"{k}/{n} (killed / non-equivalent)."]
+    lines += ["", f"Per cell, over {some.evaluated} source instances: **E** eligible (frozen predicate over the "
+                  "relation's alphabet), **D** deviating (eligible, and the mutant behaves differently from the "
+                  "correct replica on some execution the relation performs: state, or head for head-time "
+                  "mutants), **K** detecting (deviating, and the relation is violated). Exposure rate = D/E; "
+                  "detection breadth = K/D. Anomalies (deviation on an ineligible instance, detection without "
+                  f"deviation, errors): {len(matrix_anomalies(m))}. Suite mutation score: {k}/{n} "
+                  "(mutants killed by some relation / mutants that deviate under some relation)."]
     return "\n".join(lines)
 
 

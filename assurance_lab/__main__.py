@@ -376,6 +376,100 @@ def domain_adequacy(cfg: Config) -> str:
     return "\n".join(lines) + "\n"
 
 
+_INTEGRITY_ASSUME = ("replica snapshots are not authenticated: a consistent omission (for example a "
+                     "rolled-back invalidation) is indistinguishable from a replica that has not yet "
+                     "received the events, passes the integrity check, and can restore a stale head",)
+
+
+def snapshot_integrity_results() -> list[Result]:
+    """The restore boundary, each control reported on its own (development
+    lineage; the published main baseline has the same defect, unrepaired)."""
+    from assurance_lab.distributed.replica import CorruptSnapshot, Replica
+    rows = mm.corruption_table()
+    hard = [r for r in rows if r["class"] in ("inconsistent", "malformed")]
+    soft = [r for r in rows if r["class"] == "omission"]
+    infected = sum(r["infected_snapshots"] for r in hard)
+    leaks = [r["corruption"] for r in hard if r["validator"]["refused"] != r["infected_snapshots"]
+             or r["validator"]["other_exceptions"] or not r["validator"]["deterministic"]]
+    out = [Result("SNAPSHOT INTEGRITY: every inconsistent or malformed snapshot is refused at thaw (INVALID_SNAPSHOT)",
+                  Verdict.FAIL if leaks else Verdict.PASS, "corruption-injection",
+                  f"{len(hard)} corruption classes × every serialized prefix of {len(mm.KINDS)} instances",
+                  f"{infected} damaged snapshots refused, deterministically, no other exception type",
+                  _INTEGRITY_ASSUME, detail=f"leaks: {leaks}")]
+    authority = [r["corruption"] for r in hard if r["bypass"]["authority_from_damaged_state"]
+                 or r["bypass"]["exceptions"] or r["bypass"]["state_changed_by_head"]]
+    out.append(Result("SNAPSHOT INTEGRITY (diagnostic, boundary bypassed): head() answers UNKNOWN on every damaged "
+                      "state, never CONFLICT or a record, and changes nothing",
+                      Verdict.FAIL if authority else Verdict.PASS, "defense-in-depth",
+                      "thaw(validate=False), diagnostic only", "not evidence that the boundary works; evidence "
+                      "that head() does not turn damaged evidence into authority", detail=f"failed: {authority}"))
+    false_rej = []
+    n = 0
+    for inst in mm.instances():
+        for pre in mm.serialization_prefixes(inst):
+            rep = mm.run(inst, list(pre), {})
+            n += 1
+            try:
+                Replica.thaw(inst.policy, rep.freeze())
+            except CorruptSnapshot as e:
+                false_rej.append(f"{inst.name}/{len(pre)}: {e}")
+            if any(rep.explain_head(lin).status == "UNKNOWN" for lin in inst.lineages):
+                false_rej.append(f"{inst.name}/{len(pre)}: UNKNOWN")
+    out.append(Result("SNAPSHOT INTEGRITY: genuine snapshots are never refused and never UNKNOWN",
+                      Verdict.FAIL if false_rej else Verdict.PASS, "false-rejection-check",
+                      f"{n} genuine serialized states (plus every replica-checker state, thawed through the "
+                      "validator with UNKNOWN as a safety violation)", "zero false rejections",
+                      detail="\n".join(false_rej)))
+    ce_bad = []
+    for spec in mm.RETAINED_COUNTEREXAMPLES:
+        inst, _pre, damaged = mm.counterexample_snapshot(spec)
+        try:
+            Replica.thaw(inst.policy, damaged)
+            ce_bad.append(f"{spec['id']}: restored")
+        except CorruptSnapshot as e:
+            if e.status != "INVALID_SNAPSHOT":
+                ce_bad.append(f"{spec['id']}: status {e.status}")
+        if Replica.thaw(inst.policy, damaged, validate=False).explain_head("L").status != "UNKNOWN":
+            ce_bad.append(f"{spec['id']}: bypassed head() is not UNKNOWN")
+    out.append(Result("SNAPSHOT INTEGRITY: retained KeyError counterexamples are refused, and UNKNOWN when bypassed",
+                      Verdict.FAIL if ce_bad else Verdict.PASS, "regression",
+                      f"{len(mm.RETAINED_COUNTEREXAMPLES)} counterexamples (crash b535b1a and main c175fbd)",
+                      "INVALID_SNAPSHOT at thaw; UNKNOWN, not CONFLICT, with the boundary bypassed",
+                      detail="\n".join(ce_bad)))
+    blind = [r["corruption"] for r in soft if (r["relation"] or {}).get("exact-state") != r["infected_instances"]]
+    out.append(Result("METAMORPHIC: exact-state comparison detects every consistent omission",
+                      Verdict.FAIL if blind else Verdict.PASS, "corruption-injection",
+                      f"{len(soft)} omission classes, which pass the boundary by construction",
+                      "against a never-serialized reference (a deployment has no such reference)",
+                      _INTEGRITY_ASSUME, detail=f"missed: {blind}"))
+    return out
+
+
+def snapshot_integrity_section() -> list[str]:
+    rows = mm.corruption_table()
+    fmt = lambda d: ", ".join(f"{k} {v}" for k, v in sorted(d.items())) or "-"  # noqa: E731
+    lines = ["**Snapshot integrity: each control separately** (development lineage only; the published main "
+             "baseline `c175fbd` has the same `head()` defect and is not repaired). *Validator*: the production "
+             "boundary, `thaw` validating. *Bypassed*: `thaw(validate=False)`, a diagnostic only, never evidence "
+             "that the boundary works. *Relation*: for consistent omissions, which pass the boundary by "
+             "construction, the serialization relation's layers against a never-serialized reference.", "",
+             "| Corruption | Class | Infected (instances / snapshots) | Validator: refused | Bypassed: head() | "
+             "Relation: projection / next event / exact state |", "|---|---|---|---|---|---|"]
+    for r in rows:
+        rel = r["relation"]
+        lines.append(f"| {r['corruption']} | {r['class']} | {r['infected_instances']} / {r['infected_snapshots']} | "
+                     f"{r['validator']['refused']} | "
+                     + ("refused even unvalidated" if r["bypass"]["refused_even_unvalidated"] else fmt(r["bypass"]["statuses"]))
+                     + " | " + (f"{rel['projection']} / {rel['next-event']} / {rel['exact-state']}" if rel else "-") + " |")
+    lines += ["", "Head results: `HEAD` a record, `NONE` X_⊥, `CONFLICT` a genuine fork or dispute on a valid state, "
+              "`UNKNOWN` the state fails the integrity check. A consistent omission is the state of a replica that "
+              "has not received some events: it passes the boundary, and a rolled-back invalidation restores a "
+              "stale head (residual risk: snapshots are not authenticated). Projection equivalence does not imply "
+              "behavioral equivalence (an omitted pending event), and behavioral equivalence does not imply "
+              "exact-state equivalence (an omitted rejected event).", ""]
+    return lines
+
+
 def metamorphic_results() -> tuple[list[Result], str]:
     """METAMORPHIC_CONSISTENCY: relations on the corrected replica, calibrated
     by negative controls; plus the core encoding round-trip."""
@@ -388,13 +482,7 @@ def metamorphic_results() -> tuple[list[Result], str]:
                           "metamorphic-relation", f"{len(mm.KINDS)} replica source instances",
                           f"{r.checks:,} comparisons; {r.coverage_note()}", assume,
                           detail="\n".join(w.pretty() for w in r.witnesses)))
-    table = mm.corruption_table()
-    missed = [n for n, inf, thaw, mech in table if thaw != inf or mech["exact-state"] != inf]
-    out.append(Result("METAMORPHIC: corrupted snapshots fail closed at thaw; exact state sees each",
-                      Verdict.FAIL if missed else Verdict.PASS, "corruption-injection",
-                      f"{len(mm.KINDS)} replica source instances",
-                      f"{len(table)} corruption classes, each refused wherever it infects",
-                      detail=f"missed: {missed}"))
+    out += snapshot_integrity_results()
     v1 = mm.instances(mm.KINDS_V1)
     v1_broken = [n for n, r in [("order", mm.order_invariance(v1)), ("duplicate", mm.duplicate_idempotence(v1)),
                                 ("projection", mm.lineage_projection(v1)),
@@ -426,11 +514,21 @@ def metamorphic_results() -> tuple[list[Result], str]:
     unkilled_rel = [r for r in mm.RELATIONS if not any(m[(r, f)].category == mm.Cell.KILLED for f in mm.FLAGS)]
     unkilled_mut = [f for f in mm.FLAGS if not any(m[(r, f)].category == mm.Cell.KILLED for r in mm.RELATIONS)]
     errors = [k for k, v in m.items() if v.errors]
-    partial = [f"{f} × {r}" for (r, f), c in m.items() if c.category == mm.Cell.KILLED and c.detecting != c.eligible]
-    out.append(Result("METAMORPHIC: every kill detects the mutant in every eligible instance",
-                      Verdict.UNKNOWN if errors else (Verdict.FAIL if partial else Verdict.PASS),
-                      "relation-x-mutant-matrix", f"{len(mm.KINDS)} instances, evaluated one at a time",
-                      "kill breadth = detecting / eligible", detail=f"partial: {partial}"))
+    anomalies = mm.matrix_anomalies(m) + mm.matrix_anomalies(m_v1)
+    out.append(Result("METAMORPHIC: matrix denominators complete (eligible ⊇ deviating ⊇ detecting, per instance)",
+                      Verdict.UNKNOWN if errors else (Verdict.FAIL if anomalies else Verdict.PASS),
+                      "relation-x-mutant-matrix", f"{len(mm.KINDS)} and {len(mm.KINDS_V1)} instances, one at a time",
+                      "frozen eligibility predicates; deviation by lockstep differential execution; no deviation "
+                      "outside eligibility, no detection without deviation",
+                      detail="\n".join(anomalies)))
+    v1_pub = mm.published_v1_categories(mm.PUBLISHED_V1_TABLE)
+    changed = mm.v1_to_v2_changes(v1_pub, m)
+    explained = {k: (a, b) for k, (a, b, _why) in mm.V1_TO_V2_CHANGES.items()}
+    out.append(Result("METAMORPHIC: every category change from the published v1 matrix is explained",
+                      Verdict.PASS if changed == explained else Verdict.FAIL, "matrix-versioning",
+                      "v1 as published at b535b1a vs v2", f"{len(changed)} changed cells, each with a recorded reason",
+                      detail=f"unexplained: {sorted(set(changed) - set(explained))}; "
+                             f"stale: {sorted(set(explained) - set(changed))}"))
     vd = lambda bad: Verdict.UNKNOWN if errors else (Verdict.FAIL if bad else Verdict.PASS)  # noqa: E731
     out.append(Result("METAMORPHIC: every relation kills a negative control", vd(unkilled_rel),
                       "relation-x-mutant-matrix", f"{len(mm.RELATIONS)} relations × {len(mm.FLAGS)} mutants",
@@ -438,29 +536,37 @@ def metamorphic_results() -> tuple[list[Result], str]:
     out.append(Result("METAMORPHIC: every negative control is killed", vd(unkilled_mut),
                       "relation-x-mutant-matrix", f"{len(mm.RELATIONS)} relations × {len(mm.FLAGS)} mutants",
                       detail=f"unkilled mutants: {unkilled_mut}"))
+    ax = mm.alphabet_exercise()
+    gap = ax["rejection_rules_not_exercised"]
+    out.append(Result("METAMORPHIC: declared event alphabet exercised, boundary events handled only as declared",
+                      Verdict.PASS if not ax["never_delivered"] and not ax["unexpected"] and not gap
+                      else Verdict.FAIL, "alphabet-exercise",
+                      f"{ax['events']} events and declared sequences × every serialized prefix",
+                      f"{ax['deliveries']:,} deliveries; {len(mm.REJECTION_RULES) - len(gap)}/{len(mm.REJECTION_RULES)} "
+                      "rejection rules exercised (cross-lineage through a declared two-event sequence)",
+                      detail=json.dumps({k: ax[k] for k in ("never_delivered", "unexpected", "rejection_rules_not_exercised")})))
     probe = mm.order_invariance([mm.EQUIVOCATION_PROBE])
     flagged = mm.shared_precondition(mm.EQUIVOCATION_PROBE)
     sec = ["## Metamorphic relations × negative controls", "",
-           "KILLED = relation violated; survived = the deviant branch ran and the relation held; "
-           "not reached = this relation's inputs never reach a branch another relation does exercise "
-           "(source-input adequacy); equivalent? = no relation exercises the mutant (excluded from "
-           "the score). Numbers are deviant-branch executions; a kill resting on very few is thin "
-           "evidence. Preconditions and justifications: `docs/METAMORPHIC.md`.", "",
-           f"**Matrix v2** ({len(mm.KINDS)} source instances; history and the reasons for changed "
-           "cells: `docs/METAMORPHIC_MATRIX_HISTORY.md`):", "", mm.matrix_markdown(m), "",
-           f"**Frozen v1 fixtures under the current code** ({len(mm.KINDS_V1)} instances; same "
-           "categories, smaller denominators):", "", mm.matrix_markdown(m_v1), "",
-           "**Deliberately corrupted snapshots** (*infected* = instances where the corruption changed "
-           "the frozen state). Thaw validation refuses each; the later columns show what each layer "
-           "catches on its own with validation *off*:", "",
-           "| Corruption | Infected | Refused at thaw | Projection | Next event | Exact state |",
-           "|---|---|---|---|---|---|",
-           *(f"| {n} | {inf}/{len(mm.KINDS)} | {thaw} | {mech['projection']} | {mech['next-event']} | "
-             f"{mech['exact-state']} |" for n, inf, thaw, mech in table),
-           "",
-           "Projection equivalence does not imply behavioral equivalence (a lost pending queue is "
-           "invisible until the deferred event's dependency arrives), and behavioral equivalence does "
-           "not imply exact-state equivalence (a lost duplicate filter never shows in behavior).", "",
+           "Per cell: **E** eligible instances (frozen predicate over the inputs the relation can deliver, "
+           "never an outcome), **D** deviating (eligible, and the mutant behaves differently from the correct "
+           "replica on some execution the relation performs), **K** detecting (deviating, and the relation is "
+           "violated). Exposure = D/E, detection breadth = K/D. KILLED: K > 0; survived: D > 0 = K; not "
+           "reached: E > 0 = D; n/a: no eligible instance; equivalent?: no relation's inputs make the mutant "
+           "deviate. Preconditions and justifications: `docs/METAMORPHIC.md`.", "",
+           f"**Matrix v2** ({len(mm.KINDS)} source instances; history, the published v1 table and the reason "
+           "for every changed cell: `docs/METAMORPHIC_MATRIX_HISTORY.md`):", "", mm.matrix_markdown(m), "",
+           f"**Frozen v1 fixtures under v2** ({len(mm.KINDS_V1)} instances; same categories):", "",
+           mm.matrix_markdown(m_v1), "",
+           *snapshot_integrity_section(),
+           "**Declared alphabet, exercised.** Every event of the serialization alphabet delivered after every "
+           "serialized prefix, to a correct replica; how the replica handled each boundary event:", "",
+           "| Boundary event | Handling (count) |", "|---|---|",
+           *(f"| {b} | " + ", ".join(f"{o} {n}" for o, n in sorted(c.items())) + " |" for b, c in ax["boundary"].items()),
+           "", f"Rejection rules exercised: {', '.join(f'{r} ({n})' for r, n in ax['rejection_rules_exercised'].items())}. "
+           f"Not exercised: {', '.join(gap) or 'none'}. No single event after a single-lineage prefix can reach "
+           "the cross-lineage rule (both ends must be admitted), so a declared two-event sequence does; a direct "
+           "unit test covers the rule separately, as narrower evidence.", "",
            "**Known limitation (outside the precondition):** with Byzantine equivocation (two "
            "different admissions for one record id), the outcome depends on delivery order. The "
            f"precondition checker flags the probe ({'; '.join(flagged)}), which is why it is excluded. "

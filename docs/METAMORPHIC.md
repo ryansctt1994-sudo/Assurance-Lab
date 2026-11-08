@@ -88,53 +88,61 @@ is not observed.
 | Duplicate-message idempotence | the duplicate is identical to an event already delivered | redelivery of a seen event is a no-op; effects are idempotent | `replay_readmits` (a replayed admission revives an invalidated record) |
 | Unrelated-lineage projection | the added lineage shares no ids and has no cross-lineage references | every replica rule is per lineage | `global_dispute` (a dispute anywhere blocks every lineage) |
 | Identifier-renaming equivariance | bijections on record ids and principal names; `seq` and lineage names fixed | ids and names are used only for equality and membership; forward order comes from `seq`; roots are recomputed for renamed ids | `rid_tiebreak` (silent arbitration by smallest id), `principal_order_quorum` (identity compared by name order) |
-| Serialization round-trip: finite-domain exhaustive projection testing **plus exact-state restoration verification over a declared event alphabet** | the frozen form is the complete state | `thaw(freeze(r))` rebuilds every field of the exact-state contract, so the copy has the same projection, the same exact state, and the same response to **every event of the declared finite alphabet** (all instances' events, both lineages, eight invalid and boundary events), but **not** to every event the API could accept. Reference: a never-serialized re-execution under the same flags | `freeze_drops_invalidated`, plus six snapshot corruptions |
+| Serialization round-trip: finite-domain exhaustive projection testing **plus exact-state restoration verification over a declared event alphabet** | the frozen form is the complete state | `thaw(freeze(r))` rebuilds every field of the exact-state contract, so the copy has the same projection, the same exact state, and the same response to **every event of the declared finite alphabet** (all instances' events, both lineages, eleven invalid and boundary events), but **not** to every event the API could accept. Reference: a never-serialized re-execution under the same flags | `freeze_drops_invalidated`, plus thirteen snapshot corruptions in three classes |
 | `ac-state-v1` round-trip (core) | versioned canonical encoding | `decanon` inverts `canon`; decoded states enable the same steps | a codec that drops `retracted` (test) |
 
 **Not claimed for the core model:** lineage projection. Core lineages share
 global state (authority levels, semantic version), so adding a lineage is
 not semantics-preserving there.
 
-**Calibration.** Each mutant counts executions of its deviant branch, so the
-relation × mutant matrix in `docs/RESULTS.md` distinguishes:
+**Calibration: three denominators per cell.** For each relation × mutant
+cell, over every source instance:
 
-- **KILLED**: the relation was violated;
-- **survived**: the branch ran and the relation held (correct when the
-  relation can't see that kind of fault);
-- **not reached**: this relation's inputs never reach a branch that some
-  other relation does exercise. That's a source-input adequacy observation
-  about this relation, often by design, because its precondition excludes the
-  triggering input (order invariance has no duplicates, so it can't reach
-  `replay_readmits`);
-- **equivalent?**: no relation ever exercises the mutant. It's a candidate
-  equivalent or unreachable mutant, excluded from the mutation score's
-  denominator (currently none: the score is 7/7).
+- **eligible (E)**: the instance satisfies the mutant's frozen predicate
+  (`ELIGIBILITY`) over the events the relation *can* deliver, and the
+  relation performs the operation the mutated code is in. Never defined by
+  an outcome;
+- **deviating (D)**: eligible, and on some execution the relation performs
+  the mutant and the correct replica, run in lockstep, differ: state after a
+  step, the head for the two head-time mutants, or a refused restore;
+- **detecting (K)**: deviating, and the relation is violated.
 
-**Measuring kills.** Relations stop at the first witness per source
-instance, so a deviant-branch count on a KILLED cell only measures
-exercise *until detection*. KILLED cells therefore report **kill breadth**:
-in how many source instances the mutant was caught. An external audit
-(at `e63a326`) correctly flagged `freeze_drops_invalidated` and
-`naive_stale_guard` as thinly killed (2 executions each). Four targeted
-instances (invalidation and out-of-order chains) were added; they are now
-killed in 6/12 and 5/12 instances.
+Exposure rate = D/E; detection breadth = K/D. Categories: **KILLED** (K > 0),
+**survived** (D > 0, K = 0: correct when the relation cannot see that kind of
+fault), **not reached** (E > 0, D = 0: the relation's inputs never trigger the
+deviation, often by design, e.g. order invariance has no duplicates), **n/a**
+(no eligible instance: the relation cannot reach the mutated code at all),
+**equivalent?** (no relation's inputs make the mutant deviate; excluded from
+the score, currently none: 7/7). Anomalies fail the campaign: a deviation on
+an ineligible instance (the predicate under-approximates) or a detection
+without a deviation. Recorded deviations replay.
+
+Partial breadth stays visible. `rid_tiebreak` deviates in 7 instances under
+renaming but is detected in 2: in the other 5 the fork is resolved by the
+end, so the arbitration only ever shows transiently, and the relation
+compares final observations. `global_dispute` is detected in 9 of 12 under
+projection: in 3, L's own final head is CONFLICT either way. An earlier
+draft (`0fe2c2b`) defined eligibility by the outcome and reported both as
+full breadth; that claim is withdrawn (`docs/METAMORPHIC_MATRIX_HISTORY.md`).
 
 **Sampled versus exhaustive** is reported per relation. Order invariance is
 exhaustive on 11/12 instances and samples one (`fork+dispute+escalation`:
 4,713 distinct of 40,320 orders). Lineage projection is exhaustive on all 12
 (every interleaving that preserves each lineage's own order).
 
-**Serialization scope and corruption.** Restored replicas are compared
-against a never-serialized reference on every event of a **declared finite
-event universe**: all source instances' events, both lineages. That is not
-every event the API could accept. Prefixes come from the causal and the
-reversed delivery order, so states with deferred events are serialized too;
-the first version used causal prefixes only, so a dropped pending queue was
-never even infected. Two criteria apply: observational, and exact state (a
-correct thaw is exact). Six deliberate corruptions of the frozen state are
-each rejected in every instance they infect. Losing the duplicate filter is
-unobservable, because effects are idempotent, so only the exact-state
-criterion rejects it.
+**Serialization scope.** Restored replicas are compared against a
+never-serialized reference on every event of a **declared finite event
+alphabet**: all source instances' events, both lineages, and eleven invalid
+and boundary events. That is not every event the API could accept. Prefixes
+come from the causal and the reversed delivery order, so states with
+deferred events are serialized too. `alphabet_exercise` delivers every
+alphabet event after every serialized prefix and records how the replica
+handled it: every boundary event is exercised and handled only as declared
+(`BOUNDARY_EXPECT`), and all 9 of the replica's rejection rules are
+exercised. No single event after a single-lineage prefix can reach the
+cross-lineage edge rule (both ends must be admitted), so the alphabet
+declares a two-event sequence that does: admit `m0`, then `Edge(r0->m0)`. A
+direct unit test covers the rule too, as narrower, separate evidence.
 
 **Preconditions are machine-checked**, not just stated:
 `precondition_violations()` verifies on every source instance that ids are
@@ -194,20 +202,56 @@ precondition). `exact_state` extracts these fields directly. It deliberately
 does **not** call `freeze`: comparing two outputs of the serializer under
 test would hide any field the serializer drops on both sides.
 
-**Explicit invariant:** projection equivalence ⇏ behavioral equivalence ⇏
-exact-state equivalence. Measured, not assumed: a dropped pending queue is
-projection-equal but behaves differently later, and a dropped duplicate
-filter is behaviorally equal but not exact-state equal.
+**The defect, and what was retained.** A damaged snapshot (one admitted
+record dropped) made `head()` raise `KeyError` in two places. Both
+counterexamples are kept as data (`tests/fixtures/snapshot_counterexamples.json`,
+recipes `RETAINED_COUNTEREXAMPLES`), and a test replays them against the
+code loaded from git: they still crash `b535b1a`, where they were found, and
+the published main baseline `c175fbd`, which has the same defect and is not
+repaired. Everything below is development-lineage evidence only.
 
-**Fail-closed restoration.** `Replica.thaw` validates integrity (every
-effect is explained by a seen event; every seen event is applied, pending,
-or recorded as rejected) and refuses an inconsistent snapshot with
-`CorruptSnapshot`. Building this exposed that a damaged snapshot could make
-`head()` raise `KeyError` in two places: an earlier check had short-circuited
-before `head()` ran. `head()` now also fails closed to CONFLICT on
-inconsistent state (defense in depth). The validator accepts every genuine
-state: the replica model checker thaws all of its roughly 31k explored states
-through it.
+**Three outcomes that stay distinct.**
+
+| Outcome | Where | Meaning |
+|---|---|---|
+| `INVALID_SNAPSHOT` | `thaw` raises `CorruptSnapshot` | the snapshot is not the shape `freeze` emits, or fails the integrity check; sorted reasons, identical in every process and under every hash seed |
+| `CONFLICT` | `head()` | a state that **passes** the integrity check and has an unresolved fork, disputed resolutions, or several eligible records |
+| `UNKNOWN` | `head()` | the state **fails** the integrity check (reachable only if the boundary was bypassed); the reason starts with `integrity:`. Never a record, never CONFLICT |
+
+`explain_head` returns the status with its reason. It is read-only: tests
+check every field before and after on every genuine and every damaged
+state. The integrity check covers types, accounting (every effect explained
+by a seen event; every seen event exactly applied, pending or rejected), and
+rules (every applied edge and resolution satisfies the correct rule for
+applying it). No genuine state fails it: every serialized prefix of every
+instance and every snapshot the replica model checker explores passes, and
+the checker treats UNKNOWN on an explored state as a safety violation, per
+state and again at quiescence (each shown failing a negative control).
+
+*Correction.* The `0fe2c2b` commit said the validator accepts "~31k explored
+states". That was the 2-replica scenarios' count of **network states**
+(31,612), which contain only 158 distinct replica snapshots. State visits,
+distinct snapshots and validation calls are different quantities, and the
+v2 acceptance receipt counts each separately for every scenario (all ten
+clean scenarios: 348,980 network states, 2,728 distinct snapshots summed per
+scenario, 2,799,270 validating thaws, zero refused, zero UNKNOWN).
+
+**Corruption classes, with each control reported separately.** *Inconsistent*
+(effects without evidence, evidence without effects, effects the rules
+forbid) and *malformed* (wrong shape or types) snapshots must be refused at
+the boundary wherever they change the snapshot; every one is. With the
+boundary bypassed (`thaw(validate=False)`, a diagnostic only, never
+evidence that the boundary works), `head()` answers UNKNOWN on every damaged
+state. *Consistent omissions* are different: the damaged snapshot is exactly
+the state of a replica that has not received some events, so no
+snapshot-local check can refuse it. Integrity is not authenticity: a
+rolled-back invalidation passes the boundary and restores a stale head.
+Catching that needs authenticated snapshots, which are not modeled; it is
+listed as a residual risk. On omissions the relation's layers are measured
+with the boundary on: an omitted pending event is projection-equal but
+behaves differently later, and an omitted rejected event behaves the same
+but is not exact-state equal. So projection equivalence ⇏ behavioral
+equivalence ⇏ exact-state equivalence.
 
 Matrix versions and the reasons for changed cells:
 `docs/METAMORPHIC_MATRIX_HISTORY.md`.

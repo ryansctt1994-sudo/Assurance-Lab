@@ -25,40 +25,62 @@ Suite mutation score 7/7. External audit (at `e63a326`, same matrix
 shape) findings A2 and A3 apply to this version: the serialization scope was
 overstated, coverage was unlabeled, and two kills were thin.
 
-## v2: this branch (report bound to the commit in `docs/RESULTS.md`)
+## v2 draft at `0fe2c2b`: withdrawn before freezing
 
-What changed, in order:
+The draft measured "kill breadth = detecting eligible / eligible", where an
+instance was *eligible* when the mutant made an effective deviation at the
+point the relation observes. That defines the denominator by the outcome,
+and it hid narrow exposure: a mutant that deviates in many instances but is
+seen in few read as full breadth. Its "every KILLED cell is full breadth"
+claim is withdrawn. Under complete denominators (below):
 
-1. **Metric.** Raw branch counts measured exercise *until detection*, not
-   exposure. Cells are now evaluated **one source instance at a time**:
-   kill breadth = detecting eligible instances / eligible instances, where an
-   instance is *eligible* when the mutant makes an **effective deviation**
-   in it (changes state or result relative to the correct rule; executing the
-   branch harmlessly does not count). Ineligible and errored instances are
-   counted separately.
-2. **Serialization relation.** Prefixes from the causal *and* the reversed
-   order (so deferred events exist). Responses compared on a **declared
-   finite event alphabet**: all instances' events, both lineages, plus eight
-   invalid and boundary events. Exact-state comparison uses an independent
-   extractor (`exact_state`), not the serializer under test. `thaw` validates
-   snapshot integrity and refuses inconsistent ones (fail closed).
-3. **Fixtures.** Four targeted instances were added for the two thin kills
-   (`KINDS` = 12). The v1 fixture set is kept frozen and re-run under the v2
-   code, so the expanded fixtures cannot silently improve the baseline's
-   numbers (both appear in the report).
+| Draft claim | Corrected (E / D / K) |
+|---|---|
+| `rid_tiebreak` × renaming 2/2 | 7 / 7 / 2: deviates transiently in 7 instances, detected in 2 |
+| `global_dispute` × projection 9/9 | 12 / 12 / 9: in 3 instances L's final head is CONFLICT either way |
+| the other five KILLED cells | full breadth stands: 2/2/2, 5/5/5, 6/6/6, 5/5/5, 6/6/6 |
 
-**Cells whose category changed from v1 to v2.** Both changed because of the
-relation upgrade (change 2), not the fixtures; they read the same on the
-frozen v1 fixtures under v2 code:
+The draft also reported snapshot corruptions "with validation off" per
+layer. With `head()` now failing closed to UNKNOWN, those numbers would
+credit the projection comparison for what the integrity guard did, so they
+are replaced (see `docs/METAMORPHIC.md`).
+
+## v2: frozen with this change (report bound to the commit in `docs/RESULTS.md`)
+
+**Schema.** Per (relation, mutant), over every source instance, three
+quantities, each defined independently of the outcome it is compared with:
+
+| Quantity | Definition |
+|---|---|
+| Eligible (E) | the instance satisfies the mutant's frozen predicate (`ELIGIBILITY`) over the events the relation can deliver (`alphabet`), and the relation performs the operation the mutated code is in |
+| Deviating (D) | eligible, and on some execution the relation performs (`_programs`, the same sets as the relation itself) the mutant and the correct replica differ, run in lockstep: state after a step, or head for the two head-time mutants, or a mutant snapshot refused at thaw |
+| Detecting (K) | deviating, and the relation is violated on that instance |
+
+Exposure rate = D/E; detection breadth = K/D. Anomalies fail the campaign:
+a deviation on an ineligible instance (the predicate under-approximates), a
+detection without a deviation, an errored instance. A new category, **n/a**,
+marks cells with no eligible instance. Each deviation is recorded with its
+execution and step, and replays (`test_deviation_witnesses_replay`).
+
+**Alphabet.** The serialization alphabet gained three boundary resolutions
+(tampered post-state root, winner = loser, under-quorum) and one declared
+two-event sequence (admit `m0`, then `Edge(r0->m0)`), so all 9 of the
+replica's rejection rules are exercised from it. The cross-lineage rule
+cannot be reached by any single event after a single-lineage prefix, which
+is why it needs the sequence. The matrix categories did not change.
+
+**Cells whose category differs from v1** (exactly these; the suite fails on
+any other, `V1_TO_V2_CHANGES`):
 
 | Cell | v1 | v2 | Reason |
 |---|---|---|---|
-| `naive_stale_guard` × serialization | not reached | survived | reversed-order prefixes create out-of-order edge arrivals, which reach the naive guard's branch; the relation correctly doesn't flag it (restored and reference share the mutant) |
-| `global_dispute` × serialization | not reached | survived | the event alphabet now includes the unrelated lineage's events, which create the cross-lineage dispute the mutant reacts to; same reason it survives |
+| `naive_stale_guard` × serialization | not reached | survived | prefixes of the reversed order make edges arrive out of order, which reaches the naive guard; restored and reference replicas share the mutant, so the relation correctly holds |
+| `global_dispute` × serialization | not reached | survived | the alphabet includes the unrelated lineage's admissions, so a dispute in L meets a head query for M; restored and reference share the mutant |
+| `global_dispute` × order, duplicate, renaming | not reached | n/a | a single-lineage alphabet cannot reach the cross-lineage branch: no instance is eligible (v1 had no eligibility predicate) |
+| `freeze_drops_invalidated` × order, duplicate, projection, renaming | not reached | n/a | these relations never serialize, so the mutated `freeze()` never runs (v1 had no eligibility predicate) |
 
-**Kill breadth in v2** (every KILLED cell is full breadth, detecting every
-eligible instance): `first_applied_wins` 2/2, `naive_stale_guard` 5/5 (v1
-fixtures 2/2), `replay_readmits` 6/6, `global_dispute` 9/9,
-`rid_tiebreak` 2/2, `principal_order_quorum` 5/5,
-`freeze_drops_invalidated` 6/6 (v1 fixtures 2/2). The authoritative v2
-tables, both fixture sets, are generated into `docs/RESULTS.md`.
+The v1 numbers (raw branch executions) and v2's (E / D / K) are different
+metrics and are not compared numerically. The frozen v1 fixtures are re-run
+under v2 and give the same categories. Both tables are generated into
+`docs/RESULTS.md`; the acceptance receipt for this version is under
+`receipts/`.

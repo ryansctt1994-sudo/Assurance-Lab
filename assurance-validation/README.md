@@ -35,7 +35,7 @@ expected values), before running anything.
    independent timestamp, such as a comment on a GitHub issue or a commit
    pushed to your own repository. Record where in `r1/timestamp-anchor.json`,
    for example `{"url": "...", "published_utc": "..."}`. Do not look at
-   `docs/RESULTS.md` or compare numbers before this step.
+   `docs/RESULTS.md`, `docs/reports/`, or compare numbers before this step.
 
 3. **Reconcile** (the reveal):
 
