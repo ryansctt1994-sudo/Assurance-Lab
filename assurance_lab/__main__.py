@@ -275,8 +275,9 @@ def render(results: list[Result], receipt: dict, meta: dict, drifted: bool,
         f"- `assurance_lab/` working tree at start: **{receipt['model_tree']}**",
         f"- SHA-256 over executed `assurance_lab/**/*.py` at start: `{receipt['source_sha256']}`",
         f"- Same digest from git objects at the commit: `{receipt['git_object_sha256']}`",
-        f"- Import origins: {procs_checked} process(es) checked (parent + pool workers, "
-        f"start method `{receipt['start_method']}`); outside executed tree: "
+        f"- Import origins verified in every process that ran campaign code: the parent + "
+        f"{max(procs_checked - 1, 0)} pool worker(s) that executed jobs (start method "
+        f"`{receipt['start_method']}`); outside executed tree: "
         f"**{len(foreign) if foreign else 'none'}**",
         f"- Executed source re-hashed at end: **{'MISMATCH' if drifted else 'unchanged'}**",
         f"- Core domain: {receipt['core_domain']}",
