@@ -17,8 +17,31 @@ Pure Python ≥3.10, no runtime dependencies.
 pip install pytest
 python -m pytest -q                 # ~100 tests, a few minutes
 python -m assurance_lab             # quick verification campaign
-python -m assurance_lab --full --out docs/RESULTS.md   # headline domain, ~3 min on 4 cores
+python -m assurance_lab --full --out docs/RESULTS.md   # headline domain, ~6 min on 4 cores
 ```
+
+Exit codes: `0` all obligations PASS · `1` some obligation FAIL/UNKNOWN ·
+`2` refused (dirty `assurance_lab/` tree with `--out`) · `3` source changed
+during the run.
+
+## How results are bound to code
+
+- A **start receipt** (commit, SHA-256 over `assurance_lab/**/*.py`, domains,
+  worker count, command) is captured *before* enumeration and never recomputed.
+- `--out` **refuses a dirty `assurance_lab/` tree** unless `--allow-dirty`,
+  which is then flagged at the top of the report.
+- The source is **re-hashed at the end**; a mismatch marks the report
+  INVALID PROVENANCE and fails the gate even if every obligation passed.
+  (Pool workers under spawn/forkserver re-import the package from disk, so a
+  mid-run edit is not harmless.)
+- **Claims carry no run-dependent values.** Timing and environment sit in a
+  trailing "Run metadata" section, so two reports of the same code differ
+  only there.
+- Induction totals are tested to be **worker-count invariant** (plain
+  sequential loop vs. a 2-worker process pool).
+- **Green CI ≠ full induction.** PR CI runs the tests and the quick
+  campaign; the full campaign runs only on `main` or by manual dispatch.
+  `docs/RESULTS.md` comes from a local `--full` run whose receipt it records.
 
 ## What is here
 
