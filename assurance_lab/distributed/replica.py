@@ -77,6 +77,23 @@ class ResolutionPolicy:
 
 
 CONFLICT = "CONFLICT"
+#: head() on a state whose records reference ones that are not admitted (only
+#: reachable when a snapshot is restored without validation). Never a record,
+#: None or CONFLICT: a damaged state must not look like an authority decision.
+UNKNOWN = "UNKNOWN"
+#: Outcome of a refused restore (``CorruptSnapshot.status``).
+INVALID_SNAPSHOT = "INVALID_SNAPSHOT"
+
+
+class CorruptSnapshot(ValueError):
+    """``thaw`` refused a snapshot: the INVALID_SNAPSHOT outcome. ``problems``
+    is sorted, so a given snapshot always gives the same reasons."""
+
+    status = INVALID_SNAPSHOT
+
+    def __init__(self, problems):
+        self.problems = tuple(sorted(set(problems)))
+        super().__init__("; ".join(self.problems))
 
 
 @dataclass
@@ -237,10 +254,13 @@ class Replica:
     def head(self, lineage: str) -> Optional[str]:
         """Derived current authority for a lineage.
 
-        Returns a record id, None (X_⊥ / nothing eligible), or CONFLICT
-        (unresolved fork, fail closed). Delivery order is never authority
+        Returns a record id, None (X_⊥ / nothing eligible), CONFLICT
+        (unresolved fork, fail closed), or UNKNOWN when the state references
+        records that are not admitted. Delivery order is never authority
         order: the answer is a function of the delivered *set*.
         """
+        if self.reference_problems():
+            return UNKNOWN  # AL-SNAPSHOT-001: dangling references; no authority is derived
         members = [a for a in self.admitted.values() if a.lineage == lineage]
         if any(self.admitted[src].lineage == lineage and self.decision(src)[0] == "disputed"
                for src in self.resolutions):
@@ -279,11 +299,44 @@ class Replica:
         )
 
     @classmethod
-    def thaw(cls, policy: ResolutionPolicy, frozen: tuple, **flags) -> "Replica":
+    def thaw(cls, policy: ResolutionPolicy, frozen: tuple, validate: bool = True, **flags) -> "Replica":
+        """Restore a frozen replica. With ``validate`` (the default) a snapshot
+        whose records reference ones that are not admitted is refused
+        (``CorruptSnapshot``) instead of being restored into a replica whose
+        head() would fail. ``validate=False`` is for diagnostics only."""
         adm, edges, inv, res, rej, pend, seen = frozen
-        return cls(policy, admitted=dict(adm), edges=set(edges), invalidated=set(inv),
-                   resolutions={k: set(v) for k, v in res}, rejected=list(rej),
-                   pending=list(pend), seen=set(seen), **flags)
+        rep = cls(policy, admitted=dict(adm), edges=set(edges), invalidated=set(inv),
+                  resolutions={k: set(v) for k, v in res}, rejected=list(rej),
+                  pending=list(pend), seen=set(seen), **flags)
+        if validate:
+            problems = rep.reference_problems()
+            if problems:
+                raise CorruptSnapshot(problems)
+        return rep
+
+    def reference_problems(self) -> list[str]:
+        """Records that reference a record which is not admitted (sorted).
+        This is referential integrity only, the defect class of
+        AL-SNAPSHOT-001; it does not check that effects match seen events."""
+        out = []
+        for rid, ev in self.admitted.items():
+            if ev.rid != rid:
+                out.append(f"admitted[{rid}] is the admission of {ev.rid}")
+        for a, b in self.edges:
+            for x in (a, b):
+                if x not in self.admitted:
+                    out.append(f"edge {a}->{b} references {x}, which is not admitted")
+        for rid in self.invalidated:
+            if rid not in self.admitted:
+                out.append(f"invalidation of {rid}, which is not admitted")
+        for src, rs in self.resolutions.items():
+            if src not in self.admitted:
+                out.append(f"resolution of {src}, which is not admitted")
+            for r in rs:
+                for c in r.candidates:
+                    if c not in self.admitted:
+                        out.append(f"resolution of {src} names candidate {c}, which is not admitted")
+        return sorted(set(out))
 
     def canonical(self) -> tuple:
         return (

@@ -103,3 +103,38 @@ def test_every_genuine_snapshot_is_still_accepted():
                 assert restored.head("L") == rep.head("L") != getattr(R, "UNKNOWN", object())
                 n += 1
     assert n == 2 * (6 + 6 + 8)
+
+
+# --- the model checker must not let the new outcomes pass silently -----------
+
+def _patched_head(pred):
+    real = Replica.head
+    return lambda self, lineage: R.UNKNOWN if pred(self) else real(self, lineage)
+
+
+def test_unknown_on_an_explored_state_fails_the_model_checker(monkeypatch):
+    from assurance_lab.distributed.mc import SCENARIOS, check_scenario
+    monkeypatch.setattr(Replica, "head", _patched_head(lambda r: len(r.seen) == 1))
+    v = check_scenario(SCENARIOS[0]).violation
+    assert v and "head UNKNOWN on an explored state" in v
+
+
+def test_unknown_at_quiescence_fails_even_without_the_per_state_check(monkeypatch):
+    """Replicas that all answer UNKNOWN agree, and that is not convergence."""
+    from assurance_lab.distributed import mc
+    sc = mc.SCENARIOS[0]
+    total = len({e for script in sc.scripts for e in script})
+    monkeypatch.setattr(mc, "safety_violations", lambda rep, lineage: [])
+    monkeypatch.setattr(Replica, "head", _patched_head(lambda r: len(r.seen) == total and not r.pending))
+    assert mc.check_scenario(sc).violation == "head UNKNOWN at quiescence"
+
+
+def test_a_refused_snapshot_is_a_recorded_model_checker_failure(monkeypatch):
+    """A refusal on an explored state is a failure with a trace, never an
+    escaping exception and never a pass."""
+    from assurance_lab.distributed.mc import SCENARIOS, check_scenario
+    real = Replica.reference_problems
+    monkeypatch.setattr(Replica, "reference_problems",
+                        lambda self: ["injected refusal"] if len(self.seen) == 2 else real(self))
+    r = check_scenario(SCENARIOS[0])
+    assert r.violation.startswith("INVALID_SNAPSHOT") and "injected refusal" in r.violation and r.trace
