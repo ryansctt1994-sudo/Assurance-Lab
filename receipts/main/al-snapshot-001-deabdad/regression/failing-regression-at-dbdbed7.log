@@ -1,0 +1,98 @@
+FFFF.                                                                    [100%]
+=================================== FAILURES ===================================
+_ test_head_on_a_damaged_snapshot_does_not_raise[CE-1 chain, reversed prefix of 4] _
+
+name = 'CE-1 chain, reversed prefix of 4'
+
+    @pytest.mark.parametrize("name", sorted(CASES))
+    def test_head_on_a_damaged_snapshot_does_not_raise(name):
+        """The reproduction: unrepaired, this raises KeyError inside head()."""
+        rep = _thaw_unvalidated(_damaged(CASES[name]))
+>       result = rep.head("L")
+                 ^^^^^^^^^^^^^
+
+tests/test_al_snapshot_001.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+assurance_lab/distributed/replica.py:258: in head
+    if not self._chain_linked(rid):
+           ^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Replica(policy=ResolutionPolicy(authorities=frozenset({'alice', 'bob', 'carol'}), min_quorum=2), naive_stale_guard=Fal...r1'), Edge(old='r1', new='r2'), Admit(rid='r1', lineage='L', seq=1, owner='bob', pred='r0'), Edge(old='r0', new='r1')})
+rid = 'r2'
+
+    def _chain_linked(self, rid: str) -> bool:
+        """Every declared predecessor edge back to a root has been applied.
+    
+        Refinement from a counterexample found here: checking only the
+        record's *own* edge let r2 (linked to r1) be eligible while r1 was
+        still unlinked from r0, so r0 and r2 both looked like heads.
+        """
+        seen = set()
+        cur = self.admitted[rid]
+        while cur.pred is not None:
+            if cur.rid in seen or (cur.pred, cur.rid) not in self.edges:
+                return False
+            seen.add(cur.rid)
+>           cur = self.admitted[cur.pred]
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'r1'
+
+assurance_lab/distributed/replica.py:221: KeyError
+_ test_head_on_a_damaged_snapshot_does_not_raise[CE-2 fork with two disputing resolutions] _
+
+name = 'CE-2 fork with two disputing resolutions'
+
+    @pytest.mark.parametrize("name", sorted(CASES))
+    def test_head_on_a_damaged_snapshot_does_not_raise(name):
+        """The reproduction: unrepaired, this raises KeyError inside head()."""
+        rep = _thaw_unvalidated(_damaged(CASES[name]))
+>       result = rep.head("L")
+                 ^^^^^^^^^^^^^
+
+tests/test_al_snapshot_001.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+assurance_lab/distributed/replica.py:245: in head
+    if any(self.admitted[src].lineage == lineage and self.decision(src)[0] == "disputed"
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <dict_keyiterator object at 0x7f1675f1aed0>
+
+>   if any(self.admitted[src].lineage == lineage and self.decision(src)[0] == "disputed"
+           ^^^^^^^^^^^^^^^^^^
+           for src in self.resolutions):
+E          KeyError: 'r0'
+
+assurance_lab/distributed/replica.py:245: KeyError
+_ test_restoring_a_damaged_snapshot_is_refused_with_stable_reasons[CE-1 chain, reversed prefix of 4] _
+
+name = 'CE-1 chain, reversed prefix of 4'
+
+    @pytest.mark.parametrize("name", sorted(CASES))
+    def test_restoring_a_damaged_snapshot_is_refused_with_stable_reasons(name):
+        corrupt = getattr(R, "CorruptSnapshot", None)
+>       assert corrupt is not None, "no refusal outcome exists for a damaged snapshot"
+E       AssertionError: no refusal outcome exists for a damaged snapshot
+E       assert None is not None
+
+tests/test_al_snapshot_001.py:82: AssertionError
+_ test_restoring_a_damaged_snapshot_is_refused_with_stable_reasons[CE-2 fork with two disputing resolutions] _
+
+name = 'CE-2 fork with two disputing resolutions'
+
+    @pytest.mark.parametrize("name", sorted(CASES))
+    def test_restoring_a_damaged_snapshot_is_refused_with_stable_reasons(name):
+        corrupt = getattr(R, "CorruptSnapshot", None)
+>       assert corrupt is not None, "no refusal outcome exists for a damaged snapshot"
+E       AssertionError: no refusal outcome exists for a damaged snapshot
+E       assert None is not None
+
+tests/test_al_snapshot_001.py:82: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_al_snapshot_001.py::test_every_genuine_snapshot_is_still_accepted
+FAILED tests/test_al_snapshot_001.py::test_head_on_a_damaged_snapshot_does_not_raise[CE-1 chain, reversed prefix of 4]
+FAILED tests/test_al_snapshot_001.py::test_head_on_a_damaged_snapshot_does_not_raise[CE-2 fork with two disputing resolutions]
+FAILED tests/test_al_snapshot_001.py::test_restoring_a_damaged_snapshot_is_refused_with_stable_reasons[CE-1 chain, reversed prefix of 4]
+FAILED tests/test_al_snapshot_001.py::test_restoring_a_damaged_snapshot_is_refused_with_stable_reasons[CE-2 fork with two disputing resolutions]
+4 failed, 1 passed in 0.05s

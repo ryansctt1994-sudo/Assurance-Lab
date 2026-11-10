@@ -1,0 +1,4 @@
+python: Python 3.13.18; pytest: pytest 9.2.0; git: git version 2.43.0
+expected tree=114fab710578bc0a69e1af486300abc9f8b8966b
+[full-suite-clone] start 2026-11-10T23:39:27Z head=deabdad605d3536a7b55110c63404abe64eecc9e tree=114fab710578bc0a69e1af486300abc9f8b8966b status=[]
+[full-suite-clone] end 2026-11-10T23:40:48Z exit=0 head=deabdad605d3536a7b55110c63404abe64eecc9e tree=114fab710578bc0a69e1af486300abc9f8b8966b status=[]

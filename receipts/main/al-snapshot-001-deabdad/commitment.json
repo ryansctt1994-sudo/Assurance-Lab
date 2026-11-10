@@ -1,0 +1,9 @@
+{
+ "output_hashes_sha256": "dd46d1f2474d33261677b70191b1afc64eb4eddbe7186b9652f2a2e1c5f91985",
+ "signed": false,
+ "status": "UNSIGNED: no signature exists for this receipt",
+ "bytes_to_sign": "output-hashes.sha256 (exactly the file's bytes; its SHA-256 is output_hashes_sha256)",
+ "sign_command": "ssh-keygen -Y sign -f <dedicated Ed25519 key, held outside this repository> -n assurance-lab-receipt output-hashes.sha256",
+ "verify_command": "ssh-keygen -Y verify -f <allowed_signers> -I <signer identity> -n assurance-lab-receipt -s output-hashes.sha256.sig < output-hashes.sha256",
+ "check_command": "sha256sum -c output-hashes.sha256"
+}

@@ -1,0 +1,15 @@
+{
+ "runs": {
+  "run-I": "python3 -I -S -B (isolated)",
+  "run-seed0": "env -i PYTHONHASHSEED=0 python3 -S -B",
+  "run-seed4242": "env -i PYTHONHASHSEED=4242 python3 -S -B"
+ },
+ "sha256": {
+  "run-I.json": "daf637888c2b39bc1e42f446322a9458c21dc131e7cf9b1d5cdaaafad23d23b5",
+  "run-I.md": "f0ee822fc3e9a1b39216088605108fc86262443216616bbd0513d2982eeef620",
+  "run-seed0.json": "daf637888c2b39bc1e42f446322a9458c21dc131e7cf9b1d5cdaaafad23d23b5",
+  "run-seed0.md": "f0ee822fc3e9a1b39216088605108fc86262443216616bbd0513d2982eeef620",
+  "run-seed4242.json": "daf637888c2b39bc1e42f446322a9458c21dc131e7cf9b1d5cdaaafad23d23b5",
+  "run-seed4242.md": "f0ee822fc3e9a1b39216088605108fc86262443216616bbd0513d2982eeef620"
+ }
+}

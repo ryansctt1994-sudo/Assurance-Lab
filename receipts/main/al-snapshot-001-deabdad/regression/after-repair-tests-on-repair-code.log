@@ -1,0 +1,12 @@
+........                                                                 [100%]
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_al_snapshot_001.py::test_head_on_a_damaged_snapshot_does_not_raise[CE-1 chain, reversed prefix of 4]
+PASSED tests/test_al_snapshot_001.py::test_head_on_a_damaged_snapshot_does_not_raise[CE-2 fork with two disputing resolutions]
+PASSED tests/test_al_snapshot_001.py::test_restoring_a_damaged_snapshot_is_refused_with_stable_reasons[CE-1 chain, reversed prefix of 4]
+PASSED tests/test_al_snapshot_001.py::test_restoring_a_damaged_snapshot_is_refused_with_stable_reasons[CE-2 fork with two disputing resolutions]
+PASSED tests/test_al_snapshot_001.py::test_every_genuine_snapshot_is_still_accepted
+PASSED tests/test_al_snapshot_001.py::test_unknown_on_an_explored_state_fails_the_model_checker
+PASSED tests/test_al_snapshot_001.py::test_unknown_at_quiescence_fails_even_without_the_per_state_check
+PASSED tests/test_al_snapshot_001.py::test_a_refused_snapshot_is_a_recorded_model_checker_failure
+8 passed in 0.10s

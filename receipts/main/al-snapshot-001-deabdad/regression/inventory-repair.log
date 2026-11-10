@@ -1,0 +1,136 @@
+tests/test_admission_reliance_verdict.py::test_admission_within_projection_yields_bound_receipt
+tests/test_admission_reliance_verdict.py::test_admission_reading_diagnostics_is_blocked
+tests/test_admission_reliance_verdict.py::test_receipt_is_insensitive_to_diagnostics_but_sensitive_to_projection
+tests/test_admission_reliance_verdict.py::test_use_without_receipt_and_undeclared_use_are_distinguished
+tests/test_admission_reliance_verdict.py::test_receipt_must_bind_current_evidence
+tests/test_admission_reliance_verdict.py::test_descendant_closure_classification_and_unknown_scope_fails_closed
+tests/test_admission_reliance_verdict.py::test_boundary_triage[g_modeled-BoundaryVerdict.COVERED]
+tests/test_admission_reliance_verdict.py::test_boundary_triage[g_outside-BoundaryVerdict.OUT_OF_SCOPE]
+tests/test_admission_reliance_verdict.py::test_boundary_triage[g_external_ok-BoundaryVerdict.ENLARGE_MODEL]
+tests/test_admission_reliance_verdict.py::test_boundary_triage[g_rogue-BoundaryVerdict.UNAUTHORIZED]
+tests/test_admission_reliance_verdict.py::test_non_compensating_authorization
+tests/test_admission_reliance_verdict.py::test_label_carries_scope
+tests/test_admission_reliance_verdict.py::test_start_receipt_binds_source_before_run
+tests/test_admission_reliance_verdict.py::test_dirty_tree_refused_unless_allowed
+tests/test_admission_reliance_verdict.py::test_source_change_during_run_is_detected
+tests/test_admission_reliance_verdict.py::test_claims_are_stable_under_run_metadata_and_drift_is_flagged
+tests/test_admission_reliance_verdict.py::test_claim_labels_contain_no_timing
+tests/test_admission_reliance_verdict.py::test_in_place_reports_are_unbound_and_fail_the_gate
+tests/test_al_snapshot_001.py::test_head_on_a_damaged_snapshot_does_not_raise[CE-1 chain, reversed prefix of 4]
+tests/test_al_snapshot_001.py::test_head_on_a_damaged_snapshot_does_not_raise[CE-2 fork with two disputing resolutions]
+tests/test_al_snapshot_001.py::test_restoring_a_damaged_snapshot_is_refused_with_stable_reasons[CE-1 chain, reversed prefix of 4]
+tests/test_al_snapshot_001.py::test_restoring_a_damaged_snapshot_is_refused_with_stable_reasons[CE-2 fork with two disputing resolutions]
+tests/test_al_snapshot_001.py::test_every_genuine_snapshot_is_still_accepted
+tests/test_al_snapshot_001.py::test_unknown_on_an_explored_state_fails_the_model_checker
+tests/test_al_snapshot_001.py::test_unknown_at_quiescence_fails_even_without_the_per_state_check
+tests/test_al_snapshot_001.py::test_a_refused_snapshot_is_a_recorded_model_checker_failure
+tests/test_core.py::test_clean_reachability_has_no_violation[2 records, 2 principals, 1 lineages, levels 0..2, sem 0..1]
+tests/test_core.py::test_clean_reachability_has_no_violation[2 records, 2 principals, 2 lineages, levels 0..2, sem 0..1]
+tests/test_core.py::test_clean_reachability_has_no_violation[3 records, 2 principals, 2 lineages, levels 0..1, sem 0..0]
+tests/test_core.py::test_clean_induction[2 records, 2 principals, 1 lineages, levels 0..2, sem 0..1]
+tests/test_core.py::test_clean_induction[2 records, 2 principals, 2 lineages, levels 0..2, sem 0..1]
+tests/test_core.py::test_clean_induction[3 records, 2 principals, 2 lineages, levels 0..1, sem 0..0]
+tests/test_core.py::test_every_action_kind_is_exercised
+tests/test_core.py::test_stable_no_current_state_is_reachable_and_inert
+tests/test_core.py::test_record_local_prune_matches_clauses[cfg0]
+tests/test_core.py::test_record_local_prune_matches_clauses[cfg1]
+tests/test_core.py::test_inv_generator_equals_brute_force_filter
+tests/test_core.py::test_inv_implies_safety_is_not_trivially_satisfied
+tests/test_core.py::test_induction_totals_are_worker_count_invariant[2 records, 2 principals, 2 lineages, levels 0..2, sem 0..1]
+tests/test_core.py::test_induction_totals_are_worker_count_invariant[3 records, 2 principals, 1 lineages, levels 0..1, sem 0..0]
+tests/test_core.py::test_induction_totals_invariant_across_start_methods[fork]
+tests/test_core.py::test_induction_totals_invariant_across_start_methods[spawn]
+tests/test_core.py::test_induction_totals_invariant_across_start_methods[forkserver]
+tests/test_core.py::test_reachable_states_are_all_generated
+tests/test_distributed.py::test_all_120_schedules_converge
+tests/test_distributed.py::test_duplicate_delivery_is_idempotent
+tests/test_distributed.py::test_out_of_order_edge_is_deferred_not_dropped
+tests/test_distributed.py::test_retained_partial_chain_counterexample
+tests/test_distributed.py::test_cross_lineage_edge_rejected
+tests/test_distributed.py::test_handoff_failure_3_naive_stale_guard_diverges
+tests/test_distributed.py::test_merge_of_concurrent_successors_is_conflict_not_choice
+tests/test_distributed.py::test_resolution_by_beneficiary_alone_is_rejected
+tests/test_distributed.py::test_beneficiary_does_not_count_toward_quorum
+tests/test_distributed.py::test_unlisted_approvers_do_not_count
+tests/test_distributed.py::test_tampered_roots_are_rejected
+tests/test_distributed.py::test_valid_resolution_converges_under_all_720_schedules
+tests/test_distributed.py::test_loser_descendants_are_not_eligible
+tests/test_distributed_mc.py::test_scenario_holds_exhaustively[chain across replicas]
+tests/test_distributed_mc.py::test_scenario_holds_exhaustively[invalidated head is X_\u22a5, not fallback]
+tests/test_distributed_mc.py::test_scenario_holds_exhaustively[fork, one independent resolver]
+tests/test_distributed_mc.py::test_scenario_holds_exhaustively[fork, beneficiary-only resolution]
+tests/test_distributed_mc.py::test_scenario_holds_exhaustively[fork, two authorities may resolve concurrently and disagree]
+tests/test_distributed_mc.py::test_scenario_holds_exhaustively[fork, disagreement escalated at epoch 2]
+tests/test_distributed_mc.py::test_retained_counterexamples_are_found[split-brain: first-applied-wins resolution]
+tests/test_distributed_mc.py::test_retained_counterexamples_are_found[handoff failure #3: naive stale-successor guard]
+tests/test_distributed_mc.py::test_concurrent_disagreement_with_third_replica
+tests/test_distributed_mc.py::test_disagreeing_resolutions_fail_closed_in_any_order
+tests/test_distributed_mc.py::test_higher_epoch_settles_a_dispute_in_any_order
+tests/test_distributed_mc.py::test_agreeing_resolutions_from_different_quorums_agree
+tests/test_mutants.py::test_mutant_is_detected_by_bfs[supersede_without_fresh_admission]
+tests/test_mutants.py::test_mutant_is_detected_by_bfs[resurrect_on_retract]
+tests/test_mutants.py::test_mutant_is_detected_by_bfs[sem_rewrite_on_role_revise]
+tests/test_mutants.py::test_mutant_is_detected_by_bfs[beneficiary_self_approval]
+tests/test_mutants.py::test_mutant_is_detected_by_bfs[self_grant]
+tests/test_mutants.py::test_mutant_is_detected_by_bfs[adjudicate_unadmitted]
+tests/test_mutants.py::test_mutant_is_detected_by_bfs[lineage_rewrite]
+tests/test_mutants.py::test_mutant_is_detected_by_bfs[cross_lineage_supersede]
+tests/test_mutants.py::test_mutant_is_detected_by_bfs[stale_successor]
+tests/test_mutants.py::test_mutant_is_detected_by_bfs[admit_into_occupied_lineage]
+tests/test_mutants.py::test_mutant_is_detected_by_bfs[invalidate_falls_back]
+tests/test_mutants.py::test_mutant_is_detected_by_bfs[diagnosis_rewrites_adjudication]
+tests/test_mutants.py::test_mutant_is_detected_by_bfs[latched_live]
+tests/test_mutants.py::test_counterexample_step_is_not_in_clean_next[supersede_without_fresh_admission]
+tests/test_mutants.py::test_counterexample_step_is_not_in_clean_next[resurrect_on_retract]
+tests/test_mutants.py::test_counterexample_step_is_not_in_clean_next[sem_rewrite_on_role_revise]
+tests/test_mutants.py::test_counterexample_step_is_not_in_clean_next[beneficiary_self_approval]
+tests/test_mutants.py::test_counterexample_step_is_not_in_clean_next[self_grant]
+tests/test_mutants.py::test_counterexample_step_is_not_in_clean_next[adjudicate_unadmitted]
+tests/test_mutants.py::test_counterexample_step_is_not_in_clean_next[lineage_rewrite]
+tests/test_mutants.py::test_counterexample_step_is_not_in_clean_next[cross_lineage_supersede]
+tests/test_mutants.py::test_counterexample_step_is_not_in_clean_next[stale_successor]
+tests/test_mutants.py::test_counterexample_step_is_not_in_clean_next[admit_into_occupied_lineage]
+tests/test_mutants.py::test_counterexample_step_is_not_in_clean_next[invalidate_falls_back]
+tests/test_mutants.py::test_counterexample_step_is_not_in_clean_next[diagnosis_rewrites_adjudication]
+tests/test_mutants.py::test_counterexample_step_is_not_in_clean_next[latched_live]
+tests/test_mutants.py::test_counterexamples_are_short
+tests/test_mutants.py::test_equivalent_mutant_is_reported_not_counted
+tests/test_mutants.py::test_mutant_is_detected_by_induction[supersede_without_fresh_admission]
+tests/test_mutants.py::test_mutant_is_detected_by_induction[resurrect_on_retract]
+tests/test_mutants.py::test_mutant_is_detected_by_induction[sem_rewrite_on_role_revise]
+tests/test_mutants.py::test_mutant_is_detected_by_induction[beneficiary_self_approval]
+tests/test_mutants.py::test_mutant_is_detected_by_induction[self_grant]
+tests/test_mutants.py::test_mutant_is_detected_by_induction[adjudicate_unadmitted]
+tests/test_mutants.py::test_mutant_is_detected_by_induction[lineage_rewrite]
+tests/test_mutants.py::test_mutant_is_detected_by_induction[cross_lineage_supersede]
+tests/test_mutants.py::test_mutant_is_detected_by_induction[stale_successor]
+tests/test_mutants.py::test_mutant_is_detected_by_induction[admit_into_occupied_lineage]
+tests/test_mutants.py::test_mutant_is_detected_by_induction[invalidate_falls_back]
+tests/test_mutants.py::test_mutant_is_detected_by_induction[diagnosis_rewrites_adjudication]
+tests/test_mutants.py::test_mutant_is_detected_by_induction[latched_live]
+tests/test_mutants.py::test_handoff_failure_1_historical_admission_is_not_successor_eligibility
+tests/test_mutants.py::test_handoff_failure_2_single_head_per_lineage
+tests/test_provenance.py::test_snapshot_matches_git_objects_and_working_tree
+tests/test_provenance.py::test_snapshot_is_read_only
+tests/test_provenance.py::test_snapshot_interpreter_and_workers_import_only_from_snapshot[fork]
+tests/test_provenance.py::test_snapshot_interpreter_and_workers_import_only_from_snapshot[spawn]
+tests/test_provenance.py::test_snapshot_interpreter_and_workers_import_only_from_snapshot[forkserver]
+tests/test_provenance.py::test_foreign_origin_detection
+tests/test_provenance.py::test_snapshot_preflight_refusals
+tests/test_provenance.py::test_manifest_round_trips
+tests/test_store.py::test_rank_then_filter_loses_live_successor
+tests/test_store.py::test_filter_then_rank_resolves_to_head
+tests/test_store.py::test_cross_lineage_supersession_rejected
+tests/test_store.py::test_stale_handle_fast_forwards_at_effect_time
+tests/test_store.py::test_read_repair_never_falls_back_to_predecessor
+tests/test_store.py::test_read_repair_fails_closed_on_fork
+tests/test_store.py::test_safe_compaction_preserves_supersession
+tests/test_store.py::test_unsafe_compaction_resurrects_stale_record
+tests/test_store.py::test_four_crash_combinations_recover[False-False]
+tests/test_store.py::test_four_crash_combinations_recover[False-True]
+tests/test_store.py::test_four_crash_combinations_recover[True-False]
+tests/test_store.py::test_four_crash_combinations_recover[True-True]
+tests/test_store.py::test_rollback_to_coherent_stale_generation_needs_checkpoint
+tests/test_store.py::test_anchor_is_monotone
+
+134 tests collected in 0.17s
