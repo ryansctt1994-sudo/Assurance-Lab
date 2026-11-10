@@ -27,7 +27,7 @@ the harness only.
 
 ```bash
 pip install pytest
-python -m pytest -q                 # 291 tests, ~12 min on 4 cores
+python -m pytest -q                 # 349 tests, ~12 min on 4 cores
 python -m assurance_lab             # quick campaign, in-place, no report
 python -m assurance_lab --full --out docs/reports/dev-$(git rev-parse --short=12 HEAD).md
                                     # headline domain from a snapshot of HEAD, ~10-20 min on 4 cores
@@ -107,8 +107,9 @@ tested bytes found no discrepancy. It closes the two items left open at
 `3c6fad1`, whose own evidence (including the receipt defect D-1) stays as
 published. **No promotion.** Core domain: 3 records, 2 principals, 2
 lineages, levels 0..2, sem 0..1. Later commits change documentation and
-evidence only; the `assurance_lab/` tree is still the tested one
-(`139d177d`).
+evidence, and add the AL-RUNTIME-001 runtime under `assurance_lab/runtime/`,
+which that report does not cover (see "Runtime" below). Every other file under
+`assurance_lab/` is still the tested one (`139d177d`).
 
 The published main baseline is a separate, older result:
 [`docs/reports/main-c175fbd.md`](docs/reports/main-c175fbd.md), 32/32,
@@ -150,6 +151,15 @@ The handoff reported 106,938 states for its v3 model. That model is not in
 this repo; this is an independent rebuild with a different state encoding,
 so the numbers are not comparable. See `docs/SPEC_MAP.md` for exactly what
 is and is not modeled.
+
+## Runtime: AL-RUNTIME-001 (E1, in progress)
+
+The runtime is a gate that writes files into a sandbox directory. It writes
+only when the replica's verified authority logic says the requester holds the
+current authority. Its contract, `docs/RUNTIME_CONTRACT.md` (version
+`al-runtime-001/e1/v1`), was frozen and pinned by a test before the gate was
+written. **The sandbox directory is not a security boundary.** The 76-obligation
+report above covers nothing in this section.
 
 ## Counterexamples found while building this repo
 
