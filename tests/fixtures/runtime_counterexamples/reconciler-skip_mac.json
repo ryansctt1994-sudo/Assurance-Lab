@@ -1,0 +1,32 @@
+{
+ "failure": {
+  "kind": "findings",
+  "model_findings": [
+   [
+    "LOG_TAMPERED",
+    "log"
+   ]
+  ],
+  "op": [
+   "tamper_log"
+  ],
+  "runtime_findings": [
+   [
+    "LOG_BEHIND_WITNESS",
+    "log"
+   ]
+  ],
+  "step": 0
+ },
+ "found_in_seed": 20,
+ "length": 30,
+ "mutant": "skip_mac",
+ "passes_without_the_mutant": true,
+ "side": "reconciler",
+ "status": "detected",
+ "trace": [
+  [
+   "tamper_log"
+  ]
+ ]
+}

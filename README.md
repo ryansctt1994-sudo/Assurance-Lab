@@ -27,7 +27,7 @@ the harness only.
 
 ```bash
 pip install pytest
-python -m pytest -q                 # 349 tests, ~12 min on 4 cores
+python -m pytest -q                 # 454 tests, ~12 min on 4 cores
 python -m assurance_lab             # quick campaign, in-place, no report
 python -m assurance_lab --full --out docs/reports/dev-$(git rev-parse --short=12 HEAD).md
                                     # headline domain from a snapshot of HEAD, ~10-20 min on 4 cores
@@ -160,6 +160,13 @@ current authority. Its contract, `docs/RUNTIME_CONTRACT.md` (version
 `al-runtime-001/e1/v1`), was frozen and pinned by a test before the gate was
 written. **The sandbox directory is not a security boundary.** The 76-obligation
 report above covers nothing in this section.
+
+| Part | Module | Tests |
+|---|---|---|
+| Gate: ordered checks, single-use request ids, two-phase effects through directory handles, fail-closed startup, explicit recovery | `runtime/gate.py` | `test_runtime_gate.py` |
+| Reconciler: the log against the witness's whole commitment history, and against the files actually in `effects/` | `runtime/reconcile.py` | `test_runtime_reconcile.py` |
+| The five specified negative controls, each shown to be caught by its own control (that control disabled, the attack succeeds) | | `test_runtime_negative_controls.py` |
+| Reference model and conformance harness: fuzzed traces with restarts, crashes, races and attacks; every gate and reconciler mutant caught; one shrunk counterexample kept per mutant | `runtime/model.py`, `runtime/harness.py` | `test_runtime_conformance.py` |
 
 ## Counterexamples found while building this repo
 

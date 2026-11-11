@@ -1,0 +1,46 @@
+{
+ "failure": {
+  "kind": "response",
+  "model": [
+   "REFUSED",
+   "FORGED_REQUEST"
+  ],
+  "op": [
+   "request",
+   {
+    "auth": "forged",
+    "cites": "r0",
+    "content": 0,
+    "id": "req-000015-711693",
+    "lineage": "M",
+    "requester": "alice",
+    "target": "a.txt"
+   }
+  ],
+  "runtime": [
+   "REFUSED",
+   "NO_AUTHORITY"
+  ],
+  "step": 0
+ },
+ "found_in_seed": 0,
+ "length": 30,
+ "mutant": "skip_auth",
+ "passes_without_the_mutant": true,
+ "side": "gate",
+ "status": "detected",
+ "trace": [
+  [
+   "request",
+   {
+    "auth": "forged",
+    "cites": "r0",
+    "content": 0,
+    "id": "req-000015-711693",
+    "lineage": "M",
+    "requester": "alice",
+    "target": "a.txt"
+   }
+  ]
+ ]
+}

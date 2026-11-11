@@ -1,0 +1,52 @@
+{
+ "failure": {
+  "kind": "response",
+  "model": [
+   "REFUSED",
+   "EFFECT_FAILED"
+  ],
+  "op": [
+   "request",
+   {
+    "auth": "valid",
+    "cites": "m0",
+    "content": 1,
+    "id": "req-000027-791446",
+    "lineage": "M",
+    "race": true,
+    "requester": "bob",
+    "target": "dir/b.txt"
+   }
+  ],
+  "runtime": [
+   "ADMITTED",
+   null
+  ],
+  "step": 1
+ },
+ "found_in_seed": 17,
+ "length": 30,
+ "mutant": "follow_symlinks",
+ "passes_without_the_mutant": true,
+ "side": "gate",
+ "status": "detected",
+ "trace": [
+  [
+   "authority",
+   9
+  ],
+  [
+   "request",
+   {
+    "auth": "valid",
+    "cites": "m0",
+    "content": 1,
+    "id": "req-000027-791446",
+    "lineage": "M",
+    "race": true,
+    "requester": "bob",
+    "target": "dir/b.txt"
+   }
+  ]
+ ]
+}

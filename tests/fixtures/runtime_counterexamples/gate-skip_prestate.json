@@ -1,0 +1,55 @@
+{
+ "failure": {
+  "kind": "response",
+  "model": [
+   "REFUSED",
+   "PATH_UNSAFE"
+  ],
+  "op": [
+   "request",
+   {
+    "auth": "valid",
+    "cites": "r0",
+    "content": 0,
+    "id": "req-000018-767022",
+    "lineage": "L",
+    "requester": "alice",
+    "target": "dir/sub/c.txt"
+   }
+  ],
+  "runtime": [
+   "REFUSED",
+   "EFFECT_FAILED"
+  ],
+  "step": 2
+ },
+ "found_in_seed": 0,
+ "length": 30,
+ "mutant": "skip_prestate",
+ "passes_without_the_mutant": true,
+ "side": "gate",
+ "status": "detected",
+ "trace": [
+  [
+   "bypass_write",
+   "L/dir/sub",
+   2
+  ],
+  [
+   "authority",
+   0
+  ],
+  [
+   "request",
+   {
+    "auth": "valid",
+    "cites": "r0",
+    "content": 0,
+    "id": "req-000018-767022",
+    "lineage": "L",
+    "requester": "alice",
+    "target": "dir/sub/c.txt"
+   }
+  ]
+ ]
+}
