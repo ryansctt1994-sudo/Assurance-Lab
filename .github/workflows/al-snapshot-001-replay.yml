@@ -1,0 +1,86 @@
+name: AL-SNAPSHOT-001 exact-commit regression replay
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/al-snapshot-001-replay.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pinned-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout candidate source with complete history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install pytest
+      - name: Verify exact source, failing baseline and passing repaired regression
+        shell: bash
+        env:
+          BASE: ba10a0c3d58e9ea2663e6b73dc763bee4bc29404
+          FIX: deabdad605d3536a7b55110c63404abe64eecc9e
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          git cat-file -e "${BASE}^{commit}"
+          git cat-file -e "${FIX}^{commit}"
+          mkdir -p replay/base replay/fix
+          git archive "$BASE" | tar -x -C replay/base
+          git archive "$FIX" | tar -x -C replay/fix
+          # Identical new regression tests run against both immutable source revisions.
+          git show "$FIX:tests/test_al_snapshot_001.py" > replay/base/tests/test_al_snapshot_001.py
+          cmp replay/base/tests/test_al_snapshot_001.py replay/fix/tests/test_al_snapshot_001.py
+          {
+            echo "baseline_commit=$BASE"
+            echo "baseline_tree=$(git rev-parse "$BASE^{tree}")"
+            echo "repair_commit=$FIX"
+            echo "repair_tree=$(git rev-parse "$FIX^{tree}")"
+            echo "regression_blob=$(git rev-parse "$FIX:tests/test_al_snapshot_001.py")"
+            echo "python=$(python --version)"
+            echo "pytest=$(python -m pytest --version)"
+          } > replay/evidence.txt
+          set +e
+          (cd replay/base && python -m pytest -p no:cacheprovider -q -rA tests/test_al_snapshot_001.py) > replay/baseline.log 2>&1
+          base_exit=$?
+          set -e
+          printf 'baseline_exit=%s\n' "$base_exit" >> replay/evidence.txt
+          if [[ "$base_exit" -eq 0 ]] || ! grep -q 'KeyError' replay/baseline.log; then
+            echo "::error::Baseline did not reproduce the expected KeyError defect"
+            cat replay/baseline.log
+            exit 1
+          fi
+          # Seven negative controls fail and one passes on the original source.
+          grep -Eq '7 failed, 1 passed' replay/baseline.log || {
+            echo "::error::Baseline result differs from preregistered 7-fail/1-pass expectation"
+            cat replay/baseline.log
+            exit 1
+          }
+          (cd replay/fix && python -m pytest -p no:cacheprovider -q -rA tests/test_al_snapshot_001.py) > replay/repaired.log 2>&1
+          grep -Eq '8 passed' replay/repaired.log || {
+            echo "::error::Repair regression summary differs from expected 8 passes"
+            cat replay/repaired.log
+            exit 1
+          }
+          {
+            echo "repaired_exit=0"
+            sha256sum replay/baseline.log replay/repaired.log
+          } >> replay/evidence.txt
+          echo "### AL-SNAPSHOT-001 fresh pinned replay" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Baseline \`$BASE\`: expected **7 FAIL, 1 PASS**, confirmed KeyError" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Repair \`$FIX\`: **8 PASS** on the same regression file" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Evidence: log hashes and pin metadata uploaded as artifacts" >> "$GITHUB_STEP_SUMMARY"
+      - name: Retain baseline and repair evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: al-snapshot-001-pinned-replay
+          path: replay/
+          if-no-files-found: warn
+          retention-days: 30
