@@ -1,0 +1,12 @@
+INTERRUPTED test-suite run (INCONCLUSIVE). Not a completed result; kept as its own record.
+
+Command: python -m pytest -q -p no:cacheprovider (working tree after the candidate's first changes:
+checker refusal handling, alphabet corpus, receipt parser; before the corpus domain reporting).
+Started ~15:00 UTC; last write to its log 15:06:01 UTC; process no longer running at 15:07:53 UTC.
+Stopped by the session's task control ("stopped by the user or by the app"), not by the operator.
+
+Observed before the log was removed: 85 "." markers (passed), 0 "F" or "E" markers,
+last progress marker "[ 24%]". About 294 tests were collected for a complete run.
+
+Raw log NOT retained: it was deleted when the suite was restarted at 15:09:19 UTC (a handling
+error by the operator). The observation above was captured from the log before deletion.

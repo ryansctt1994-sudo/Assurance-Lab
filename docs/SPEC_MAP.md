@@ -28,7 +28,7 @@ Status key: **modeled** (in the exhaustively checked core), **tested**
 | 16–17 | Three-valued verdicts, scoped labels | implemented | `verdict.py` |
 | 19–20 | Inductive obligations | modeled | `checker/induction.py`, results above |
 | 21 | Retained counterexamples | tested | `test_handoff_failure_1/2/3_*` |
-| 22 | Mutation testing | modeled | 13 mutants, BFS + induction |
+| 22 | Mutation testing | modeled | 20 mutants, BFS + induction; mutant × property coverage matrix (`docs/METAMORPHIC.md`) |
 | 23–25 | Store seam | tested | `store/retrieval.py` |
 | 26 | Crash recovery + epoch checkpoint | tested | `store/recovery.py` (anchor trust is an assumption) |
 | 27 | Schedule convergence | **modeled** (replica level) + tested | `distributed/mc.py`: 2 replicas (3 in `--full`), concurrent origination, reordering, ≤3 duplicates; convergence at every quiescent state. Plus 120 single-replica schedules |
@@ -65,8 +65,9 @@ Status key: **modeled** (in the exhaustively checked core), **tested**
 
 ## Suggested next steps
 
-1. Port the core to TLA+ and check it with TLC at the same bounds, as an
-   independent oracle (I_6R: a second implementation that doesn't share code).
+1. TLA+ oracle: spec, cfgs, dump parser, digest targets and runner are in
+   place but **UNVALIDATED**; running TLC awaits an approved execution path
+   (`docs/ORACLE.md`).
 2. Model I_1 (execution witness vs correctness) and BasisBound.
 3. ~~Replica-level model checker~~: done (`distributed/mc.py`). Next: message
    loss with retransmission, crash/recovery, and Byzantine replicas.

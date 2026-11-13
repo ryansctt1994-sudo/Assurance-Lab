@@ -1,0 +1,28 @@
+{
+ "failure": {
+  "kind": "response",
+  "model": [
+   "LOG_TAMPERED",
+   null
+  ],
+  "op": [
+   "tamper_log"
+  ],
+  "runtime": [
+   "ROLLBACK_DETECTED",
+   null
+  ],
+  "step": 0
+ },
+ "found_in_seed": 0,
+ "length": 30,
+ "mutant": "skip_log_verify",
+ "passes_without_the_mutant": true,
+ "side": "gate",
+ "status": "detected",
+ "trace": [
+  [
+   "tamper_log"
+  ]
+ ]
+}

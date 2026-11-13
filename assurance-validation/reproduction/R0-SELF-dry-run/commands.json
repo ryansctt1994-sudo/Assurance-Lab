@@ -1,0 +1,60 @@
+[
+  {
+    "argv": [
+      "python",
+      "-m",
+      "pip",
+      "install",
+      "pytest"
+    ],
+    "exit_code": 0,
+    "role": "setup",
+    "seconds": 2.2,
+    "stderr": "cmd0-setup.stderr.log",
+    "stdout": "cmd0-setup.stdout.log"
+  },
+  {
+    "argv": [
+      "python",
+      "-m",
+      "pytest",
+      "-q"
+    ],
+    "exit_code": 0,
+    "role": "test",
+    "seconds": 91.1,
+    "stderr": "cmd1-test.stderr.log",
+    "stdout": "cmd1-test.stdout.log"
+  },
+  {
+    "argv": [
+      "python",
+      "-m",
+      "assurance_lab",
+      "--out",
+      "results-quick.md"
+    ],
+    "artifact": "generated-results-quick.md",
+    "exit_code": 0,
+    "role": "quick-campaign",
+    "seconds": 29.2,
+    "stderr": "cmd2-quick-campaign.stderr.log",
+    "stdout": "cmd2-quick-campaign.stdout.log"
+  },
+  {
+    "argv": [
+      "python",
+      "-m",
+      "assurance_lab",
+      "--full",
+      "--out",
+      "results-reproduction.md"
+    ],
+    "artifact": "generated-results.md",
+    "exit_code": 0,
+    "role": "full-campaign",
+    "seconds": 620.6,
+    "stderr": "cmd3-full-campaign.stderr.log",
+    "stdout": "cmd3-full-campaign.stdout.log"
+  }
+]

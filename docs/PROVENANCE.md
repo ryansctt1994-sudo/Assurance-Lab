@@ -4,6 +4,13 @@ A verification report is only as good as the link between its numbers and
 the code that computed them. This file states what that link guarantees,
 how it is enforced, where it stops, and the evidence for each part.
 
+> **Not an immutability guarantee.** Snapshot execution closes the
+> demonstrated *working-tree* edit-and-revert attack. It does not make the
+> snapshot immutable: a sufficiently privileged process (root, in the
+> development container) can modify the snapshot and restore it before the
+> end of the run, and the end re-hash cannot see a change that was undone.
+> The random directory name provides isolation, not a security boundary.
+
 ## Threat model
 
 In scope: **accidental or careless mismatch** between the code that ran and
@@ -43,6 +50,41 @@ mechanisms below *detect* some such tampering but don't prevent it.
 7. **End re-hash.** The executed tree is hashed again at the end; any change
    means exit 3. With snapshot execution this is a second, independent check.
 8. **In-place reports are UNBOUND** and rejected (exit 3); see the evidence below.
+
+## Partition integrity (parallel induction)
+
+Self-consistency is not enough. An aggregator that drops a partition and
+recomputes everything from the rest produces a package whose counts and
+digests all agree with each other, but is incomplete. So
+(`checker/partitions.py`):
+
+- a **manifest** of the expected partitions (ids, key predicates
+  `(levels, sem_now)`, and the coverage obligation that the keys are exactly
+  `Lv^P × S`, each once, checked statically) is **frozen before execution**
+  and its content digest is recorded in the start receipt;
+- each partition yields one **evidence record** from the worker that
+  enumerated it (keys of every state generated, counts, verdict bits,
+  digests), HMAC'd under a per-run key that never appears in a report;
+- **reconciliation** checks provenance, then MAC integrity, then identity,
+  completeness, disjointness and arithmetic, and the aggregate in the report
+  is the one recomputed from verified records.
+
+| Injected fault | Outcome (tested) |
+|---|---|
+| remove a partition | rejected: incomplete coverage |
+| repeat a partition | rejected: duplicate partition identity |
+| overlap two partitions (a validly signed record over two keys) | rejected: non-disjoint coverage |
+| change the aggregate count | rejected: arithmetic inconsistency |
+| substitute a partition from another run | rejected: provenance mismatch |
+| corrupt a partition digest | rejected: integrity mismatch |
+| reorder valid partitions | accepted, identical aggregate |
+| **drop a partition and recompute a self-consistent aggregate** | **rejected: incomplete coverage** (every self-consistency check passes) |
+| a worker terminated mid-run | the pool raises; nothing is published |
+| an interruption at publication | previous report intact; no partial file (atomic temp + fsync + rename) |
+
+The HMAC detects mis-aggregation, stale or substituted evidence and
+corruption after signing. It is not a defense against a malicious worker,
+which holds the key.
 
 ## Evidence
 

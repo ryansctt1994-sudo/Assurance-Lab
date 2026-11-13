@@ -1,0 +1,73 @@
+{
+ "failure": {
+  "kind": "findings",
+  "model_findings": [
+   [
+    "LOG_BEHIND_WITNESS",
+    "log"
+   ]
+  ],
+  "op": [
+   "rollback_all",
+   4
+  ],
+  "runtime_findings": [],
+  "step": 5
+ },
+ "found_in_seed": 3,
+ "length": 30,
+ "mutant": "skip_witness",
+ "passes_without_the_mutant": true,
+ "side": "reconciler",
+ "status": "detected",
+ "trace": [
+  [
+   "request",
+   {
+    "auth": "valid",
+    "cites": "r3",
+    "content": 2,
+    "id": "req-000004-623640",
+    "lineage": "L",
+    "requester": "carol",
+    "target": "dir/b.txt"
+   }
+  ],
+  [
+   "request",
+   {
+    "auth": "valid",
+    "cites": "r0",
+    "content": 2,
+    "id": "req-000005-142573",
+    "lineage": "L",
+    "requester": "alice",
+    "target": "dir/b.txt"
+   }
+  ],
+  [
+   "request",
+   {
+    "auth": "forged",
+    "cites": "m0",
+    "content": 0,
+    "id": "req-000006-243674",
+    "lineage": "M",
+    "requester": "mallory",
+    "target": "dir//b"
+   }
+  ],
+  [
+   "authority",
+   8
+  ],
+  [
+   "authority",
+   1
+  ],
+  [
+   "rollback_all",
+   4
+  ]
+ ]
+}

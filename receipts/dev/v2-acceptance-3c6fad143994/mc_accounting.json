@@ -1,0 +1,240 @@
+{
+ "clean_totals": {
+  "clean_violations": 0,
+  "distinct_snapshots_validated": 2728,
+  "distinct_snapshots_validated_union": 2039,
+  "head_calls": 1015456,
+  "head_unknown": 0,
+  "model_checker_states_visited": 348980,
+  "refused": 0,
+  "thaw_calls": 2799270
+ },
+ "note": "model_checker_states_visited counts network states (all replicas plus in-flight messages); distinct_snapshots_validated counts distinct single-replica frozen states thawed through the validator, per scenario (the total sums them; _union counts each (policy, snapshot) once across scenarios); thaw_calls counts validations. The earlier '~31k states' wording (0fe2c2b) was the 2-replica network-state count, not a snapshot count.",
+ "rows": [
+  {
+   "distinct_snapshots_validated": 18,
+   "head_calls": 5468,
+   "head_statuses": {
+    "HEAD": 4117,
+    "NONE": 1351
+   },
+   "kind": "clean",
+   "max_dups": 3,
+   "model_checker_states_visited": 2730,
+   "quiescent": 4,
+   "refused": 0,
+   "replicas": 2,
+   "scenario": "chain across replicas",
+   "thaw_calls": 14220,
+   "transitions": 10937,
+   "violation": null
+  },
+  {
+   "distinct_snapshots_validated": 30,
+   "head_calls": 17132,
+   "head_statuses": {
+    "HEAD": 11297,
+    "NONE": 5835
+   },
+   "kind": "clean",
+   "max_dups": 3,
+   "model_checker_states_visited": 8562,
+   "quiescent": 4,
+   "refused": 0,
+   "replicas": 2,
+   "scenario": "invalidated head is X_⊥, not fallback",
+   "thaw_calls": 48836,
+   "transitions": 39446,
+   "violation": null
+  },
+  {
+   "distinct_snapshots_validated": 24,
+   "head_calls": 7988,
+   "head_statuses": {
+    "CONFLICT": 792,
+    "HEAD": 7035,
+    "NONE": 161
+   },
+   "kind": "clean",
+   "max_dups": 3,
+   "model_checker_states_visited": 3990,
+   "quiescent": 4,
+   "refused": 0,
+   "replicas": 2,
+   "scenario": "fork, one independent resolver",
+   "thaw_calls": 23216,
+   "transitions": 15767,
+   "violation": null
+  },
+  {
+   "distinct_snapshots_validated": 24,
+   "head_calls": 7988,
+   "head_statuses": {
+    "CONFLICT": 2000,
+    "HEAD": 5827,
+    "NONE": 161
+   },
+   "kind": "clean",
+   "max_dups": 3,
+   "model_checker_states_visited": 3990,
+   "quiescent": 4,
+   "refused": 0,
+   "replicas": 2,
+   "scenario": "fork, beneficiary-only resolution",
+   "thaw_calls": 23216,
+   "transitions": 15767,
+   "violation": null
+  },
+  {
+   "distinct_snapshots_validated": 30,
+   "head_calls": 11484,
+   "head_statuses": {
+    "CONFLICT": 1580,
+    "HEAD": 9743,
+    "NONE": 161
+   },
+   "kind": "clean",
+   "max_dups": 3,
+   "model_checker_states_visited": 5730,
+   "quiescent": 12,
+   "refused": 0,
+   "replicas": 2,
+   "scenario": "fork, two authorities may resolve concurrently and disagree",
+   "thaw_calls": 36558,
+   "transitions": 22311,
+   "violation": null
+  },
+  {
+   "distinct_snapshots_validated": 32,
+   "head_calls": 13244,
+   "head_statuses": {
+    "CONFLICT": 1792,
+    "HEAD": 11291,
+    "NONE": 161
+   },
+   "kind": "clean",
+   "max_dups": 3,
+   "model_checker_states_visited": 6610,
+   "quiescent": 12,
+   "refused": 0,
+   "replicas": 2,
+   "scenario": "fork, disagreement escalated at epoch 2",
+   "thaw_calls": 46468,
+   "transitions": 25561,
+   "violation": null
+  },
+  {
+   "distinct_snapshots_validated": 108,
+   "head_calls": 73368,
+   "head_statuses": {
+    "CONFLICT": 5382,
+    "HEAD": 53901,
+    "NONE": 14085
+   },
+   "kind": "clean",
+   "max_dups": 1,
+   "model_checker_states_visited": 24454,
+   "quiescent": 2,
+   "refused": 0,
+   "replicas": 3,
+   "scenario": "fork, one independent resolver (+ passive 3rd replica)",
+   "thaw_calls": 201020,
+   "transitions": 126233,
+   "violation": null
+  },
+  {
+   "distinct_snapshots_validated": 108,
+   "head_calls": 73368,
+   "head_statuses": {
+    "CONFLICT": 20634,
+    "HEAD": 38649,
+    "NONE": 14085
+   },
+   "kind": "clean",
+   "max_dups": 1,
+   "model_checker_states_visited": 24454,
+   "quiescent": 2,
+   "refused": 0,
+   "replicas": 3,
+   "scenario": "fork, beneficiary-only resolution (+ passive 3rd replica)",
+   "thaw_calls": 201020,
+   "transitions": 126233,
+   "violation": null
+  },
+  {
+   "distinct_snapshots_validated": 408,
+   "head_calls": 192540,
+   "head_statuses": {
+    "CONFLICT": 33266,
+    "HEAD": 120485,
+    "NONE": 38789
+   },
+   "kind": "clean",
+   "max_dups": 1,
+   "model_checker_states_visited": 64174,
+   "quiescent": 6,
+   "refused": 0,
+   "replicas": 3,
+   "scenario": "fork, two authorities may resolve concurrently and disagree (+ passive 3rd replica)",
+   "thaw_calls": 539499,
+   "transitions": 322599,
+   "violation": null
+  },
+  {
+   "distinct_snapshots_validated": 1946,
+   "head_calls": 612876,
+   "head_statuses": {
+    "CONFLICT": 68432,
+    "HEAD": 411767,
+    "NONE": 132677
+   },
+   "kind": "clean",
+   "max_dups": 1,
+   "model_checker_states_visited": 204286,
+   "quiescent": 6,
+   "refused": 0,
+   "replicas": 3,
+   "scenario": "fork, disagreement escalated at epoch 2 (+ passive 3rd replica)",
+   "thaw_calls": 1665217,
+   "transitions": 1007255,
+   "violation": null
+  },
+  {
+   "distinct_snapshots_validated": 31,
+   "head_calls": 7776,
+   "head_statuses": {
+    "CONFLICT": 660,
+    "HEAD": 6955,
+    "NONE": 161
+   },
+   "kind": "mutant",
+   "max_dups": 3,
+   "model_checker_states_visited": 4656,
+   "quiescent": 3,
+   "refused": 0,
+   "replicas": 2,
+   "scenario": "split-brain: first-applied-wins resolution",
+   "thaw_calls": 26927,
+   "transitions": 16821,
+   "violation": "divergence at quiescence: heads=['r1', 'r2']"
+  },
+  {
+   "distinct_snapshots_validated": 19,
+   "head_calls": 2198,
+   "head_statuses": {
+    "HEAD": 1530,
+    "NONE": 668
+   },
+   "kind": "mutant",
+   "max_dups": 3,
+   "model_checker_states_visited": 1718,
+   "quiescent": 1,
+   "refused": 0,
+   "replicas": 2,
+   "scenario": "handoff failure #3: naive stale-successor guard",
+   "thaw_calls": 6078,
+   "transitions": 5294,
+   "violation": "divergence at quiescence: heads=['r0', 'r2']"
+  }
+ ]
+}

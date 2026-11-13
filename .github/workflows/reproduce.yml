@@ -1,0 +1,36 @@
+# Runs the reproduction kit on a GitHub-hosted runner. Manual only.
+# Evidence class: author-controlled environment (R0-CI). It adds environment
+# diversity, NOT operator independence, and never counts toward G1.
+name: reproduce-baseline
+on:
+  workflow_dispatch:
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # the subject and the baseline report are both in history
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Reproduce from a fresh clone, then seal
+        run: >
+          python assurance-validation/reproduce.py --out r0-ci --label R0-CI
+          --source "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
+          --operator "GitHub Actions runner started by the repository owner; author-controlled; not independent"
+      - name: Verify the seal with standard tools
+        working-directory: r0-ci
+        run: sha256sum --quiet -c output-hashes.sha256
+      - name: Commitment, logged before the reveal step
+        run: python -c "import json; print(json.load(open('r0-ci/pre-reveal-commitment.json'))['commitment'])"
+      - name: Reconcile (reveal)
+        run: |
+          c=$(python -c "import json; print(json.load(open('r0-ci/pre-reveal-commitment.json'))['commitment'])")
+          python assurance-validation/reconcile.py r0-ci --published "$c"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r0-ci-reproduction
+          path: r0-ci/

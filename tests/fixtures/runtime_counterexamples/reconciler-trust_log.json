@@ -1,0 +1,39 @@
+{
+ "failure": {
+  "kind": "findings",
+  "model_findings": [
+   [
+    "UNEXPECTED_DIRECTORY",
+    "L"
+   ],
+   [
+    "UNEXPECTED_DIRECTORY",
+    "L/dir"
+   ],
+   [
+    "UNEXPECTED_FILE",
+    "L/dir/sub"
+   ]
+  ],
+  "op": [
+   "bypass_write",
+   "L/dir/sub",
+   2
+  ],
+  "runtime_findings": [],
+  "step": 0
+ },
+ "found_in_seed": 0,
+ "length": 30,
+ "mutant": "trust_log",
+ "passes_without_the_mutant": true,
+ "side": "reconciler",
+ "status": "detected",
+ "trace": [
+  [
+   "bypass_write",
+   "L/dir/sub",
+   2
+  ]
+ ]
+}

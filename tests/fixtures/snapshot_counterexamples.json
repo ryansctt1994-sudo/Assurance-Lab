@@ -1,0 +1,390 @@
+{
+  "description": "Retained counterexamples: corrupted replica snapshots that made head() raise KeyError before the repair. Kept as data so they can be replayed against any revision. Regenerate with scripts/make_snapshot_counterexamples.py.",
+  "revisions": {
+    "b535b1a": "development lineage before the repair",
+    "c175fbd": "published main baseline (not repaired; not ported)"
+  },
+  "counterexamples": [
+    {
+      "id": "CE-1",
+      "site": "_chain_linked follows a predecessor that is no longer admitted",
+      "instance": "chain",
+      "order": "reversed",
+      "prefix": 4,
+      "corruption": "drop one admitted record",
+      "lineage": "L",
+      "prefix_events": [
+        {
+          "type": "Edge",
+          "old": "r1",
+          "new": "r2"
+        },
+        {
+          "type": "Edge",
+          "old": "r0",
+          "new": "r1"
+        },
+        {
+          "type": "Admit",
+          "rid": "r2",
+          "lineage": "L",
+          "seq": 2,
+          "owner": "carol",
+          "pred": "r1"
+        },
+        {
+          "type": "Admit",
+          "rid": "r1",
+          "lineage": "L",
+          "seq": 1,
+          "owner": "bob",
+          "pred": "r0"
+        }
+      ],
+      "snapshot": {
+        "admitted": [
+          [
+            "r2",
+            {
+              "type": "Admit",
+              "rid": "r2",
+              "lineage": "L",
+              "seq": 2,
+              "owner": "carol",
+              "pred": "r1"
+            }
+          ]
+        ],
+        "edges": [
+          [
+            "r1",
+            "r2"
+          ]
+        ],
+        "invalidated": [],
+        "resolutions": [],
+        "rejected": [],
+        "pending": [
+          {
+            "type": "Edge",
+            "old": "r0",
+            "new": "r1"
+          }
+        ],
+        "seen": [
+          {
+            "type": "Admit",
+            "rid": "r1",
+            "lineage": "L",
+            "seq": 1,
+            "owner": "bob",
+            "pred": "r0"
+          },
+          {
+            "type": "Admit",
+            "rid": "r2",
+            "lineage": "L",
+            "seq": 2,
+            "owner": "carol",
+            "pred": "r1"
+          },
+          {
+            "type": "Edge",
+            "old": "r0",
+            "new": "r1"
+          },
+          {
+            "type": "Edge",
+            "old": "r1",
+            "new": "r2"
+          }
+        ]
+      },
+      "historical_failures": {
+        "b535b1a": {
+          "outcome": "uncaught exception",
+          "exception": "KeyError",
+          "message": "'r1'",
+          "line": 241,
+          "source_line": "cur = self.admitted[cur.pred]"
+        },
+        "c175fbd": {
+          "outcome": "uncaught exception",
+          "exception": "KeyError",
+          "message": "'r1'",
+          "line": 221,
+          "source_line": "cur = self.admitted[cur.pred]"
+        }
+      }
+    },
+    {
+      "id": "CE-2",
+      "site": "head() looks up the source of a resolution that is no longer admitted",
+      "instance": "fork+dispute",
+      "order": "causal",
+      "prefix": 7,
+      "corruption": "drop one admitted record",
+      "lineage": "L",
+      "prefix_events": [
+        {
+          "type": "Admit",
+          "rid": "r0",
+          "lineage": "L",
+          "seq": 0,
+          "owner": "alice",
+          "pred": null
+        },
+        {
+          "type": "Admit",
+          "rid": "r1",
+          "lineage": "L",
+          "seq": 1,
+          "owner": "bob",
+          "pred": "r0"
+        },
+        {
+          "type": "Admit",
+          "rid": "r2",
+          "lineage": "L",
+          "seq": 2,
+          "owner": "carol",
+          "pred": "r0"
+        },
+        {
+          "type": "Edge",
+          "old": "r0",
+          "new": "r1"
+        },
+        {
+          "type": "Edge",
+          "old": "r0",
+          "new": "r2"
+        },
+        {
+          "type": "Resolve",
+          "conflict_id": "d6803adac24bb7f6",
+          "source": "r0",
+          "candidates": [
+            "r1",
+            "r2"
+          ],
+          "pre_state_root": "860359355099b167",
+          "rule": "policy:independent-quorum",
+          "winner": "r1",
+          "loser": "r2",
+          "approvals": [
+            "alice",
+            "carol"
+          ],
+          "quorum": 2,
+          "evidence_basis": "ce2f654eb9114ffb",
+          "epoch": 1,
+          "post_state_root": "66b4b72564d1e7dc"
+        },
+        {
+          "type": "Resolve",
+          "conflict_id": "d6803adac24bb7f6",
+          "source": "r0",
+          "candidates": [
+            "r1",
+            "r2"
+          ],
+          "pre_state_root": "860359355099b167",
+          "rule": "policy:independent-quorum",
+          "winner": "r2",
+          "loser": "r1",
+          "approvals": [
+            "alice",
+            "bob"
+          ],
+          "quorum": 2,
+          "evidence_basis": "ce2f654eb9114ffb",
+          "epoch": 1,
+          "post_state_root": "1148adb81ad6c9e8"
+        }
+      ],
+      "snapshot": {
+        "admitted": [
+          [
+            "r1",
+            {
+              "type": "Admit",
+              "rid": "r1",
+              "lineage": "L",
+              "seq": 1,
+              "owner": "bob",
+              "pred": "r0"
+            }
+          ],
+          [
+            "r2",
+            {
+              "type": "Admit",
+              "rid": "r2",
+              "lineage": "L",
+              "seq": 2,
+              "owner": "carol",
+              "pred": "r0"
+            }
+          ]
+        ],
+        "edges": [
+          [
+            "r0",
+            "r1"
+          ],
+          [
+            "r0",
+            "r2"
+          ]
+        ],
+        "invalidated": [],
+        "resolutions": [
+          [
+            "r0",
+            [
+              {
+                "type": "Resolve",
+                "conflict_id": "d6803adac24bb7f6",
+                "source": "r0",
+                "candidates": [
+                  "r1",
+                  "r2"
+                ],
+                "pre_state_root": "860359355099b167",
+                "rule": "policy:independent-quorum",
+                "winner": "r2",
+                "loser": "r1",
+                "approvals": [
+                  "alice",
+                  "bob"
+                ],
+                "quorum": 2,
+                "evidence_basis": "ce2f654eb9114ffb",
+                "epoch": 1,
+                "post_state_root": "1148adb81ad6c9e8"
+              },
+              {
+                "type": "Resolve",
+                "conflict_id": "d6803adac24bb7f6",
+                "source": "r0",
+                "candidates": [
+                  "r1",
+                  "r2"
+                ],
+                "pre_state_root": "860359355099b167",
+                "rule": "policy:independent-quorum",
+                "winner": "r1",
+                "loser": "r2",
+                "approvals": [
+                  "alice",
+                  "carol"
+                ],
+                "quorum": 2,
+                "evidence_basis": "ce2f654eb9114ffb",
+                "epoch": 1,
+                "post_state_root": "66b4b72564d1e7dc"
+              }
+            ]
+          ]
+        ],
+        "rejected": [],
+        "pending": [],
+        "seen": [
+          {
+            "type": "Resolve",
+            "conflict_id": "d6803adac24bb7f6",
+            "source": "r0",
+            "candidates": [
+              "r1",
+              "r2"
+            ],
+            "pre_state_root": "860359355099b167",
+            "rule": "policy:independent-quorum",
+            "winner": "r2",
+            "loser": "r1",
+            "approvals": [
+              "alice",
+              "bob"
+            ],
+            "quorum": 2,
+            "evidence_basis": "ce2f654eb9114ffb",
+            "epoch": 1,
+            "post_state_root": "1148adb81ad6c9e8"
+          },
+          {
+            "type": "Resolve",
+            "conflict_id": "d6803adac24bb7f6",
+            "source": "r0",
+            "candidates": [
+              "r1",
+              "r2"
+            ],
+            "pre_state_root": "860359355099b167",
+            "rule": "policy:independent-quorum",
+            "winner": "r1",
+            "loser": "r2",
+            "approvals": [
+              "alice",
+              "carol"
+            ],
+            "quorum": 2,
+            "evidence_basis": "ce2f654eb9114ffb",
+            "epoch": 1,
+            "post_state_root": "66b4b72564d1e7dc"
+          },
+          {
+            "type": "Admit",
+            "rid": "r0",
+            "lineage": "L",
+            "seq": 0,
+            "owner": "alice",
+            "pred": null
+          },
+          {
+            "type": "Admit",
+            "rid": "r1",
+            "lineage": "L",
+            "seq": 1,
+            "owner": "bob",
+            "pred": "r0"
+          },
+          {
+            "type": "Admit",
+            "rid": "r2",
+            "lineage": "L",
+            "seq": 2,
+            "owner": "carol",
+            "pred": "r0"
+          },
+          {
+            "type": "Edge",
+            "old": "r0",
+            "new": "r1"
+          },
+          {
+            "type": "Edge",
+            "old": "r0",
+            "new": "r2"
+          }
+        ]
+      },
+      "historical_failures": {
+        "b535b1a": {
+          "outcome": "uncaught exception",
+          "exception": "KeyError",
+          "message": "'r0'",
+          "line": 266,
+          "source_line": "if any(self.admitted[src].lineage == lineage for src in disputed):"
+        },
+        "c175fbd": {
+          "outcome": "uncaught exception",
+          "exception": "KeyError",
+          "message": "'r0'",
+          "line": 245,
+          "source_line": "if any(self.admitted[src].lineage == lineage and self.decision(src)[0] == \"disputed\""
+        }
+      }
+    }
+  ]
+}

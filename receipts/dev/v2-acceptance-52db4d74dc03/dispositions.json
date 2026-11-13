@@ -1,0 +1,143 @@
+[
+ {
+  "assigned_by": "thaw validator, the production boundary",
+  "disposition": "INVALID_SNAPSHOT (restore refused)",
+  "evidence": "810/810 refused, deterministic=True",
+  "failure": "inconsistent or malformed snapshot"
+ },
+ {
+  "assigned_by": "head() integrity guard",
+  "disposition": "UNKNOWN, never CONFLICT or a record",
+  "evidence": "authority from damaged state: 0",
+  "failure": "damaged state with the boundary bypassed (diagnostic only)"
+ },
+ {
+  "assigned_by": "head() derivation",
+  "disposition": "CONFLICT, with its reason",
+  "evidence": "valid corpus statuses {'CONFLICT': 13, 'HEAD': 68, 'NONE': 83}",
+  "failure": "genuine fork or authority dispute on a valid state"
+ },
+ {
+  "assigned_by": "none in production (integrity is not authenticity); exact-state comparison against a reference in tests",
+  "disposition": "accepted; may restore a stale head (residual risk)",
+  "evidence": "corruptions.rows, class omission",
+  "failure": "consistent omission (missing evidence, rolled-back snapshot)"
+ },
+ {
+  "assigned_by": "replica model checker (check_scenario) and campaign (mc_verdict)",
+  "disposition": "INVALID_SNAPSHOT violation: FAIL, with the offending snapshot, the reasons and the trace kept",
+  "evidence": "test_a_refused_snapshot_is_a_recorded_failure_of_the_model_checker; clean scenarios refused: 0",
+  "failure": "a replica snapshot of an explored state refused at thaw"
+ },
+ {
+  "assigned_by": "integrity check",
+  "disposition": "accepted: not an integrity failure",
+  "evidence": {
+   "deduplication": {
+    "alphabet": "events deduplicated by equality, first occurrence kept",
+    "deliveries": "not deduplicated: one per (instance, prefix, suffix)",
+    "distinct_states": "distinct (policy authorities, frozen snapshot) pairs",
+    "prefixes": "the two orders' prefixes, deduplicated as event tuples"
+   },
+   "deliveries": 4237,
+   "distinct_states": 1719,
+   "domain": {
+    "heads_queried": [
+     "L",
+     "M"
+    ],
+    "instances": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+resolution",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution+invalidate-winner",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle",
+     "fork+resolution+invalidate-loser"
+    ],
+    "prefixes": "164: every prefix of each instance's causal order and of its reversed order",
+    "replica": "one correct replica (no mutant flags), the instance's policy",
+    "suffixes": "297 in all, plus the empty suffix: each event of the instance's serialization alphabet (its own events, the unrelated lineage M's events, the boundary events) and each declared boundary sequence"
+   },
+   "incomplete_but_valid": {
+    "admitted record whose predecessor is not admitted": [
+     1180,
+     742
+    ],
+    "deferred events": [
+     2818,
+     1495
+    ],
+    "event deferred forever (references a record no event admits)": [
+     328,
+     160
+    ]
+   },
+   "not_claimed": "not every reachable replica state: only these delivery orders (two per instance), at most one suffix after a prefix, the declared alphabet, one replica, the correct implementation",
+   "problem_count": 0
+  },
+  "failure": "causally incomplete but genuine state (deferred, deferred forever, predecessor never arrives)"
+ },
+ {
+  "assigned_by": "replica model checker, per state and again at quiescence",
+  "disposition": "safety violation: FAIL, not inconclusive",
+  "evidence": "tests test_unknown_fails_model_checking_*; clean scenarios: 0 UNKNOWN",
+  "failure": "UNKNOWN on a state the replica model checker explores"
+ },
+ {
+  "assigned_by": "campaign",
+  "disposition": "UNKNOWN verdict (inconclusive), never PASS",
+  "evidence": "replica_mc_results",
+  "failure": "checker budget exhausted"
+ },
+ {
+  "assigned_by": "matrix",
+  "disposition": "survived (D > K), instances listed",
+  "evidence": "17 cells with undetected deviations",
+  "failure": "mutant exposed but not detected by a relation"
+ },
+ {
+  "assigned_by": "matrix",
+  "disposition": "not reached (E > 0, D = 0)",
+  "evidence": [
+   "duplicate/naive_stale_guard",
+   "order/replay_readmits",
+   "projection/naive_stale_guard",
+   "projection/replay_readmits",
+   "renaming/naive_stale_guard",
+   "renaming/replay_readmits"
+  ],
+  "failure": "mutant never exposed by a relation's inputs"
+ },
+ {
+  "assigned_by": "frozen eligibility predicate",
+  "disposition": "n/a (E = 0)",
+  "evidence": [
+   "duplicate/freeze_drops_invalidated",
+   "duplicate/global_dispute",
+   "order/freeze_drops_invalidated",
+   "order/global_dispute",
+   "projection/freeze_drops_invalidated",
+   "renaming/freeze_drops_invalidated",
+   "renaming/global_dispute"
+  ],
+  "failure": "mutated code unreachable by a relation"
+ },
+ {
+  "assigned_by": "alphabet exercise",
+  "disposition": "listed as a gap",
+  "evidence": [],
+  "failure": "rejection rule not exercised by the alphabet"
+ },
+ {
+  "assigned_by": "assurance-validation/reconcile.py",
+  "disposition": "INCONCLUSIVE",
+  "evidence": "assurance-validation/protocol/acceptance-criteria.md",
+  "failure": "reproduction evidence missing or unbound (R1)"
+ }
+]

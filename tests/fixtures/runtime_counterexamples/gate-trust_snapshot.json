@@ -1,0 +1,182 @@
+{
+ "failure": {
+  "kind": "response",
+  "model": [
+   "SNAPSHOT_MISMATCH",
+   null
+  ],
+  "op": [
+   "rollback_snapshot",
+   15
+  ],
+  "runtime": [
+   "OPERATIONAL",
+   null
+  ],
+  "step": 16
+ },
+ "found_in_seed": 7,
+ "length": 30,
+ "mutant": "trust_snapshot",
+ "passes_without_the_mutant": true,
+ "side": "gate",
+ "status": "detected",
+ "trace": [
+  [
+   "request",
+   {
+    "auth": "valid",
+    "cites": "m1",
+    "content": 0,
+    "id": "req-000000-050631",
+    "lineage": "L",
+    "requester": "mallory",
+    "target": "dir/sub/c.txt"
+   }
+  ],
+  [
+   "request",
+   {
+    "auth": "valid",
+    "cites": "m0",
+    "content": 0,
+    "id": "req-000003-613984",
+    "lineage": "L",
+    "requester": "alice",
+    "target": "a.txt"
+   }
+  ],
+  [
+   "request",
+   {
+    "auth": "valid",
+    "cites": "r0",
+    "content": 0,
+    "crash": true,
+    "id": "req-000004-598951",
+    "lineage": "L",
+    "requester": "alice",
+    "target": "dir/b.txt"
+   }
+  ],
+  [
+   "request",
+   {
+    "auth": "valid",
+    "cites": "r1",
+    "content": 0,
+    "id": "req-000007-832967",
+    "lineage": "M",
+    "requester": "carol",
+    "target": "a.txt"
+   }
+  ],
+  [
+   "request",
+   {
+    "auth": "valid",
+    "cites": "r3",
+    "content": 0,
+    "id": "req-000010-442182",
+    "lineage": "M",
+    "requester": "bob",
+    "target": "dir/sub/c.txt"
+   }
+  ],
+  [
+   "request",
+   {
+    "auth": "valid",
+    "cites": "r0",
+    "content": 1,
+    "id": "req-000011-880770",
+    "lineage": "M",
+    "requester": "mallory",
+    "target": "dir/b.txt"
+   }
+  ],
+  [
+   "request",
+   {
+    "auth": "tampered",
+    "cites": "m1",
+    "content": 0,
+    "id": "req-000012-404531",
+    "lineage": "M",
+    "requester": "carol",
+    "target": ".hidden"
+   }
+  ],
+  [
+   "request",
+   {
+    "auth": "valid",
+    "cites": "m1",
+    "content": 0,
+    "id": "req-000013-259642",
+    "lineage": "M",
+    "requester": "bob",
+    "target": "dir/b.txt"
+   }
+  ],
+  [
+   "request",
+   {
+    "auth": "valid",
+    "bad_content": true,
+    "cites": "r1",
+    "content": 0,
+    "id": "req-000015-158252",
+    "lineage": "M",
+    "requester": "mallory",
+    "target": "a.txt"
+   }
+  ],
+  [
+   "authority",
+   3
+  ],
+  [
+   "authority",
+   4
+  ],
+  [
+   "request",
+   {
+    "auth": "valid",
+    "cites": "r3",
+    "content": 2,
+    "id": "req-000018-943228",
+    "lineage": "L",
+    "race": true,
+    "requester": "alice",
+    "target": "dir//b"
+   }
+  ],
+  [
+   "request",
+   {
+    "replay": 1
+   }
+  ],
+  [
+   "bypass_write",
+   "M/dir",
+   1
+  ],
+  [
+   "request",
+   {
+    "replay": 9
+   }
+  ],
+  [
+   "authority",
+   5
+  ],
+  [
+   "rollback_snapshot",
+   15
+  ]
+ ]
+}

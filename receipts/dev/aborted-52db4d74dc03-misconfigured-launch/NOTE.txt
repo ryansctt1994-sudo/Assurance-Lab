@@ -1,0 +1,7 @@
+Aborted receipt launch for 52db4d7 (operator error), 15:23:2x UTC.
+The launch line backgrounded a whole && chain, so the variables holding the commit id and the
+scratch path were empty in the second command: the receipt started with
+--out receipts/dev/v2-acceptance- --report docs/reports/dev-.md and historical paths under /.
+Stopped by the operator within about a minute, after it had written schema.json, source.json and
+v1_matrix.json (kept here, unchanged). It never ran the test suite and never sealed. Not evidence.
+The correctly configured receipt was relaunched immediately afterwards.

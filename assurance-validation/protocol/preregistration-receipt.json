@@ -1,0 +1,16 @@
+{
+  "preregistration_version": 1,
+  "purpose": "Freezes the R1 protocol and harness before any reproduction. Changing a listed file means re-issuing this receipt in a new commit, which the history shows; tests/test_validation_kit.py fails until then.",
+  "subject_commit": "c175fbd7b7eb5efdbd3a7b07bbf9d41bc998139c",
+  "files": {
+    "protocol/claim-subject-manifest.json": "352113d5b44ea5a37a998b4c66ac06454e1baab6807e20f989a875a735f8c43d",
+    "protocol/discrepancy-rubric.md": "c38e045806286785c31271d889827772eec24b93966ea871b6c6711f745a25bb",
+    "protocol/acceptance-criteria.md": "6dc89d125d40865d25d18ba39f4bf00938dd2f0a08a1fbd1832612a7e631d9f6",
+    "reproduce.py": "0e5286b7cdee51c8a55b216efa507b9d9e888af8886d64af985eb187e93f45c8",
+    "reconcile.py": "214471d8194022a611c9a8a955979b04ec8036784e66df9c4290171ea3026a04"
+  },
+  "issued_utc": "2026-11-08T13:12:05Z",
+  "issued_by": "the baseline author's agent (not independent)",
+  "anchor": "weak: GitHub's server-side push and CI timestamps for the commit that adds this file. Not an append-only third-party log; a durable anchor (P0-06) is still open.",
+  "prior_runs": "none before this receipt; R0-SELF runs that follow are harness validation only"
+}

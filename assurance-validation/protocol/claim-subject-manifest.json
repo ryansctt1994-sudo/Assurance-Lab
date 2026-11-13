@@ -1,0 +1,380 @@
+{
+  "manifest_version": 2,
+  "subject": {
+    "description": "Published main baseline: the 32-obligation docs/RESULTS.md on main, generated from a snapshot of c175fbd",
+    "repository": "https://github.com/ryansctt1994-sudo/Assurance-Lab.git",
+    "source_commit": "c175fbd7b7eb5efdbd3a7b07bbf9d41bc998139c",
+    "source_tree": "fe8456fa0b9ad6bf486ce47091cd35af96ae6246",
+    "source_tree_assurance_lab": "9301006544f9c9b5b288a133fdc4995987d03040",
+    "source_sha256_assurance_lab": "bd9443baa64e641217e24d4c80bc787b0254d7a8da82ef1b79423de661414af8",
+    "source_digest_definition": "SHA-256 over every *.py file under assurance_lab/, sorted by relative path components, each fed as posix relative path + NUL + file bytes + NUL (the definition of digest_entries/source_digest in assurance_lab/provenance.py at the subject commit)",
+    "baseline_report": {
+      "commit": "ba10a0c3d58e9ea2663e6b73dc763bee4bc29404",
+      "path": "docs/RESULTS.md"
+    },
+    "expected_targets_sha256": "5c3b11219cc02866c6fb029a7da9ce0b39a9e889d8556af1225ce37af2bf3079",
+    "expected_targets_definition": "SHA-256 of the canonical JSON (sorted keys, separators ',' and ':', UTF-8) of the list of [obligation, verdict label] pairs of the baseline report's Claims table, in report order"
+  },
+  "claims_note": "Verdict labels and result values are withheld from this package (P1-02). They are committed by expected_targets_sha256 and read only by reconcile.py, after the sealed evidence has passed integrity and identity checks.",
+  "claims": [
+    {
+      "id": "C01",
+      "obligation": "Reachable ⊨ Inv ∧ Safety ∧ TransitionProps",
+      "method": "bfs-exhaustive-reachability",
+      "scope": "3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C02",
+      "obligation": "Init ⇒ Inv",
+      "method": "finite-exhaustive-induction",
+      "scope": "3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C03",
+      "obligation": "Inv ∧ Next ⇒ Inv'",
+      "method": "finite-exhaustive-induction",
+      "scope": "3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C04",
+      "obligation": "Inv ⇒ Safety",
+      "method": "finite-exhaustive-induction",
+      "scope": "3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C05",
+      "obligation": "Reach ⊆ Inv-states (BFS vs generator)",
+      "method": "exhaustive-cross-check",
+      "scope": "3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C06",
+      "obligation": "mutant detected: supersede_without_fresh_admission",
+      "method": "bfs-reachability",
+      "scope": "3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C07",
+      "obligation": "mutant detected: resurrect_on_retract",
+      "method": "bfs-reachability",
+      "scope": "3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C08",
+      "obligation": "mutant detected: sem_rewrite_on_role_revise",
+      "method": "bfs-reachability",
+      "scope": "3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C09",
+      "obligation": "mutant detected: beneficiary_self_approval",
+      "method": "bfs-reachability",
+      "scope": "3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C10",
+      "obligation": "mutant detected: self_grant",
+      "method": "bfs-reachability",
+      "scope": "3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C11",
+      "obligation": "mutant detected: adjudicate_unadmitted",
+      "method": "bfs-reachability",
+      "scope": "3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C12",
+      "obligation": "mutant detected: lineage_rewrite",
+      "method": "bfs-reachability",
+      "scope": "3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C13",
+      "obligation": "mutant detected: cross_lineage_supersede",
+      "method": "bfs-reachability",
+      "scope": "3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C14",
+      "obligation": "mutant detected: stale_successor",
+      "method": "bfs-reachability",
+      "scope": "3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C15",
+      "obligation": "mutant detected: admit_into_occupied_lineage",
+      "method": "bfs-reachability",
+      "scope": "3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C16",
+      "obligation": "mutant detected: invalidate_falls_back",
+      "method": "bfs-reachability",
+      "scope": "3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C17",
+      "obligation": "mutant detected: diagnosis_rewrites_adjudication",
+      "method": "bfs-reachability",
+      "scope": "3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C18",
+      "obligation": "mutant detected: latched_live",
+      "method": "bfs-reachability",
+      "scope": "3 records, 2 principals, 2 lineages, levels 0..2, sem 0..1",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C19",
+      "obligation": "eventual convergence (chain r0→r1→r2)",
+      "method": "permutation-exhaustive",
+      "scope": "5 events",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C20",
+      "obligation": "successor conflict resolves only via independent quorum",
+      "method": "permutation-exhaustive",
+      "scope": "6 events (fork + resolution)",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C21",
+      "obligation": "replica MC: chain across replicas",
+      "method": "bfs-exhaustive-replica-network",
+      "scope": "2 replicas, ≤3 duplicated messages",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C22",
+      "obligation": "replica MC: invalidated head is X_⊥, not fallback",
+      "method": "bfs-exhaustive-replica-network",
+      "scope": "2 replicas, ≤3 duplicated messages",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C23",
+      "obligation": "replica MC: fork, one independent resolver",
+      "method": "bfs-exhaustive-replica-network",
+      "scope": "2 replicas, ≤3 duplicated messages",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C24",
+      "obligation": "replica MC: fork, beneficiary-only resolution",
+      "method": "bfs-exhaustive-replica-network",
+      "scope": "2 replicas, ≤3 duplicated messages",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C25",
+      "obligation": "replica MC: fork, two authorities may resolve concurrently and disagree",
+      "method": "bfs-exhaustive-replica-network",
+      "scope": "2 replicas, ≤3 duplicated messages",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C26",
+      "obligation": "replica MC: fork, disagreement escalated at epoch 2",
+      "method": "bfs-exhaustive-replica-network",
+      "scope": "2 replicas, ≤3 duplicated messages",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C27",
+      "obligation": "replica MC: fork, one independent resolver (+ passive 3rd replica)",
+      "method": "bfs-exhaustive-replica-network",
+      "scope": "3 replicas, ≤1 duplicated message",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C28",
+      "obligation": "replica MC: fork, beneficiary-only resolution (+ passive 3rd replica)",
+      "method": "bfs-exhaustive-replica-network",
+      "scope": "3 replicas, ≤1 duplicated message",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C29",
+      "obligation": "replica MC: fork, two authorities may resolve concurrently and disagree (+ passive 3rd replica)",
+      "method": "bfs-exhaustive-replica-network",
+      "scope": "3 replicas, ≤1 duplicated message",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C30",
+      "obligation": "replica MC: fork, disagreement escalated at epoch 2 (+ passive 3rd replica)",
+      "method": "bfs-exhaustive-replica-network",
+      "scope": "3 replicas, ≤1 duplicated message",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C31",
+      "obligation": "replica mutant detected: split-brain: first-applied-wins resolution",
+      "method": "bfs-exhaustive-replica-network",
+      "scope": "2 replicas, ≤3 duplicated messages",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    },
+    {
+      "id": "C32",
+      "obligation": "replica mutant detected: handoff failure #3: naive stale-successor guard",
+      "method": "bfs-exhaustive-replica-network",
+      "scope": "2 replicas, ≤3 duplicated messages",
+      "source": "docs/RESULTS.md at ba10a0c (generated from a snapshot of c175fbd)",
+      "evidence_class": "AUTHOR-REPORTED",
+      "status": "REPORTED, NOT INDEPENDENTLY REPRODUCED"
+    }
+  ],
+  "residual_assumptions_of_the_baseline": [
+    "BoundaryCompleteness: every covered authority relation is represented in the model",
+    "Logical actions are atomic at the invariant's abstraction level",
+    "Python interpreter and this checker are correct (no independent proof checker)",
+    "finite domain only",
+    "finite domain only; no unbounded/parameterized proof",
+    "Safety is encoded; its adequacy vs. the informal principle is a judgment",
+    "causal deferral; reliable eventual delivery",
+    "NOT linearizability, consensus, or arbitrary partitions",
+    "replicas may serve a stale head before delivery",
+    "resolution policy authorities are themselves trustworthy",
+    "a replica may act on the eventual loser before learning of the fork",
+    "reliable eventual delivery (no loss)",
+    "no message loss, crashes, or Byzantine replicas modeled",
+    "outcomes checked only for the scripted scenarios"
+  ],
+  "excluded": [
+    "the development branch (PR #2) and its later reports",
+    "the TLA+ artifacts, which have never been run under SANY/TLC",
+    "the handoff's v3 model and its counts, which are not in this repository",
+    "run-dependent metadata (timestamps, durations, interpreter version, run id, receipt id)"
+  ],
+  "commands": [
+    {
+      "role": "setup",
+      "argv": [
+        "python",
+        "-m",
+        "pip",
+        "install",
+        "pytest"
+      ]
+    },
+    {
+      "role": "test",
+      "argv": [
+        "python",
+        "-m",
+        "pytest",
+        "-q"
+      ]
+    },
+    {
+      "role": "quick-campaign",
+      "argv": [
+        "python",
+        "-m",
+        "assurance_lab",
+        "--out",
+        "results-quick.md"
+      ],
+      "report": "results-quick.md",
+      "artifact": "generated-results-quick.md"
+    },
+    {
+      "role": "full-campaign",
+      "argv": [
+        "python",
+        "-m",
+        "assurance_lab",
+        "--full",
+        "--out",
+        "results-reproduction.md"
+      ],
+      "report": "results-reproduction.md",
+      "artifact": "generated-results.md"
+    }
+  ],
+  "commands_note": "'python' means the reproduction interpreter (a fresh venv by default). pytest is unpinned, as in the frozen roadmap package; the installed version is recorded in environment.json (pip_freeze). The quick campaign has no published target; it is run and recorded, and a nonzero exit counts.",
+  "acceptance_criteria": "assurance-validation/protocol/acceptance-criteria.md",
+  "rubric": "assurance-validation/protocol/discrepancy-rubric.md"
+}

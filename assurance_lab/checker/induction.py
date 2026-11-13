@@ -19,6 +19,7 @@ from __future__ import annotations
 import itertools
 import multiprocessing
 import os
+import secrets
 import time
 from dataclasses import dataclass, field
 from typing import Iterator, Optional
@@ -26,6 +27,8 @@ from typing import Iterator, Optional
 from ..core.model import Config, CoreModel, Rec, State, live
 from ..core.properties import inv, inv_failures, safety_failures, transition_failures
 from ..provenance import loaded_origins
+from ..statedigest import SetDigest, action_label, add_transitions, canon
+from .partitions import Evidence, Manifest, build_manifest, manifest_problems, reconcile, sign
 
 
 def record_domain(cfg: Config) -> list[Rec]:
@@ -109,6 +112,12 @@ class InductionReport:
     start_method: Optional[str] = None  # None: no pool (sequential loop in this process)
     # pid -> files that process imported assurance_lab from (parent included)
     origins: dict = field(default_factory=dict)
+    digest: Optional[SetDigest] = None  # over every Inv-state checked
+    transition_digest: Optional[SetDigest] = None  # (source, action, destination) triples
+    edge_digest: Optional[SetDigest] = None  # (source, destination) pairs
+    manifest: Optional[Manifest] = None  # frozen before any partition ran
+    evidence: list = field(default_factory=list)  # signed per-partition records
+    reconciliation_problems: list = field(default_factory=list)
 
 
 def _check_parts(model: CoreModel, parts, max_states, stop_on_failure=False):
@@ -117,16 +126,22 @@ def _check_parts(model: CoreModel, parts, max_states, stop_on_failure=False):
     first = None
     count = transitions = 0
     complete = True
+    digest, tdig, edig = SetDigest(), SetDigest(), SetDigest()
+    keys = set()
     for s in inv_states(cfg, parts):
         if max_states is not None and count >= max_states:
             complete = False
             break
         count += 1
+        keys.add((s.levels, s.sem_now))
+        digest.add(s)
+        succ = list(model.next(s))
+        add_transitions(tdig, edig, canon(s), [(action_label(lbl), canon(t)) for lbl, t in succ])
         sf = safety_failures(cfg, s)
         if sf:
             safety_ok = False
             first = first or ("Inv⇒Safety", s, None, None, sf)
-        for lbl, t in model.next(s):
+        for lbl, t in succ:
             transitions += 1
             msgs = inv_failures(cfg, t) + transition_failures(cfg, s, lbl, t)
             if msgs:
@@ -135,52 +150,82 @@ def _check_parts(model: CoreModel, parts, max_states, stop_on_failure=False):
         if stop_on_failure and first:
             complete = False
             break
-    return count, transitions, step_ok, safety_ok, complete, first
+    return count, transitions, step_ok, safety_ok, complete, first, digest, tdig, edig, keys
+
+
+def _evidence(res, pid: str, manifest: Manifest, key: bytes) -> Evidence:
+    count, transitions, step_ok, safety_ok, complete, _first, d, t, e, keys = res
+    return sign(Evidence(manifest.run_id, manifest.digest(), pid, tuple(sorted(keys)), count, transitions,
+                         step_ok, safety_ok, complete, d.label(), t.label(), e.label()), key)
 
 
 def _worker(args):
-    model_cls, cfg, parts = args
-    return _check_parts(model_cls(cfg), parts, None), os.getpid(), loaded_origins()
+    model_cls, cfg, pkeys, pid, manifest, key = args
+    res = _check_parts(model_cls(cfg), pkeys, None)
+    return _evidence(res, pid, manifest, key), res[5], os.getpid(), loaded_origins()
 
 
 def check_induction(model: CoreModel, max_states: Optional[int] = None,
                     workers: int = 1, stop_on_failure: bool = False,
-                    mp_context=None) -> InductionReport:
-    """Run the three obligations. ``workers>1`` splits by partition (needs a
-    module-level model class, as mutants and CoreModel are). ``mp_context``
-    selects the pool's start method (default: the platform default). Every
-    pool worker reports the files it imported ``assurance_lab`` from."""
+                    mp_context=None, manifest: Optional[Manifest] = None,
+                    key: Optional[bytes] = None) -> InductionReport:
+    """Run the three obligations, one partition at a time.
+
+    The partition set is a ``Manifest`` frozen before any partition runs
+    (pass one to bind it to a receipt). Each partition yields a signed
+    ``Evidence`` record, sequentially or from a pool worker (``workers>1``;
+    needs a module-level model class), and the aggregate is the
+    reconciliation of those records against the manifest: any provenance,
+    integrity, identity, completeness, disjointness or arithmetic problem
+    makes the report incomplete. ``mp_context`` selects the pool's start
+    method; every pool worker reports where it imported ``assurance_lab``.
+    """
     cfg = model.cfg
     t0 = time.perf_counter()
+    manifest = manifest or build_manifest(cfg, secrets.token_hex(8))
+    key = key or secrets.token_bytes(32)
     s0 = model.init()
     init_ok = inv(cfg, s0)
     first = None if init_ok else ("Init⇒Inv", s0, None, None, inv_failures(cfg, s0))
     origins = {os.getpid(): loaded_origins()}
     start_method = None
+    jobs = [(pid, [(tuple(lv), sn)]) for pid, lv, sn in manifest.entries]
+    evidence, firsts = [], []
     if workers > 1 and max_states is None:
         from concurrent.futures import ProcessPoolExecutor
         ctx = mp_context or multiprocessing.get_context()
         start_method = ctx.get_start_method()
-        jobs = [(type(model), cfg, [p]) for p in partitions(cfg)]
         with ProcessPoolExecutor(workers, mp_context=ctx) as ex:
-            tagged = list(ex.map(_worker, jobs))
-        results = [r for r, _pid, _o in tagged]
-        for _r, pid, o in tagged:
-            origins[pid] = o
+            tagged = list(ex.map(_worker, [(type(model), cfg, pk, pid, manifest, key) for pid, pk in jobs]))
+        for ev, fail, wpid, o in tagged:
+            evidence.append(ev)
+            firsts.append(fail)
+            origins[wpid] = o
     else:
-        results = [_check_parts(model, None, max_states, stop_on_failure)]
-    count = sum(r[0] for r in results)
-    transitions = sum(r[1] for r in results)
-    step_ok = all(r[2] for r in results)
-    safety_ok = all(r[3] for r in results)
-    complete = all(r[4] for r in results)
-    for r in results:
-        first = first or r[5]
+        used = 0
+        for pid, pk in jobs:
+            budget = None if max_states is None else max_states - used
+            if budget is not None and budget <= 0:
+                break
+            res = _check_parts(model, pk, budget, stop_on_failure)
+            used += res[0]
+            evidence.append(_evidence(res, pid, manifest, key))
+            firsts.append(res[5])
+            if not res[4]:  # budget hit or stopped on failure
+                break
+    agg, problems = reconcile(manifest, evidence, key)
+    problems = manifest_problems(manifest, cfg) + problems
+    for f in firsts:
+        first = first or f
+    from .partitions import _sd
     return InductionReport(
-        model=model.name, config=cfg, inv_state_count=count, transitions_checked=transitions,
-        init_ok=init_ok, step_ok=step_ok, safety_ok=safety_ok, complete=complete,
+        model=model.name, config=cfg, inv_state_count=agg.count, transitions_checked=agg.transitions,
+        init_ok=init_ok, step_ok=agg.step_ok, safety_ok=agg.safety_ok,
+        complete=agg.complete and not problems,
         seconds=time.perf_counter() - t0, first_failure=first,
-        start_method=start_method, origins=origins,
+        start_method=start_method, origins=origins, digest=_sd(agg.digest),
+        transition_digest=_sd(agg.transition_digest), edge_digest=_sd(agg.edge_digest),
+        manifest=manifest, evidence=evidence, reconciliation_problems=problems,
     )
 
 

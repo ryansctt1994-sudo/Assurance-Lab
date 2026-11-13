@@ -1,0 +1,83 @@
+[
+ {
+  "assigned_by": "thaw validator, the production boundary",
+  "disposition": "INVALID_SNAPSHOT (restore refused)",
+  "evidence": "810/810 refused, deterministic=True",
+  "failure": "inconsistent or malformed snapshot"
+ },
+ {
+  "assigned_by": "head() integrity guard",
+  "disposition": "UNKNOWN, never CONFLICT or a record",
+  "evidence": "authority from damaged state: 0",
+  "failure": "damaged state with the boundary bypassed (diagnostic only)"
+ },
+ {
+  "assigned_by": "head() derivation",
+  "disposition": "CONFLICT, with its reason",
+  "evidence": "valid corpus statuses {'CONFLICT': 13, 'HEAD': 68, 'NONE': 83}",
+  "failure": "genuine fork or authority dispute on a valid state"
+ },
+ {
+  "assigned_by": "none in production (integrity is not authenticity); exact-state comparison against a reference in tests",
+  "disposition": "accepted; may restore a stale head (residual risk)",
+  "evidence": "corruptions.rows, class omission",
+  "failure": "consistent omission (missing evidence, rolled-back snapshot)"
+ },
+ {
+  "assigned_by": "replica model checker, per state and again at quiescence",
+  "disposition": "safety violation: FAIL, not inconclusive",
+  "evidence": "tests test_unknown_fails_model_checking_*; clean scenarios: 0 UNKNOWN",
+  "failure": "UNKNOWN on a state the replica model checker explores"
+ },
+ {
+  "assigned_by": "campaign",
+  "disposition": "UNKNOWN verdict (inconclusive), never PASS",
+  "evidence": "replica_mc_results",
+  "failure": "checker budget exhausted"
+ },
+ {
+  "assigned_by": "matrix",
+  "disposition": "survived (D > K), instances listed",
+  "evidence": "17 cells with undetected deviations",
+  "failure": "mutant exposed but not detected by a relation"
+ },
+ {
+  "assigned_by": "matrix",
+  "disposition": "not reached (E > 0, D = 0)",
+  "evidence": [
+   "duplicate/naive_stale_guard",
+   "order/replay_readmits",
+   "projection/naive_stale_guard",
+   "projection/replay_readmits",
+   "renaming/naive_stale_guard",
+   "renaming/replay_readmits"
+  ],
+  "failure": "mutant never exposed by a relation's inputs"
+ },
+ {
+  "assigned_by": "frozen eligibility predicate",
+  "disposition": "n/a (E = 0)",
+  "evidence": [
+   "duplicate/freeze_drops_invalidated",
+   "duplicate/global_dispute",
+   "order/freeze_drops_invalidated",
+   "order/global_dispute",
+   "projection/freeze_drops_invalidated",
+   "renaming/freeze_drops_invalidated",
+   "renaming/global_dispute"
+  ],
+  "failure": "mutated code unreachable by a relation"
+ },
+ {
+  "assigned_by": "alphabet exercise",
+  "disposition": "listed as a gap",
+  "evidence": [],
+  "failure": "rejection rule not exercised by the alphabet"
+ },
+ {
+  "assigned_by": "assurance-validation/reconcile.py",
+  "disposition": "INCONCLUSIVE",
+  "evidence": "assurance-validation/protocol/acceptance-criteria.md",
+  "failure": "reproduction evidence missing or unbound (R1)"
+ }
+]

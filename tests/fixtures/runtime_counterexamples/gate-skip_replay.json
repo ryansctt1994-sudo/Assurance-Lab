@@ -1,0 +1,46 @@
+{
+ "failure": {
+  "kind": "response",
+  "model": [
+   "REFUSED",
+   "REPLAYED_REQUEST"
+  ],
+  "op": [
+   "request",
+   {
+    "replay": 0
+   }
+  ],
+  "runtime": [
+   "REFUSED",
+   "NO_AUTHORITY"
+  ],
+  "step": 1
+ },
+ "found_in_seed": 1,
+ "length": 30,
+ "mutant": "skip_replay",
+ "passes_without_the_mutant": true,
+ "side": "gate",
+ "status": "detected",
+ "trace": [
+  [
+   "request",
+   {
+    "auth": "valid",
+    "cites": "r0",
+    "content": 1,
+    "id": "req-000002-511554",
+    "lineage": "M",
+    "requester": "bob",
+    "target": "dir/b.txt"
+   }
+  ],
+  [
+   "request",
+   {
+    "replay": 0
+   }
+  ]
+ ]
+}

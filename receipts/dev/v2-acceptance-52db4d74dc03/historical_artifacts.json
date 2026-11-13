@@ -1,0 +1,15 @@
+{
+ "files": [
+  {
+   "file": "historical-interrupted-suite-run.txt",
+   "label": "INTERRUPTED suite run of an earlier state of these changes (85 passed, 0 failed, stopped by the session; raw log not retained). INCONCLUSIVE; not evidence for this revision",
+   "sha256": "ced8dd7e493ec87c2d1586a4d1b2fa8fe0ea0bdf71b4c3fcac81abc00b734175"
+  },
+  {
+   "file": "historical-candidate-tree-during-run.txt",
+   "label": "tested-bytes record: working-tree git tree and package digest recorded during and after the pre-commit suite run (294 passed); equal to this commit tree",
+   "sha256": "505e0514ade177d769571d2ea6b3620566db74edc78039fef295e67a3aa65daf"
+  }
+ ],
+ "note": "stored for the record only; none is evidence for the revision named in source.json"
+}

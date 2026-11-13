@@ -8,12 +8,21 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    # Linux 3.11/3.13 default to fork, Linux 3.14 to forkserver, macOS to
+    # spawn: the three pool start methods, each as the platform default.
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        python: ["3.11", "3.13"]
+        os: [ubuntu-latest]
+        python: ["3.11", "3.13", "3.14"]
+        include:
+          - os: macos-latest
+            python: "3.13"
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # tests re-derive the frozen baseline's identities from history
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
@@ -31,14 +40,14 @@ jobs:
           grep -q 'outside executed tree: \*\*none\*\*' results-quick-spawn.md
       - uses: actions/upload-artifact@v4
         with:
-          name: results-quick-${{ matrix.python }}
+          name: results-quick-${{ matrix.os }}-${{ matrix.python }}
           path: results-quick*.md
 
   full-induction:
     # Headline domain (~3.6M Inv-states). Runs on main and on demand only.
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

@@ -1,0 +1,516 @@
+{
+ "alphabet": {
+  "boundary_events": {
+   "Admit(r1, L, seq=1, owner=carol, pred=r0)": [
+    "applied",
+    "rejected: re-admission of existing id"
+   ],
+   "Admit(r3, L, seq=3, owner=alice, pred=rX)": [
+    "applied"
+   ],
+   "Edge(r0->m0)": [
+    "deferred",
+    "rejected: cross-lineage edge"
+   ],
+   "Edge(r0->r2)": [
+    "applied",
+    "deferred",
+    "duplicate",
+    "rejected: edge not declared by successor admission"
+   ],
+   "Edge(r2->r0)": [
+    "deferred",
+    "rejected: non-forward edge"
+   ],
+   "Edge(rX->r0)": [
+    "deferred"
+   ],
+   "Invalidate(rX)": [
+    "deferred"
+   ],
+   "malformed resolution (winner = loser)": [
+    "deferred",
+    "rejected: winner/loser must be the two conflicting candidates"
+   ],
+   "tampered resolution (post-state root)": [
+    "deferred",
+    "rejected: post-state root mismatch"
+   ],
+   "tampered resolution (pre-state root)": [
+    "deferred",
+    "rejected: pre-state root mismatch"
+   ],
+   "under-quorum resolution (one independent approver)": [
+    "deferred",
+    "rejected: quorum not met"
+   ]
+  },
+  "boundary_sequences": {
+   "cross-lineage edge, after admitting its M end": [
+    "Admit(m0, M, seq=0, owner=alice)",
+    "Edge(r0->m0)"
+   ]
+  },
+  "rejection_rules": [
+   "re-admission of existing id",
+   "cross-lineage edge",
+   "non-forward edge",
+   "edge not declared by successor admission",
+   "winner/loser must be the two conflicting candidates",
+   "pre-state root mismatch",
+   "post-state root mismatch",
+   "self-authorized: no independent approver",
+   "quorum not met"
+  ],
+  "serialization_universe": [
+   "Admit(r0, L, seq=0, owner=alice)",
+   "Admit(r1, L, seq=1, owner=bob, pred=r0)",
+   "Admit(r2, L, seq=2, owner=carol, pred=r1)",
+   "Edge(r0->r1)",
+   "Edge(r1->r2)",
+   "Invalidate(r2)",
+   "Admit(r2, L, seq=2, owner=carol, pred=r0)",
+   "Edge(r0->r2)",
+   "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])",
+   "Resolve(winner=r2, epoch=1, approvals=['carol'])",
+   "Resolve(winner=r1, epoch=1, approvals=['alice', 'carol'])",
+   "Resolve(winner=r2, epoch=2, approvals=['alice', 'bob', 'carol'])",
+   "Invalidate(r1)",
+   "Invalidate(r0)",
+   "Admit(m0, M, seq=0, owner=alice)",
+   "Admit(m1, M, seq=1, owner=bob, pred=m0)",
+   "Admit(m2, M, seq=2, owner=carol, pred=m0)",
+   "Edge(m0->m1)",
+   "Edge(m0->m2)",
+   "Resolve(winner=m1, epoch=1, approvals=['alice', 'carol'])",
+   "Resolve(winner=m2, epoch=1, approvals=['alice', 'bob'])",
+   "Edge(r2->r0)",
+   "Edge(r0->m0)",
+   "Edge(rX->r0)",
+   "Invalidate(rX)",
+   "Admit(r3, L, seq=3, owner=alice, pred=rX)",
+   "Admit(r1, L, seq=1, owner=carol, pred=r0)",
+   "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])",
+   "Resolve(winner=r2, epoch=1, approvals=['alice', 'bob'])",
+   "Resolve(winner=r1, epoch=1, approvals=['alice', 'bob'])",
+   "Resolve(winner=r2, epoch=1, approvals=['alice'])"
+  ]
+ },
+ "cache_keys": {
+  "v1": "9a3e1c039b52e9d8fd07017c675bef66a07c87fcaa84dbdc8d2f203120f04946",
+  "v2": "b3644b4d2cb64a6280045cc0e4391654e1676b604eefa54a73a8d9739cbd26cf"
+ },
+ "categories": {
+  "EQUIVALENT_CANDIDATE": "equivalent?",
+  "ERROR": "ERROR",
+  "KILLED": "KILLED",
+  "NOT_APPLICABLE": "n/a",
+  "NOT_REACHED": "not reached",
+  "SURVIVED": "survived"
+ },
+ "code_fingerprint": "4916bd437c695f4ffbfd526baf18c43fb0a29f46304fffba844d343ec070304e",
+ "eligibility": {
+  "first_applied_wins": {
+   "eligible": {
+    "duplicate": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "order": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "projection": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+resolution",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution+invalidate-winner",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle",
+     "fork+resolution+invalidate-loser"
+    ],
+    "renaming": [
+     "fork+dispute",
+     "fork+dispute+escalation"
+    ],
+    "serialization": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+resolution",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution+invalidate-winner",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle",
+     "fork+resolution+invalidate-loser"
+    ]
+   },
+   "operation": "deliver",
+   "requires": "two distinct resolutions of one fork"
+  },
+  "freeze_drops_invalidated": {
+   "eligible": {
+    "duplicate": [],
+    "order": [],
+    "projection": [],
+    "renaming": [],
+    "serialization": [
+     "chain+invalidate",
+     "fork+resolution+invalidate-winner",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle",
+     "fork+resolution+invalidate-loser"
+    ]
+   },
+   "operation": "freeze",
+   "requires": "an invalidation of an admitted record"
+  },
+  "global_dispute": {
+   "eligible": {
+    "duplicate": [],
+    "order": [],
+    "projection": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+resolution",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution+invalidate-winner",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle",
+     "fork+resolution+invalidate-loser"
+    ],
+    "renaming": [],
+    "serialization": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+resolution",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution+invalidate-winner",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle",
+     "fork+resolution+invalidate-loser"
+    ]
+   },
+   "operation": "head",
+   "requires": "a dispute (two same-epoch resolutions of one fork with different winners) and records of a second lineage"
+  },
+  "naive_stale_guard": {
+   "eligible": {
+    "duplicate": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle"
+    ],
+    "order": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle"
+    ],
+    "projection": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle"
+    ],
+    "renaming": [
+     "chain",
+     "chain+invalidate",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle"
+    ],
+    "serialization": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+resolution",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution+invalidate-winner",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle",
+     "fork+resolution+invalidate-loser"
+    ]
+   },
+   "operation": "deliver",
+   "requires": "a supersession chain: edges a->b and b->c"
+  },
+  "principal_order_quorum": {
+   "eligible": {
+    "duplicate": [
+     "fork+resolution",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution+invalidate-winner",
+     "fork+resolution+invalidate-loser"
+    ],
+    "order": [
+     "fork+resolution",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution+invalidate-winner",
+     "fork+resolution+invalidate-loser"
+    ],
+    "projection": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+resolution",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution+invalidate-winner",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle",
+     "fork+resolution+invalidate-loser"
+    ],
+    "renaming": [
+     "fork+resolution",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution+invalidate-winner",
+     "fork+resolution+invalidate-loser"
+    ],
+    "serialization": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+resolution",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution+invalidate-winner",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle",
+     "fork+resolution+invalidate-loser"
+    ]
+   },
+   "operation": "deliver",
+   "requires": "a resolution approved by an authority other than the winner's owner"
+  },
+  "replay_readmits": {
+   "eligible": {
+    "duplicate": [
+     "chain+invalidate",
+     "fork+resolution+invalidate-winner",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle",
+     "fork+resolution+invalidate-loser"
+    ],
+    "order": [
+     "chain+invalidate",
+     "fork+resolution+invalidate-winner",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle",
+     "fork+resolution+invalidate-loser"
+    ],
+    "projection": [
+     "chain+invalidate",
+     "fork+resolution+invalidate-winner",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle",
+     "fork+resolution+invalidate-loser"
+    ],
+    "renaming": [
+     "chain+invalidate",
+     "fork+resolution+invalidate-winner",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle",
+     "fork+resolution+invalidate-loser"
+    ],
+    "serialization": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+resolution",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution+invalidate-winner",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle",
+     "fork+resolution+invalidate-loser"
+    ]
+   },
+   "operation": "deliver",
+   "requires": "a record a replayed admission could revive or replace: an admitted record that is invalidated, or two different admissions of one id"
+  },
+  "rid_tiebreak": {
+   "eligible": {
+    "duplicate": [
+     "fork",
+     "fork+resolution",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution+invalidate-winner",
+     "fork+resolution+invalidate-loser"
+    ],
+    "order": [
+     "fork",
+     "fork+resolution",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution+invalidate-winner",
+     "fork+resolution+invalidate-loser"
+    ],
+    "projection": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+resolution",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution+invalidate-winner",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle",
+     "fork+resolution+invalidate-loser"
+    ],
+    "renaming": [
+     "fork",
+     "fork+resolution",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution+invalidate-winner",
+     "fork+resolution+invalidate-loser"
+    ],
+    "serialization": [
+     "chain",
+     "chain+invalidate",
+     "fork",
+     "fork+resolution",
+     "fork+beneficiary-only",
+     "fork+dispute",
+     "fork+dispute+escalation",
+     "fork+resolution+invalidate-winner",
+     "chain+invalidate-middle",
+     "chain+invalidate-root",
+     "chain+invalidate-head-and-middle",
+     "fork+resolution+invalidate-loser"
+    ]
+   },
+   "operation": "head",
+   "requires": "a fork: two edges from one record"
+  }
+ },
+ "execution_config": {
+  "order_max_perms": 5040,
+  "order_seed": 0,
+  "projection_interleavings": 40,
+  "projection_max_exhaustive": 8000,
+  "projection_seed": 0
+ },
+ "fixtures": {
+  "v1": [
+   "chain",
+   "chain+invalidate",
+   "fork",
+   "fork+resolution",
+   "fork+beneficiary-only",
+   "fork+dispute",
+   "fork+dispute+escalation",
+   "fork+resolution+invalidate-winner"
+  ],
+  "v2": [
+   "chain",
+   "chain+invalidate",
+   "fork",
+   "fork+resolution",
+   "fork+beneficiary-only",
+   "fork+dispute",
+   "fork+dispute+escalation",
+   "fork+resolution+invalidate-winner",
+   "chain+invalidate-middle",
+   "chain+invalidate-root",
+   "chain+invalidate-head-and-middle",
+   "fork+resolution+invalidate-loser"
+  ]
+ },
+ "flags": [
+  "first_applied_wins",
+  "naive_stale_guard",
+  "replay_readmits",
+  "global_dispute",
+  "rid_tiebreak",
+  "principal_order_quorum",
+  "freeze_drops_invalidated"
+ ],
+ "head_time_flags": [
+  "global_dispute",
+  "rid_tiebreak"
+ ],
+ "operations": {
+  "duplicate": [
+   "deliver",
+   "head"
+  ],
+  "order": [
+   "deliver",
+   "head"
+  ],
+  "projection": [
+   "deliver",
+   "head"
+  ],
+  "renaming": [
+   "deliver",
+   "head"
+  ],
+  "serialization": [
+   "deliver",
+   "freeze",
+   "head",
+   "thaw"
+  ]
+ },
+ "quantities": {
+  "anomalies": "deviation on an ineligible instance; detection without deviation; errored instance",
+  "detecting": "deviating, and the relation is violated on that instance",
+  "detection_breadth": "detecting / deviating",
+  "deviating": "eligible, and on some execution the relation performs the mutant and the correct replica differ in lockstep (state, head for head-time mutants, or a refused restore)",
+  "eligible": "instance satisfies the mutant's frozen predicate over the relation's alphabet, and the relation performs the operation the mutated code is in",
+  "exposure_rate": "deviating / eligible"
+ },
+ "relations": [
+  "order",
+  "duplicate",
+  "projection",
+  "renaming",
+  "serialization"
+ ]
+}
