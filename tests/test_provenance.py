@@ -1,10 +1,13 @@
 """Snapshot execution and import-origin verification."""
 
 import json
+import errno
 import os
+import socket
 import stat
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -70,6 +73,19 @@ print(json.dumps({"parent": p.loaded_origins(), "worker": worker, "path": sys.pa
 @pytest.mark.parametrize("method", [m for m in ("fork", "spawn", "forkserver")
                                     if m in __import__("multiprocessing").get_all_start_methods()])
 def test_snapshot_interpreter_and_workers_import_only_from_snapshot(snap, method):
+    if method == "forkserver":
+        # multiprocessing's forkserver uses an AF_UNIX listener. Some managed
+        # runners deny local-domain sockets before the worker can start; report
+        # that environment limitation as a structured skip, not a product pass.
+        try:
+            with tempfile.TemporaryDirectory(prefix="assurance-afunix-") as tmp:
+                with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as probe:
+                    probe.bind(str(Path(tmp) / "probe.sock"))
+        except OSError as exc:
+            if exc.errno in (errno.EPERM, errno.EACCES):
+                pytest.skip(f"SKIPPED_ENV_CONSTRAINT: AF_UNIX socket unavailable ({exc})")
+            raise
+
     # Same interpreter flags and sys.path bootstrap the campaign uses.
     cmd = snapshot_command(snap, [])[:4]  # [python, -I, -S, -B]
     boot = f"import sys; sys.path.insert(0, {snap.snapshot_root!r})\n" + PROBE
