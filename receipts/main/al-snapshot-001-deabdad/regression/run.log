@@ -1,0 +1,13 @@
+python: Python 3.13.18; pytest: pytest 9.2.0
+base=ba10a0c3d58e9ea2663e6b73dc763bee4bc29404 fix=deabdad605d3536a7b55110c63404abe64eecc9e
+[before-regression] start 2026-11-10T23:37:10Z tree-before=5b7cc037fa738fdc717f915be21277ab04ccc077 expected=5b7cc037fa738fdc717f915be21277ab04ccc077
+[before-regression] end 2026-11-10T23:37:11Z exit=1 tree-after=5b7cc037fa738fdc717f915be21277ab04ccc077
+[after-regression] start 2026-11-10T23:37:11Z tree-before=114fab710578bc0a69e1af486300abc9f8b8966b expected=114fab710578bc0a69e1af486300abc9f8b8966b
+[after-regression] end 2026-11-10T23:37:11Z exit=0 tree-after=114fab710578bc0a69e1af486300abc9f8b8966b
+[inventory-base] start 2026-11-10T23:37:11Z tree-before=d4f189ee047d7da00204b6faa7f380eb646e2f7b expected=d4f189ee047d7da00204b6faa7f380eb646e2f7b
+[inventory-base] end 2026-11-10T23:37:11Z exit=0 tree-after=d4f189ee047d7da00204b6faa7f380eb646e2f7b
+[inventory-fix] start 2026-11-10T23:37:11Z tree-before=114fab710578bc0a69e1af486300abc9f8b8966b expected=114fab710578bc0a69e1af486300abc9f8b8966b
+[inventory-fix] end 2026-11-10T23:37:12Z exit=0 tree-after=114fab710578bc0a69e1af486300abc9f8b8966b
+[full-suite] start 2026-11-10T23:37:12Z tree-before=114fab710578bc0a69e1af486300abc9f8b8966b expected=114fab710578bc0a69e1af486300abc9f8b8966b
+[full-suite] end 2026-11-10T23:38:37Z exit=1 tree-after=114fab710578bc0a69e1af486300abc9f8b8966b
+done 2026-11-10T23:38:37Z

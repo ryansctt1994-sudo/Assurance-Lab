@@ -1,0 +1,171 @@
+FFFF.FFF                                                                 [100%]
+=================================== FAILURES ===================================
+_ test_head_on_a_damaged_snapshot_does_not_raise[CE-1 chain, reversed prefix of 4] _
+
+name = 'CE-1 chain, reversed prefix of 4'
+
+    @pytest.mark.parametrize("name", sorted(CASES))
+    def test_head_on_a_damaged_snapshot_does_not_raise(name):
+        """The reproduction: unrepaired, this raises KeyError inside head()."""
+        rep = _thaw_unvalidated(_damaged(CASES[name]))
+>       result = rep.head("L")
+                 ^^^^^^^^^^^^^
+
+tests/test_al_snapshot_001.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+assurance_lab/distributed/replica.py:258: in head
+    if not self._chain_linked(rid):
+           ^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Replica(policy=ResolutionPolicy(authorities=frozenset({'carol', 'alice', 'bob'}), min_quorum=2), naive_stale_guard=Fal...(rid='r2', lineage='L', seq=2, owner='carol', pred='r1'), Admit(rid='r1', lineage='L', seq=1, owner='bob', pred='r0')})
+rid = 'r2'
+
+    def _chain_linked(self, rid: str) -> bool:
+        """Every declared predecessor edge back to a root has been applied.
+    
+        Refinement from a counterexample found here: checking only the
+        record's *own* edge let r2 (linked to r1) be eligible while r1 was
+        still unlinked from r0, so r0 and r2 both looked like heads.
+        """
+        seen = set()
+        cur = self.admitted[rid]
+        while cur.pred is not None:
+            if cur.rid in seen or (cur.pred, cur.rid) not in self.edges:
+                return False
+            seen.add(cur.rid)
+>           cur = self.admitted[cur.pred]
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'r1'
+
+assurance_lab/distributed/replica.py:221: KeyError
+_ test_head_on_a_damaged_snapshot_does_not_raise[CE-2 fork with two disputing resolutions] _
+
+name = 'CE-2 fork with two disputing resolutions'
+
+    @pytest.mark.parametrize("name", sorted(CASES))
+    def test_head_on_a_damaged_snapshot_does_not_raise(name):
+        """The reproduction: unrepaired, this raises KeyError inside head()."""
+        rep = _thaw_unvalidated(_damaged(CASES[name]))
+>       result = rep.head("L")
+                 ^^^^^^^^^^^^^
+
+tests/test_al_snapshot_001.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+assurance_lab/distributed/replica.py:245: in head
+    if any(self.admitted[src].lineage == lineage and self.decision(src)[0] == "disputed"
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <dict_keyiterator object at 0x7fb647f6d120>
+
+>   if any(self.admitted[src].lineage == lineage and self.decision(src)[0] == "disputed"
+           ^^^^^^^^^^^^^^^^^^
+           for src in self.resolutions):
+E          KeyError: 'r0'
+
+assurance_lab/distributed/replica.py:245: KeyError
+_ test_restoring_a_damaged_snapshot_is_refused_with_stable_reasons[CE-1 chain, reversed prefix of 4] _
+
+name = 'CE-1 chain, reversed prefix of 4'
+
+    @pytest.mark.parametrize("name", sorted(CASES))
+    def test_restoring_a_damaged_snapshot_is_refused_with_stable_reasons(name):
+        corrupt = getattr(R, "CorruptSnapshot", None)
+>       assert corrupt is not None, "no refusal outcome exists for a damaged snapshot"
+E       AssertionError: no refusal outcome exists for a damaged snapshot
+E       assert None is not None
+
+tests/test_al_snapshot_001.py:82: AssertionError
+_ test_restoring_a_damaged_snapshot_is_refused_with_stable_reasons[CE-2 fork with two disputing resolutions] _
+
+name = 'CE-2 fork with two disputing resolutions'
+
+    @pytest.mark.parametrize("name", sorted(CASES))
+    def test_restoring_a_damaged_snapshot_is_refused_with_stable_reasons(name):
+        corrupt = getattr(R, "CorruptSnapshot", None)
+>       assert corrupt is not None, "no refusal outcome exists for a damaged snapshot"
+E       AssertionError: no refusal outcome exists for a damaged snapshot
+E       assert None is not None
+
+tests/test_al_snapshot_001.py:82: AssertionError
+__________ test_unknown_on_an_explored_state_fails_the_model_checker ___________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb647e1c2b0>
+
+    def test_unknown_on_an_explored_state_fails_the_model_checker(monkeypatch):
+        from assurance_lab.distributed.mc import SCENARIOS, check_scenario
+        monkeypatch.setattr(Replica, "head", _patched_head(lambda r: len(r.seen) == 1))
+>       v = check_scenario(SCENARIOS[0]).violation
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_al_snapshot_001.py:118: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+assurance_lab/distributed/mc.py:219: in check_scenario
+    v = safety_violations(thaw(fr), sc.lineage)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+assurance_lab/distributed/mc.py:111: in safety_violations
+    head = rep.head(lineage)
+           ^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Replica(policy=ResolutionPolicy(authorities=frozenset({'carol', 'alice', 'bob'}), min_quorum=2), naive_stale_guard=Fal...d=set(), resolutions={}, rejected=[], pending=[], seen={Admit(rid='r0', lineage='L', seq=0, owner='alice', pred=None)})
+lineage = 'L'
+
+>   return lambda self, lineage: R.UNKNOWN if pred(self) else real(self, lineage)
+                                 ^^^^^^^^^
+E   AttributeError: module 'assurance_lab.distributed.replica' has no attribute 'UNKNOWN'
+
+tests/test_al_snapshot_001.py:112: AttributeError
+______ test_unknown_at_quiescence_fails_even_without_the_per_state_check _______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb64806b360>
+
+    def test_unknown_at_quiescence_fails_even_without_the_per_state_check(monkeypatch):
+        """Replicas that all answer UNKNOWN agree, and that is not convergence."""
+        from assurance_lab.distributed import mc
+        sc = mc.SCENARIOS[0]
+        total = len({e for script in sc.scripts for e in script})
+        monkeypatch.setattr(mc, "safety_violations", lambda rep, lineage: [])
+        monkeypatch.setattr(Replica, "head", _patched_head(lambda r: len(r.seen) == total and not r.pending))
+>       assert mc.check_scenario(sc).violation == "head UNKNOWN at quiescence"
+               ^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_al_snapshot_001.py:129: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+assurance_lab/distributed/mc.py:260: in check_scenario
+    heads = {r.head(sc.lineage) for r in live}
+             ^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Replica(policy=ResolutionPolicy(authorities=frozenset({'carol', 'alice', 'bob'}), min_quorum=2), naive_stale_guard=Fal...(rid='r2', lineage='L', seq=2, owner='carol', pred='r1'), Admit(rid='r1', lineage='L', seq=1, owner='bob', pred='r0')})
+lineage = 'L'
+
+>   return lambda self, lineage: R.UNKNOWN if pred(self) else real(self, lineage)
+                                 ^^^^^^^^^
+E   AttributeError: module 'assurance_lab.distributed.replica' has no attribute 'UNKNOWN'
+
+tests/test_al_snapshot_001.py:112: AttributeError
+_________ test_a_refused_snapshot_is_a_recorded_model_checker_failure __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb647f2e0f0>
+
+    def test_a_refused_snapshot_is_a_recorded_model_checker_failure(monkeypatch):
+        """A refusal on an explored state is a failure with a trace, never an
+        escaping exception and never a pass."""
+        from assurance_lab.distributed.mc import SCENARIOS, check_scenario
+>       real = Replica.reference_problems
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: type object 'Replica' has no attribute 'reference_problems'
+
+tests/test_al_snapshot_001.py:136: AttributeError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/test_al_snapshot_001.py::test_every_genuine_snapshot_is_still_accepted
+FAILED tests/test_al_snapshot_001.py::test_head_on_a_damaged_snapshot_does_not_raise[CE-1 chain, reversed prefix of 4]
+FAILED tests/test_al_snapshot_001.py::test_head_on_a_damaged_snapshot_does_not_raise[CE-2 fork with two disputing resolutions]
+FAILED tests/test_al_snapshot_001.py::test_restoring_a_damaged_snapshot_is_refused_with_stable_reasons[CE-1 chain, reversed prefix of 4]
+FAILED tests/test_al_snapshot_001.py::test_restoring_a_damaged_snapshot_is_refused_with_stable_reasons[CE-2 fork with two disputing resolutions]
+FAILED tests/test_al_snapshot_001.py::test_unknown_on_an_explored_state_fails_the_model_checker
+FAILED tests/test_al_snapshot_001.py::test_unknown_at_quiescence_fails_even_without_the_per_state_check
+FAILED tests/test_al_snapshot_001.py::test_a_refused_snapshot_is_a_recorded_model_checker_failure
+7 failed, 1 passed in 0.19s

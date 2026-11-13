@@ -1,0 +1,34 @@
+SAME  Reachable ⊨ Inv ∧ Safety ∧ TransitionProps
+SAME  Init ⇒ Inv
+SAME  Inv ∧ Next ⇒ Inv'
+SAME  Inv ⇒ Safety
+SAME  Reach ⊆ Inv-states (BFS vs generator)
+SAME  mutant detected: supersede_without_fresh_admission
+SAME  mutant detected: resurrect_on_retract
+SAME  mutant detected: sem_rewrite_on_role_revise
+SAME  mutant detected: beneficiary_self_approval
+SAME  mutant detected: self_grant
+SAME  mutant detected: adjudicate_unadmitted
+SAME  mutant detected: lineage_rewrite
+SAME  mutant detected: cross_lineage_supersede
+SAME  mutant detected: stale_successor
+SAME  mutant detected: admit_into_occupied_lineage
+SAME  mutant detected: invalidate_falls_back
+SAME  mutant detected: diagnosis_rewrites_adjudication
+SAME  mutant detected: latched_live
+SAME  eventual convergence (chain r0→r1→r2)
+SAME  successor conflict resolves only via independent quorum
+SAME  replica MC: chain across replicas
+SAME  replica MC: invalidated head is X_⊥, not fallback
+SAME  replica MC: fork, one independent resolver
+SAME  replica MC: fork, beneficiary-only resolution
+SAME  replica MC: fork, two authorities may resolve concurrently and disagree
+SAME  replica MC: fork, disagreement escalated at epoch 2
+SAME  replica MC: fork, one independent resolver (+ passive 3rd replica)
+SAME  replica MC: fork, beneficiary-only resolution (+ passive 3rd replica)
+SAME  replica MC: fork, two authorities may resolve concurrently and disagree (+ passive 3rd replica)
+SAME  replica MC: fork, disagreement escalated at epoch 2 (+ passive 3rd replica)
+SAME  replica mutant detected: split-brain: first-applied-wins resolution
+SAME  replica mutant detected: handoff failure #3: naive stale-successor guard
+claims: baseline 32, candidate 32; residual-risk section identical: True
+VERDICT: IDENTICAL CLAIMS

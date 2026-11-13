@@ -1,0 +1,14 @@
+CAUGHT  campaign obligation turned FAIL              expected G1 FAIL; assembler exit 1; failing gates: G1 G2 
+CAUGHT  campaign claim text edited                   expected G2 FAIL; assembler exit 1; failing gates: G2 
+CAUGHT  first failing regression passes              expected G3 FAIL; assembler exit 1; failing gates: G3 
+CAUGHT  before-run lost a KeyError site              expected G4 FAIL; assembler exit 1; failing gates: G4 
+CAUGHT  after-run has a failure                      expected G5 FAIL; assembler exit 1; failing gates: G5 
+CAUGHT  inventory lost a published test              expected G6 FAIL; assembler exit 1; failing gates: G6 
+CAUGHT  full suite exit 1                            expected G7 FAIL; assembler exit 1; failing gates: G7 
+CAUGHT  clone dirty after the run                    expected G7 FAIL; assembler exit 1; failing gates: G7 
+CAUGHT  tested tree changed during a run             expected G8 FAIL; assembler exit 1; failing gates: G8 
+CAUGHT  counterexample accepted by the repair        expected G9 FAIL; assembler exit 1; failing gates: G9 G12 
+CAUGHT  head() raises on the repair                  expected G10 FAIL; assembler exit 1; failing gates: G10 G12 
+CAUGHT  one genuine snapshot refused                 expected G11 FAIL; assembler exit 1; failing gates: G11 G12 
+CAUGHT  scope runs not identical                     expected G12 FAIL; assembler exit 1; failing gates: G12 
+13/13 controls caught

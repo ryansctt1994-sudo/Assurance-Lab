@@ -1,0 +1,1597 @@
+{
+ "code_under_test": {
+  "dev-lineage": {
+   "commit": "52db4d74dc03b168e088e63576f0085baf6a2d6d",
+   "path": "assurance_lab/distributed/replica.py",
+   "restore_boundary": true,
+   "sha256": "eed6f38a56a36d789b7e5b22219bf964f8caa70fd3910f825eb3d3fcd3c50767"
+  },
+  "published-main": {
+   "commit": "ba10a0c3d58e9ea2663e6b73dc763bee4bc29404",
+   "path": "assurance_lab/distributed/replica.py",
+   "restore_boundary": false,
+   "sha256": "b0801e2300bd62459ddf2bc313dcf4811178bf6e69a352f31d94b774146abc2d"
+  },
+  "repair": {
+   "commit": "deabdad605d3536a7b55110c63404abe64eecc9e",
+   "path": "assurance_lab/distributed/replica.py",
+   "restore_boundary": true,
+   "sha256": "5b37c94ed203a17c14279b00802d2e977cc0f548466d536cfb4ff30fa4792d22"
+  }
+ },
+ "counterexamples": [
+  {
+   "by_revision": {
+    "dev-lineage": {
+     "bypass_head": {
+      "L": {
+       "outcome": "UNKNOWN",
+       "value": "UNKNOWN"
+      },
+      "M": {
+       "outcome": "UNKNOWN",
+       "value": "UNKNOWN"
+      }
+     },
+     "refusal": {
+      "problems": [
+       "edge r1->r2 references a record that is not admitted",
+       "seen Admit neither applied, pending nor rejected"
+      ],
+      "status": "INVALID_SNAPSHOT"
+     },
+     "restore": "refused"
+    },
+    "published-main": {
+     "bypass_head": {
+      "L": {
+       "exception": "KeyError",
+       "function": "_chain_linked",
+       "line": 221,
+       "message": "'r1'",
+       "outcome": "raises",
+       "raised_in_code_under_test": true,
+       "source_line": "cur = self.admitted[cur.pred]"
+      },
+      "M": {
+       "outcome": "NONE",
+       "value": null
+      }
+     },
+     "restore": "accepted (this revision has no restore boundary)"
+    },
+    "repair": {
+     "bypass_head": {
+      "L": {
+       "outcome": "UNKNOWN",
+       "value": "UNKNOWN"
+      },
+      "M": {
+       "outcome": "UNKNOWN",
+       "value": "UNKNOWN"
+      }
+     },
+     "refusal": {
+      "problems": [
+       "edge r1->r2 references r1, which is not admitted"
+      ],
+      "status": "INVALID_SNAPSHOT"
+     },
+     "restore": "refused"
+    }
+   },
+   "id": "CE-1",
+   "site": "_chain_linked follows a predecessor that is no longer admitted"
+  },
+  {
+   "by_revision": {
+    "dev-lineage": {
+     "bypass_head": {
+      "L": {
+       "outcome": "UNKNOWN",
+       "value": "UNKNOWN"
+      },
+      "M": {
+       "outcome": "UNKNOWN",
+       "value": "UNKNOWN"
+      }
+     },
+     "refusal": {
+      "problems": [
+       "edge r0->r1 references a record that is not admitted",
+       "edge r0->r2 references a record that is not admitted",
+       "seen Admit neither applied, pending nor rejected"
+      ],
+      "status": "INVALID_SNAPSHOT"
+     },
+     "restore": "refused"
+    },
+    "published-main": {
+     "bypass_head": {
+      "L": {
+       "exception": "KeyError",
+       "function": "<genexpr>",
+       "line": 245,
+       "message": "'r0'",
+       "outcome": "raises",
+       "raised_in_code_under_test": true,
+       "source_line": "if any(self.admitted[src].lineage == lineage and self.decision(src)[0] == \"disputed\""
+      },
+      "M": {
+       "exception": "KeyError",
+       "function": "<genexpr>",
+       "line": 245,
+       "message": "'r0'",
+       "outcome": "raises",
+       "raised_in_code_under_test": true,
+       "source_line": "if any(self.admitted[src].lineage == lineage and self.decision(src)[0] == \"disputed\""
+      }
+     },
+     "restore": "accepted (this revision has no restore boundary)"
+    },
+    "repair": {
+     "bypass_head": {
+      "L": {
+       "outcome": "UNKNOWN",
+       "value": "UNKNOWN"
+      },
+      "M": {
+       "outcome": "UNKNOWN",
+       "value": "UNKNOWN"
+      }
+     },
+     "refusal": {
+      "problems": [
+       "edge r0->r1 references r0, which is not admitted",
+       "edge r0->r2 references r0, which is not admitted",
+       "resolution of r0, which is not admitted"
+      ],
+      "status": "INVALID_SNAPSHOT"
+     },
+     "restore": "refused"
+    }
+   },
+   "id": "CE-2",
+   "site": "head() looks up the source of a resolution that is no longer admitted"
+  }
+ ],
+ "first_example_per_outcome": {
+  "drop invalidations | dev-lineage | refused (INVALID_SNAPSHOT)": {
+   "category": "refused (INVALID_SNAPSHOT)",
+   "instance": "chain+invalidate",
+   "prefix_length": 4,
+   "problems": [
+    "seen Invalidate neither applied, pending nor rejected"
+   ]
+  },
+  "drop invalidations | published-main | accepted; head differs from the genuine snapshot's": {
+   "category": "accepted; head differs from the genuine snapshot's",
+   "genuine_heads": {
+    "L": {
+     "outcome": "NONE",
+     "value": null
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "heads": {
+    "L": {
+     "outcome": "HEAD",
+     "value": "r2"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "instance": "chain+invalidate",
+   "prefix_length": 6
+  },
+  "drop invalidations | published-main | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "chain+invalidate-middle",
+   "prefix_length": 5
+  },
+  "drop invalidations | published-main | accepted; head unchanged now, differs after further deliveries": {
+   "category": "accepted; head unchanged now, differs after further deliveries",
+   "continuation": {
+    "heads": {
+     "L": {
+      "outcome": "HEAD",
+      "value": "r2"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "genuine_continuation": {
+    "heads": {
+     "L": {
+      "outcome": "NONE",
+      "value": null
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "instance": "chain+invalidate",
+   "prefix_length": 4
+  },
+  "drop invalidations | repair | accepted; head differs from the genuine snapshot's": {
+   "category": "accepted; head differs from the genuine snapshot's",
+   "genuine_heads": {
+    "L": {
+     "outcome": "NONE",
+     "value": null
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "heads": {
+    "L": {
+     "outcome": "HEAD",
+     "value": "r2"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "instance": "chain+invalidate",
+   "prefix_length": 6
+  },
+  "drop invalidations | repair | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "chain+invalidate-middle",
+   "prefix_length": 5
+  },
+  "drop invalidations | repair | accepted; head unchanged now, differs after further deliveries": {
+   "category": "accepted; head unchanged now, differs after further deliveries",
+   "continuation": {
+    "heads": {
+     "L": {
+      "outcome": "HEAD",
+      "value": "r2"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "genuine_continuation": {
+    "heads": {
+     "L": {
+      "outcome": "NONE",
+      "value": null
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "instance": "chain+invalidate",
+   "prefix_length": 4
+  },
+  "drop one admitted record | dev-lineage | refused (INVALID_SNAPSHOT)": {
+   "category": "refused (INVALID_SNAPSHOT)",
+   "instance": "chain",
+   "prefix_length": 1,
+   "problems": [
+    "seen Admit neither applied, pending nor rejected"
+   ]
+  },
+  "drop one admitted record | published-main | accepted; head differs from the genuine snapshot's": {
+   "category": "accepted; head differs from the genuine snapshot's",
+   "genuine_heads": {
+    "L": {
+     "outcome": "HEAD",
+     "value": "r0"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "heads": {
+    "L": {
+     "outcome": "NONE",
+     "value": null
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "instance": "chain",
+   "prefix_length": 1
+  },
+  "drop one admitted record | published-main | accepted; head raises KeyError": {
+   "category": "accepted; head raises KeyError",
+   "heads": {
+    "L": {
+     "exception": "KeyError",
+     "function": "_chain_linked",
+     "line": 221,
+     "message": "'r0'",
+     "outcome": "raises",
+     "raised_in_code_under_test": true,
+     "source_line": "cur = self.admitted[cur.pred]"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "instance": "chain",
+   "prefix_length": 4
+  },
+  "drop one admitted record | published-main | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "fork+resolution",
+   "prefix_length": 5
+  },
+  "drop one admitted record | published-main | accepted; head unchanged now, differs after further deliveries": {
+   "category": "accepted; head unchanged now, differs after further deliveries",
+   "continuation": {
+    "heads": {
+     "L": {
+      "outcome": "HEAD",
+      "value": "r1"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "genuine_continuation": {
+    "heads": {
+     "L": {
+      "outcome": "HEAD",
+      "value": "r2"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "instance": "chain",
+   "prefix_length": 3
+  },
+  "drop one admitted record | repair | accepted; head differs from the genuine snapshot's": {
+   "category": "accepted; head differs from the genuine snapshot's",
+   "genuine_heads": {
+    "L": {
+     "outcome": "HEAD",
+     "value": "r0"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "heads": {
+    "L": {
+     "outcome": "NONE",
+     "value": null
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "instance": "chain",
+   "prefix_length": 1
+  },
+  "drop one admitted record | repair | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "fork+resolution",
+   "prefix_length": 5
+  },
+  "drop one admitted record | repair | accepted; head unchanged now, differs after further deliveries": {
+   "category": "accepted; head unchanged now, differs after further deliveries",
+   "continuation": {
+    "heads": {
+     "L": {
+      "outcome": "HEAD",
+      "value": "r1"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "genuine_continuation": {
+    "heads": {
+     "L": {
+      "outcome": "HEAD",
+      "value": "r2"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "instance": "chain",
+   "prefix_length": 3
+  },
+  "drop one admitted record | repair | refused (INVALID_SNAPSHOT)": {
+   "category": "refused (INVALID_SNAPSHOT)",
+   "instance": "chain",
+   "prefix_length": 4,
+   "problems": [
+    "edge r0->r1 references r0, which is not admitted"
+   ]
+  },
+  "drop one applied edge | dev-lineage | refused (INVALID_SNAPSHOT)": {
+   "category": "refused (INVALID_SNAPSHOT)",
+   "instance": "chain",
+   "prefix_length": 4,
+   "problems": [
+    "seen Edge neither applied, pending nor rejected"
+   ]
+  },
+  "drop one applied edge | published-main | accepted; head differs from the genuine snapshot's": {
+   "category": "accepted; head differs from the genuine snapshot's",
+   "genuine_heads": {
+    "L": {
+     "outcome": "HEAD",
+     "value": "r1"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "heads": {
+    "L": {
+     "outcome": "HEAD",
+     "value": "r0"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "instance": "chain",
+   "prefix_length": 4
+  },
+  "drop one applied edge | published-main | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "fork+resolution",
+   "prefix_length": 6
+  },
+  "drop one applied edge | published-main | accepted; head unchanged now, differs after further deliveries": {
+   "category": "accepted; head unchanged now, differs after further deliveries",
+   "continuation": {
+    "heads": {
+     "L": {
+      "outcome": "HEAD",
+      "value": "r1"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "genuine_continuation": {
+    "heads": {
+     "L": {
+      "outcome": "HEAD",
+      "value": "r2"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "instance": "chain",
+   "prefix_length": 4
+  },
+  "drop one applied edge | repair | accepted; head differs from the genuine snapshot's": {
+   "category": "accepted; head differs from the genuine snapshot's",
+   "genuine_heads": {
+    "L": {
+     "outcome": "HEAD",
+     "value": "r1"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "heads": {
+    "L": {
+     "outcome": "HEAD",
+     "value": "r0"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "instance": "chain",
+   "prefix_length": 4
+  },
+  "drop one applied edge | repair | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "fork+resolution",
+   "prefix_length": 6
+  },
+  "drop one applied edge | repair | accepted; head unchanged now, differs after further deliveries": {
+   "category": "accepted; head unchanged now, differs after further deliveries",
+   "continuation": {
+    "heads": {
+     "L": {
+      "outcome": "HEAD",
+      "value": "r1"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "genuine_continuation": {
+    "heads": {
+     "L": {
+      "outcome": "HEAD",
+      "value": "r2"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "instance": "chain",
+   "prefix_length": 4
+  },
+  "drop pending queue | dev-lineage | refused (INVALID_SNAPSHOT)": {
+   "category": "refused (INVALID_SNAPSHOT)",
+   "instance": "chain",
+   "prefix_length": 1,
+   "problems": [
+    "seen Edge neither applied, pending nor rejected"
+   ]
+  },
+  "drop pending queue | published-main | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "fork+beneficiary-only",
+   "prefix_length": 1
+  },
+  "drop pending queue | published-main | accepted; head unchanged now, differs after further deliveries": {
+   "category": "accepted; head unchanged now, differs after further deliveries",
+   "continuation": {
+    "heads": {
+     "L": {
+      "outcome": "HEAD",
+      "value": "r1"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "genuine_continuation": {
+    "heads": {
+     "L": {
+      "outcome": "HEAD",
+      "value": "r2"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "instance": "chain",
+   "prefix_length": 1
+  },
+  "drop pending queue | repair | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "fork+beneficiary-only",
+   "prefix_length": 1
+  },
+  "drop pending queue | repair | accepted; head unchanged now, differs after further deliveries": {
+   "category": "accepted; head unchanged now, differs after further deliveries",
+   "continuation": {
+    "heads": {
+     "L": {
+      "outcome": "HEAD",
+      "value": "r1"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "genuine_continuation": {
+    "heads": {
+     "L": {
+      "outcome": "HEAD",
+      "value": "r2"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "instance": "chain",
+   "prefix_length": 1
+  },
+  "drop resolutions | dev-lineage | refused (INVALID_SNAPSHOT)": {
+   "category": "refused (INVALID_SNAPSHOT)",
+   "instance": "fork+resolution",
+   "prefix_length": 6,
+   "problems": [
+    "seen Resolve neither applied, pending nor rejected"
+   ]
+  },
+  "drop resolutions | published-main | accepted; head differs from the genuine snapshot's": {
+   "category": "accepted; head differs from the genuine snapshot's",
+   "genuine_heads": {
+    "L": {
+     "outcome": "HEAD",
+     "value": "r2"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "heads": {
+    "L": {
+     "outcome": "CONFLICT",
+     "value": "CONFLICT"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "instance": "fork+resolution",
+   "prefix_length": 6
+  },
+  "drop resolutions | published-main | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "fork+dispute",
+   "prefix_length": 7
+  },
+  "drop resolutions | repair | accepted; head differs from the genuine snapshot's": {
+   "category": "accepted; head differs from the genuine snapshot's",
+   "genuine_heads": {
+    "L": {
+     "outcome": "HEAD",
+     "value": "r2"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "heads": {
+    "L": {
+     "outcome": "CONFLICT",
+     "value": "CONFLICT"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "instance": "fork+resolution",
+   "prefix_length": 6
+  },
+  "drop resolutions | repair | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "fork+dispute",
+   "prefix_length": 7
+  },
+  "drop seen-set (duplicate filter) | dev-lineage | refused (INVALID_SNAPSHOT)": {
+   "category": "refused (INVALID_SNAPSHOT)",
+   "instance": "chain",
+   "prefix_length": 1,
+   "problems": [
+    "admission of r0 was never seen"
+   ]
+  },
+  "drop seen-set (duplicate filter) | published-main | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "chain",
+   "prefix_length": 1
+  },
+  "drop seen-set (duplicate filter) | repair | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "chain",
+   "prefix_length": 1
+  },
+  "inject a backward edge (seen and applied) | dev-lineage | refused (INVALID_SNAPSHOT)": {
+   "category": "refused (INVALID_SNAPSHOT)",
+   "instance": "chain",
+   "prefix_length": 2,
+   "problems": [
+    "applied edge r1->r0 breaks the edge rule: non-forward edge"
+   ]
+  },
+  "inject a backward edge (seen and applied) | published-main | accepted; head differs from the genuine snapshot's": {
+   "category": "accepted; head differs from the genuine snapshot's",
+   "genuine_heads": {
+    "L": {
+     "outcome": "HEAD",
+     "value": "r1"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "heads": {
+    "L": {
+     "outcome": "NONE",
+     "value": null
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "instance": "chain",
+   "prefix_length": 4
+  },
+  "inject a backward edge (seen and applied) | published-main | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "chain+invalidate",
+   "prefix_length": 5
+  },
+  "inject a backward edge (seen and applied) | published-main | accepted; head unchanged now, differs after further deliveries": {
+   "category": "accepted; head unchanged now, differs after further deliveries",
+   "continuation": {
+    "heads": {
+     "L": {
+      "outcome": "CONFLICT",
+      "value": "CONFLICT"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "genuine_continuation": {
+    "heads": {
+     "L": {
+      "outcome": "HEAD",
+      "value": "r2"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "instance": "chain",
+   "prefix_length": 2
+  },
+  "inject a backward edge (seen and applied) | repair | accepted; head differs from the genuine snapshot's": {
+   "category": "accepted; head differs from the genuine snapshot's",
+   "genuine_heads": {
+    "L": {
+     "outcome": "HEAD",
+     "value": "r1"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "heads": {
+    "L": {
+     "outcome": "NONE",
+     "value": null
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "instance": "chain",
+   "prefix_length": 4
+  },
+  "inject a backward edge (seen and applied) | repair | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "chain+invalidate",
+   "prefix_length": 5
+  },
+  "inject a backward edge (seen and applied) | repair | accepted; head unchanged now, differs after further deliveries": {
+   "category": "accepted; head unchanged now, differs after further deliveries",
+   "continuation": {
+    "heads": {
+     "L": {
+      "outcome": "CONFLICT",
+      "value": "CONFLICT"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "genuine_continuation": {
+    "heads": {
+     "L": {
+      "outcome": "HEAD",
+      "value": "r2"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "instance": "chain",
+   "prefix_length": 2
+  },
+  "inject a self-authorized resolution (seen and applied) | dev-lineage | refused (INVALID_SNAPSHOT)": {
+   "category": "refused (INVALID_SNAPSHOT)",
+   "instance": "fork",
+   "prefix_length": 5,
+   "problems": [
+    "applied resolution of r0 breaks the resolution rule: self-authorized: no independent approver"
+   ]
+  },
+  "inject a self-authorized resolution (seen and applied) | published-main | accepted; head differs from the genuine snapshot's": {
+   "category": "accepted; head differs from the genuine snapshot's",
+   "genuine_heads": {
+    "L": {
+     "outcome": "CONFLICT",
+     "value": "CONFLICT"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "heads": {
+    "L": {
+     "outcome": "HEAD",
+     "value": "r1"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "instance": "fork",
+   "prefix_length": 5
+  },
+  "inject a self-authorized resolution (seen and applied) | published-main | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "fork+dispute",
+   "prefix_length": 6
+  },
+  "inject a self-authorized resolution (seen and applied) | repair | accepted; head differs from the genuine snapshot's": {
+   "category": "accepted; head differs from the genuine snapshot's",
+   "genuine_heads": {
+    "L": {
+     "outcome": "CONFLICT",
+     "value": "CONFLICT"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "heads": {
+    "L": {
+     "outcome": "HEAD",
+     "value": "r1"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "instance": "fork",
+   "prefix_length": 5
+  },
+  "inject a self-authorized resolution (seen and applied) | repair | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "fork+dispute",
+   "prefix_length": 6
+  },
+  "mistype a field (seq as text) | dev-lineage | refused (INVALID_SNAPSHOT)": {
+   "category": "refused (INVALID_SNAPSHOT)",
+   "instance": "chain",
+   "prefix_length": 1,
+   "problems": [
+    "admitted[r0]: Admit.seq is str",
+    "seen: Admit.seq is str"
+   ]
+  },
+  "mistype a field (seq as text) | published-main | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "chain",
+   "prefix_length": 4
+  },
+  "mistype a field (seq as text) | published-main | accepted; head unchanged now, differs after further deliveries": {
+   "category": "accepted; head unchanged now, differs after further deliveries",
+   "continuation": {
+    "exception": "TypeError",
+    "function": "_try_apply",
+    "line": 126,
+    "message": "'<' not supported between instances of 'str' and 'int'",
+    "outcome": "deliver raises",
+    "raised_in_code_under_test": true,
+    "source_line": "if not a.seq < b.seq:"
+   },
+   "genuine_continuation": {
+    "heads": {
+     "L": {
+      "outcome": "HEAD",
+      "value": "r2"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "instance": "chain",
+   "prefix_length": 1
+  },
+  "mistype a field (seq as text) | repair | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "chain",
+   "prefix_length": 4
+  },
+  "mistype a field (seq as text) | repair | accepted; head unchanged now, differs after further deliveries": {
+   "category": "accepted; head unchanged now, differs after further deliveries",
+   "continuation": {
+    "exception": "TypeError",
+    "function": "_try_apply",
+    "line": 143,
+    "message": "'<' not supported between instances of 'str' and 'int'",
+    "outcome": "deliver raises",
+    "raised_in_code_under_test": true,
+    "source_line": "if not a.seq < b.seq:"
+   },
+   "genuine_continuation": {
+    "heads": {
+     "L": {
+      "outcome": "HEAD",
+      "value": "r2"
+     },
+     "M": {
+      "outcome": "NONE",
+      "value": null
+     }
+    },
+    "outcome": "ok"
+   },
+   "instance": "chain",
+   "prefix_length": 1
+  },
+  "omit a pending event | dev-lineage | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "chain",
+   "prefix_length": 1
+  },
+  "omit a pending event | published-main | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "chain",
+   "prefix_length": 1
+  },
+  "omit a pending event | repair | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "chain",
+   "prefix_length": 1
+  },
+  "omit a rejected event | dev-lineage | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "fork+beneficiary-only",
+   "prefix_length": 6
+  },
+  "omit a rejected event | published-main | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "fork+beneficiary-only",
+   "prefix_length": 6
+  },
+  "omit a rejected event | repair | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "fork+beneficiary-only",
+   "prefix_length": 6
+  },
+  "roll back an applied invalidation | dev-lineage | accepted; head differs from the genuine snapshot's": {
+   "category": "accepted; head differs from the genuine snapshot's",
+   "genuine_heads": {
+    "L": {
+     "outcome": "NONE",
+     "value": null
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "heads": {
+    "L": {
+     "outcome": "HEAD",
+     "value": "r2"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "instance": "chain+invalidate",
+   "prefix_length": 6
+  },
+  "roll back an applied invalidation | dev-lineage | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "chain+invalidate",
+   "prefix_length": 4
+  },
+  "roll back an applied invalidation | published-main | accepted; head differs from the genuine snapshot's": {
+   "category": "accepted; head differs from the genuine snapshot's",
+   "genuine_heads": {
+    "L": {
+     "outcome": "NONE",
+     "value": null
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "heads": {
+    "L": {
+     "outcome": "HEAD",
+     "value": "r2"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "instance": "chain+invalidate",
+   "prefix_length": 6
+  },
+  "roll back an applied invalidation | published-main | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "chain+invalidate",
+   "prefix_length": 4
+  },
+  "roll back an applied invalidation | repair | accepted; head differs from the genuine snapshot's": {
+   "category": "accepted; head differs from the genuine snapshot's",
+   "genuine_heads": {
+    "L": {
+     "outcome": "NONE",
+     "value": null
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "heads": {
+    "L": {
+     "outcome": "HEAD",
+     "value": "r2"
+    },
+    "M": {
+     "outcome": "NONE",
+     "value": null
+    }
+   },
+   "instance": "chain+invalidate",
+   "prefix_length": 6
+  },
+  "roll back an applied invalidation | repair | accepted; head unchanged now and after further deliveries": {
+   "category": "accepted; head unchanged now and after further deliveries",
+   "instance": "chain+invalidate",
+   "prefix_length": 4
+  },
+  "truncate the snapshot | dev-lineage | refused (INVALID_SNAPSHOT)": {
+   "category": "refused (INVALID_SNAPSHOT)",
+   "instance": "chain",
+   "prefix_length": 0,
+   "problems": [
+    "not a 7-field replica snapshot"
+   ]
+  },
+  "truncate the snapshot | published-main | restore raises ValueError": {
+   "category": "restore raises ValueError",
+   "exception": "ValueError",
+   "function": "thaw",
+   "instance": "chain",
+   "line": 283,
+   "message": "not enough values to unpack (expected 7, got 6)",
+   "prefix_length": 0,
+   "raised_in_code_under_test": true,
+   "source_line": "adm, edges, inv, res, rej, pend, seen = frozen"
+  },
+  "truncate the snapshot | repair | restore raises ValueError": {
+   "category": "restore raises ValueError",
+   "exception": "ValueError",
+   "function": "thaw",
+   "instance": "chain",
+   "line": 307,
+   "message": "not enough values to unpack (expected 7, got 6)",
+   "prefix_length": 0,
+   "raised_in_code_under_test": true,
+   "source_line": "adm, edges, inv, res, rej, pend, seen = frozen"
+  }
+ },
+ "fixture_sha256": "ae9dfe2b681b5fb5d4a2c93beb2484ee9afefd70b4e5ea2c62cc10f70c463266",
+ "generators": {
+  "assurance_lab.distributed.metamorphic": "068b0dec12c935f01030f3151b4f1b91e92ea28a373a178bf9d5b1843cc938b3",
+  "assurance_lab.distributed.snapshot_json": "4849c9a31579ab92e87b20a9f60ba24b4003411b0b6da53edf1c5467291a45ab"
+ },
+ "genuine": {
+  "by_revision": {
+   "dev-lineage": {
+    "accepted; heads equal the live replica's": 164
+   },
+   "published-main": {
+    "accepted; heads equal the live replica's": 164
+   },
+   "repair": {
+    "accepted; heads equal the live replica's": 164
+   }
+  },
+  "equals_generator_snapshot": {
+   "dev-lineage": 164,
+   "published-main": 164,
+   "repair": 164
+  },
+  "snapshots": 164
+ },
+ "head_raise_sites_bypass": {
+  "dev-lineage": {},
+  "published-main": {
+   "KeyError at line 221: cur = self.admitted[cur.pred]": 38,
+   "KeyError at line 245: if any(self.admitted[src].lineage == lineage and self.decision(src)[0] == \"disputed\"": 30
+  },
+  "repair": {}
+ },
+ "lineages_queried": [
+  "L",
+  "M"
+ ],
+ "schema": "al-snapshot-001/replay-and-scope/v1",
+ "scope": {
+  "drop invalidations": {
+   "bypass": {
+    "dev-lineage": {
+     "head: L=UNKNOWN, M=UNKNOWN": 21
+    },
+    "published-main": {
+     "head: L=HEAD, M=NONE": 13,
+     "head: L=NONE, M=NONE": 8
+    },
+    "repair": {
+     "head: L=HEAD, M=NONE": 13,
+     "head: L=NONE, M=NONE": 8
+    }
+   },
+   "class": "inconsistent",
+   "damaged_snapshots": 21,
+   "production": {
+    "dev-lineage": {
+     "refused (INVALID_SNAPSHOT)": 21
+    },
+    "published-main": {
+     "accepted; head differs from the genuine snapshot's": 7,
+     "accepted; head unchanged now and after further deliveries": 8,
+     "accepted; head unchanged now, differs after further deliveries": 6
+    },
+    "repair": {
+     "accepted; head differs from the genuine snapshot's": 7,
+     "accepted; head unchanged now and after further deliveries": 8,
+     "accepted; head unchanged now, differs after further deliveries": 6
+    }
+   }
+  },
+  "drop one admitted record": {
+   "bypass": {
+    "dev-lineage": {
+     "head: L=UNKNOWN, M=UNKNOWN": 112
+    },
+    "published-main": {
+     "head: L=NONE, M=NONE": 59,
+     "head: L=raises, M=NONE": 38,
+     "head: L=raises, M=raises": 15
+    },
+    "repair": {
+     "head: L=NONE, M=NONE": 51,
+     "head: L=UNKNOWN, M=UNKNOWN": 61
+    }
+   },
+   "class": "inconsistent",
+   "damaged_snapshots": 112,
+   "production": {
+    "dev-lineage": {
+     "refused (INVALID_SNAPSHOT)": 112
+    },
+    "published-main": {
+     "accepted; head differs from the genuine snapshot's": 36,
+     "accepted; head raises KeyError": 53,
+     "accepted; head unchanged now and after further deliveries": 7,
+     "accepted; head unchanged now, differs after further deliveries": 16
+    },
+    "repair": {
+     "accepted; head differs from the genuine snapshot's": 36,
+     "accepted; head unchanged now and after further deliveries": 3,
+     "accepted; head unchanged now, differs after further deliveries": 12,
+     "refused (INVALID_SNAPSHOT)": 61
+    }
+   }
+  },
+  "drop one applied edge": {
+   "bypass": {
+    "dev-lineage": {
+     "head: L=UNKNOWN, M=UNKNOWN": 57
+    },
+    "published-main": {
+     "head: L=CONFLICT, M=NONE": 3,
+     "head: L=HEAD, M=NONE": 45,
+     "head: L=NONE, M=NONE": 9
+    },
+    "repair": {
+     "head: L=CONFLICT, M=NONE": 3,
+     "head: L=HEAD, M=NONE": 45,
+     "head: L=NONE, M=NONE": 9
+    }
+   },
+   "class": "inconsistent",
+   "damaged_snapshots": 57,
+   "production": {
+    "dev-lineage": {
+     "refused (INVALID_SNAPSHOT)": 57
+    },
+    "published-main": {
+     "accepted; head differs from the genuine snapshot's": 39,
+     "accepted; head unchanged now and after further deliveries": 13,
+     "accepted; head unchanged now, differs after further deliveries": 5
+    },
+    "repair": {
+     "accepted; head differs from the genuine snapshot's": 39,
+     "accepted; head unchanged now and after further deliveries": 13,
+     "accepted; head unchanged now, differs after further deliveries": 5
+    }
+   }
+  },
+  "drop pending queue": {
+   "bypass": {
+    "dev-lineage": {
+     "head: L=UNKNOWN, M=UNKNOWN": 64
+    },
+    "published-main": {
+     "head: L=NONE, M=NONE": 64
+    },
+    "repair": {
+     "head: L=NONE, M=NONE": 64
+    }
+   },
+   "class": "inconsistent",
+   "damaged_snapshots": 64,
+   "production": {
+    "dev-lineage": {
+     "refused (INVALID_SNAPSHOT)": 64
+    },
+    "published-main": {
+     "accepted; head unchanged now and after further deliveries": 6,
+     "accepted; head unchanged now, differs after further deliveries": 58
+    },
+    "repair": {
+     "accepted; head unchanged now and after further deliveries": 6,
+     "accepted; head unchanged now, differs after further deliveries": 58
+    }
+   }
+  },
+  "drop resolutions": {
+   "bypass": {
+    "dev-lineage": {
+     "head: L=UNKNOWN, M=UNKNOWN": 15
+    },
+    "published-main": {
+     "head: L=CONFLICT, M=NONE": 15
+    },
+    "repair": {
+     "head: L=CONFLICT, M=NONE": 15
+    }
+   },
+   "class": "inconsistent",
+   "damaged_snapshots": 15,
+   "production": {
+    "dev-lineage": {
+     "refused (INVALID_SNAPSHOT)": 15
+    },
+    "published-main": {
+     "accepted; head differs from the genuine snapshot's": 12,
+     "accepted; head unchanged now and after further deliveries": 3
+    },
+    "repair": {
+     "accepted; head differs from the genuine snapshot's": 12,
+     "accepted; head unchanged now and after further deliveries": 3
+    }
+   }
+  },
+  "drop seen-set (duplicate filter)": {
+   "bypass": {
+    "dev-lineage": {
+     "head: L=UNKNOWN, M=UNKNOWN": 152
+    },
+    "published-main": {
+     "head: L=CONFLICT, M=NONE": 13,
+     "head: L=HEAD, M=NONE": 68,
+     "head: L=NONE, M=NONE": 71
+    },
+    "repair": {
+     "head: L=CONFLICT, M=NONE": 13,
+     "head: L=HEAD, M=NONE": 68,
+     "head: L=NONE, M=NONE": 71
+    }
+   },
+   "class": "inconsistent",
+   "damaged_snapshots": 152,
+   "production": {
+    "dev-lineage": {
+     "refused (INVALID_SNAPSHOT)": 152
+    },
+    "published-main": {
+     "accepted; head unchanged now and after further deliveries": 152
+    },
+    "repair": {
+     "accepted; head unchanged now and after further deliveries": 152
+    }
+   }
+  },
+  "inject a backward edge (seen and applied)": {
+   "bypass": {
+    "dev-lineage": {
+     "head: L=UNKNOWN, M=UNKNOWN": 88
+    },
+    "published-main": {
+     "head: L=CONFLICT, M=NONE": 28,
+     "head: L=HEAD, M=NONE": 24,
+     "head: L=NONE, M=NONE": 36
+    },
+    "repair": {
+     "head: L=CONFLICT, M=NONE": 28,
+     "head: L=HEAD, M=NONE": 24,
+     "head: L=NONE, M=NONE": 36
+    }
+   },
+   "class": "inconsistent",
+   "damaged_snapshots": 88,
+   "production": {
+    "dev-lineage": {
+     "refused (INVALID_SNAPSHOT)": 88
+    },
+    "published-main": {
+     "accepted; head differs from the genuine snapshot's": 37,
+     "accepted; head unchanged now and after further deliveries": 28,
+     "accepted; head unchanged now, differs after further deliveries": 23
+    },
+    "repair": {
+     "accepted; head differs from the genuine snapshot's": 37,
+     "accepted; head unchanged now and after further deliveries": 28,
+     "accepted; head unchanged now, differs after further deliveries": 23
+    }
+   }
+  },
+  "inject a self-authorized resolution (seen and applied)": {
+   "bypass": {
+    "dev-lineage": {
+     "head: L=UNKNOWN, M=UNKNOWN": 25
+    },
+    "published-main": {
+     "head: L=CONFLICT, M=NONE": 11,
+     "head: L=HEAD, M=NONE": 14
+    },
+    "repair": {
+     "head: L=CONFLICT, M=NONE": 11,
+     "head: L=HEAD, M=NONE": 14
+    }
+   },
+   "class": "inconsistent",
+   "damaged_snapshots": 25,
+   "production": {
+    "dev-lineage": {
+     "refused (INVALID_SNAPSHOT)": 25
+    },
+    "published-main": {
+     "accepted; head differs from the genuine snapshot's": 18,
+     "accepted; head unchanged now and after further deliveries": 7
+    },
+    "repair": {
+     "accepted; head differs from the genuine snapshot's": 18,
+     "accepted; head unchanged now and after further deliveries": 7
+    }
+   }
+  },
+  "mistype a field (seq as text)": {
+   "bypass": {
+    "dev-lineage": {
+     "head: L=UNKNOWN, M=UNKNOWN": 112
+    },
+    "published-main": {
+     "head: L=CONFLICT, M=NONE": 13,
+     "head: L=HEAD, M=NONE": 68,
+     "head: L=NONE, M=NONE": 31
+    },
+    "repair": {
+     "head: L=CONFLICT, M=NONE": 13,
+     "head: L=HEAD, M=NONE": 68,
+     "head: L=NONE, M=NONE": 31
+    }
+   },
+   "class": "malformed",
+   "damaged_snapshots": 112,
+   "production": {
+    "dev-lineage": {
+     "refused (INVALID_SNAPSHOT)": 112
+    },
+    "published-main": {
+     "accepted; head unchanged now and after further deliveries": 45,
+     "accepted; head unchanged now, differs after further deliveries": 67
+    },
+    "repair": {
+     "accepted; head unchanged now and after further deliveries": 45,
+     "accepted; head unchanged now, differs after further deliveries": 67
+    }
+   }
+  },
+  "omit a pending event": {
+   "bypass": {
+    "dev-lineage": {
+     "head: L=NONE, M=NONE": 64
+    },
+    "published-main": {
+     "head: L=NONE, M=NONE": 64
+    },
+    "repair": {
+     "head: L=NONE, M=NONE": 64
+    }
+   },
+   "class": "omission",
+   "damaged_snapshots": 64,
+   "production": {
+    "dev-lineage": {
+     "accepted; head unchanged now and after further deliveries": 64
+    },
+    "published-main": {
+     "accepted; head unchanged now and after further deliveries": 64
+    },
+    "repair": {
+     "accepted; head unchanged now and after further deliveries": 64
+    }
+   }
+  },
+  "omit a rejected event": {
+   "bypass": {
+    "dev-lineage": {
+     "head: L=CONFLICT, M=NONE": 2
+    },
+    "published-main": {
+     "head: L=CONFLICT, M=NONE": 2
+    },
+    "repair": {
+     "head: L=CONFLICT, M=NONE": 2
+    }
+   },
+   "class": "omission",
+   "damaged_snapshots": 2,
+   "production": {
+    "dev-lineage": {
+     "accepted; head unchanged now and after further deliveries": 2
+    },
+    "published-main": {
+     "accepted; head unchanged now and after further deliveries": 2
+    },
+    "repair": {
+     "accepted; head unchanged now and after further deliveries": 2
+    }
+   }
+  },
+  "roll back an applied invalidation": {
+   "bypass": {
+    "dev-lineage": {
+     "head: L=HEAD, M=NONE": 11,
+     "head: L=NONE, M=NONE": 10
+    },
+    "published-main": {
+     "head: L=HEAD, M=NONE": 11,
+     "head: L=NONE, M=NONE": 10
+    },
+    "repair": {
+     "head: L=HEAD, M=NONE": 11,
+     "head: L=NONE, M=NONE": 10
+    }
+   },
+   "class": "omission",
+   "damaged_snapshots": 21,
+   "production": {
+    "dev-lineage": {
+     "accepted; head differs from the genuine snapshot's": 5,
+     "accepted; head unchanged now and after further deliveries": 16
+    },
+    "published-main": {
+     "accepted; head differs from the genuine snapshot's": 5,
+     "accepted; head unchanged now and after further deliveries": 16
+    },
+    "repair": {
+     "accepted; head differs from the genuine snapshot's": 5,
+     "accepted; head unchanged now and after further deliveries": 16
+    }
+   }
+  },
+  "truncate the snapshot": {
+   "bypass": {
+    "dev-lineage": {
+     "unvalidated restore refused": 164
+    },
+    "published-main": {
+     "unvalidated restore raises": 164
+    },
+    "repair": {
+     "unvalidated restore raises": 164
+    }
+   },
+   "class": "malformed",
+   "damaged_snapshots": 164,
+   "production": {
+    "dev-lineage": {
+     "refused (INVALID_SNAPSHOT)": 164
+    },
+    "published-main": {
+     "restore raises ValueError": 164
+    },
+    "repair": {
+     "restore raises ValueError": 164
+    }
+   }
+  }
+ }
+}
