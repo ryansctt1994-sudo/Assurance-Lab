@@ -1,6 +1,9 @@
+import errno
 import itertools
 import multiprocessing
 import os
+import socket
+import tempfile
 
 import pytest
 
@@ -118,6 +121,19 @@ def test_induction_totals_invariant_across_start_methods(method):
     workers re-import assurance_lab from disk. Totals must not depend on it,
     and every worker must report importing from this package directory."""
     from assurance_lab.provenance import PKG, foreign_origins
+
+    if method == "forkserver":
+        # The forkserver worker transport needs AF_UNIX. Some sandboxes deny
+        # socket creation at the OS boundary; preserve that limitation as a
+        # structured skip rather than reporting a product failure.
+        try:
+            with tempfile.TemporaryDirectory(prefix="assurance-afunix-") as tmp:
+                with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as probe:
+                    probe.bind(os.path.join(tmp, "probe.sock"))
+        except OSError as exc:
+            if exc.errno in (errno.EPERM, errno.EACCES):
+                pytest.skip(f"SKIPPED_ENV_CONSTRAINT: AF_UNIX socket unavailable ({exc})")
+            raise
 
     cfg = Config(n_records=2, n_lineages=1)
     r1 = check_induction(CoreModel(cfg), workers=1)  # no pool
